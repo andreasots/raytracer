@@ -25,7 +25,7 @@ namespace Raytracer
     {
       boost::smatch match;
       if(!boost::regex_match(line, match, re))
-        throw Exception("Malformed line in file \""+file+"\": "+line);
+        throw Exception("Malformed line in file \""+file+"\": '"+line+"'");
       if(match[1] == "file")
       {
         std::cout << "loading file " << match[2] << std::endl;
