@@ -1,4 +1,7 @@
 #include "point.h"
+#include "vector.h"
+#include <ostream>
+
 namespace Raytracer
 {
   Point::Point(double x, double y, double z, double w): mX(x), mY(y),mZ(z),mW(w)
@@ -8,7 +11,10 @@ namespace Raytracer
   Point::Point(double x, double y, double z): mX(x), mY(y), mZ(z), mW(1)
   {
   }
-   
+  
+  Point::~Point()
+  {
+  }
    
   double Point::x() const
   {
@@ -43,5 +49,9 @@ namespace Raytracer
     this->mY += v.y();
     this->mZ += v.z();
     return *this;
+  }
+  std::ostream& operator<<(std::ostream& out, Point p)
+  {
+    return out << "(" << p.x() << ", " << p.y() << ", " <<p.z()<<")";
   }
 }

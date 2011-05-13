@@ -2,12 +2,14 @@
 #define RAYTRACER_VECTOR_H
 #include "point.h"
 #include <utility>
+using namespace std::rel_ops; // For != > =< =>
 namespace Raytracer
 {
-  using namespace rel_ops; // For != > =< =>
   class Vector: public Point
   {
     public:
+      Vector(double x, double y, double z, double w);
+      Vector(double x, double y, double z);
       Vector operator-() const;
       Vector operator+(const Vector v) const;
       Vector operator-(const Vector v) const;
@@ -24,14 +26,13 @@ namespace Raytracer
   class VecMult
   {
     public:
-      double double() const;
-      Vector Vector() const;
+      operator double() const;
+      operator Vector() const;
+      VecMult(Vector v, Vector u);
     private:
       VecMult();
-      VecMult(Vector v, Vector u);
       Vector mV, mU;
-  }
-  
-  friend VecMult operator*(Vector v, Vector u);
+  };
 }
+Raytracer::VecMult operator*(const Raytracer::Vector v, const Raytracer::Vector u);
 #endif

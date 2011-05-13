@@ -4,8 +4,9 @@ WARNFLAGS := -pedantic -Wall -Warray-bounds -Wextra -Winit-self \
              -Wstrict-null-sentinel -Wctor-dtor-privacy
 
 CXXFLAGS := -O3 -march=native -fomit-frame-pointer -pipe -I../inc $(WARNFLAGS)
+#CXXFLAGS := -g -pipe -I../inc
 
-OBJS := exception.o loader.o point.o
+OBJS := exception.o loader.o point.o vector.o
 MAIN := main.o
 
 LIBS := -lboost_regex-mt

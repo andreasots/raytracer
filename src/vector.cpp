@@ -1,14 +1,24 @@
 #include "vector.h"
+#include "exception.h"
+#include <cmath>
 #define SQ(x) (x)*(x)
 
 namespace Raytracer
 {
+  Vector::Vector(double x, double y, double z, double w): Point(x, y, z, w)
+  {
+  }
+  
+  Vector::Vector(double x, double y, double z): Point(x, y, z)
+  {
+  }
+  
   Vector Vector::operator-() const
   {
     Vector ret = *this;
-    ret.x = -ret.x;
-    ret.y = -ret.y;
-    ret.z = -ret.z;
+    ret.mX = -ret.mX;
+    ret.mY = -ret.mY;
+    ret.mZ = -ret.mZ;
     return ret;
   }
   
@@ -40,28 +50,32 @@ namespace Raytracer
     return ret;
   }
   
-  Vector Vector::&operator+=(const Vector v)
+  Vector &Vector::operator+=(const Vector v)
   {
-    *this->mX += v.x();
-    *this->mY += v.y();
-    *this->mZ += v.z();
+    this->mX += v.x();
+    this->mY += v.y();
+    this->mZ += v.z();
+    return *this;
   }
   
-  Vector Vector::&operator-=(const Vector v)
+  Vector &Vector::operator-=(const Vector v)
   {
     *this += -v;
+    return *this;
   }
   
-  Vector Vector::&operator*=(const double i)
+  Vector &Vector::operator*=(const double i)
   {
-    *this->mX *= i;
-    *this->mY *= i;
-    *this->mZ *= i;
+    this->mX *= i;
+    this->mY *= i;
+    this->mZ *= i;
+    return *this;
   }
   
-  Vector Vector::&operator/=(const double i)
+  Vector &Vector::operator/=(const double i)
   {
     *this *= 1/i;
+    return *this;
   }
   
   bool Vector::operator==(const Vector v) const
@@ -75,8 +89,8 @@ namespace Raytracer
       return (SQ(this->x())+SQ(this->y())+SQ(this->z())) <
              (SQ(v.x())+SQ(v.y())+SQ(v.z()));
   }
-  
-  double VecMult::double() const
+    
+  VecMult::operator double() const
   {
     double ret = this->mV.x()*this->mU.x();
     ret += this->mV.y()*this->mU.y();
@@ -84,7 +98,7 @@ namespace Raytracer
     return ret;
   }
   
-  Vector VecMult::Vector() const
+  VecMult::operator Vector() const
   {
     double x, y, z;
     x = this->mV.y()*this->mU.z()-this->mV.z()*this->mU.y();
@@ -93,17 +107,18 @@ namespace Raytracer
     return Vector(x, -y, z);
   }
   
-  VecMult::VecMult()
+  VecMult::VecMult(): mV(0, 0, 0), mU(0, 0, 0)
   {
     throw Exception("This constructor must never be called");
   }
   
   VecMult::VecMult(Vector v, Vector u): mV(v), mU(u)
   {
-  }
-  
-  friend VecMult operator*(Vector v, Vector u)
-  {
-    return VecMult(v, u);
-  }
+  } 
 }
+
+Raytracer::VecMult operator*(const Raytracer::Vector v, const Raytracer::Vector u)
+  {
+    return Raytracer::VecMult(v, u);
+  }
+
