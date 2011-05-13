@@ -14,5 +14,5 @@ namespace Raytracer
     private:
       std::string mWhat;
   };
-};
+}
 #endif

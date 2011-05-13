@@ -1,6 +1,11 @@
-CXXFLAGS := -O3 -march=native -fomit-frame-pointer -pipe -I../inc
+WARNFLAGS := -pedantic -Wall -Warray-bounds -Wextra -Winit-self \
+             -Wpointer-arith -Wredundant-decls -Wuninitialized -Weffc++ \
+             -Wold-style-cast -Woverloaded-virtual -Wsign-promo \
+             -Wstrict-null-sentinel -Wctor-dtor-privacy
 
-OBJS := exception.o loader.o
+CXXFLAGS := -O3 -march=native -fomit-frame-pointer -pipe -I../inc $(WARNFLAGS)
+
+OBJS := exception.o loader.o point.o
 MAIN := main.o
 
 LIBS := -lboost_regex-mt

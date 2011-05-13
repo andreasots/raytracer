@@ -10,7 +10,7 @@
 
 namespace Raytracer
 {
-  void Loader::open(std::string file)
+  void Loader::open(std::string file) throw(Exception)
   {
     std::ifstream in(file.c_str());
     
@@ -41,4 +41,4 @@ namespace Raytracer
   {
     return this->mScene();
   }*/
-};
+}

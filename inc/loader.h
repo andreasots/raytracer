@@ -2,6 +2,7 @@
 #define RAYTRACER_LOADER_H
 
 #include <string>
+#include "exception.h"
 
 namespace Raytracer
 {
@@ -10,11 +11,11 @@ namespace Raytracer
   class Loader
   {
     public:
-      void open(std::string file);
+      void open(std::string file) throw(Exception);
 //      Scene scene();
     private:
 //      Scene mScene;
   };
-};
+}
 
 #endif

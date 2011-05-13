@@ -2,17 +2,17 @@
 
 namespace Raytracer
 {
-  Exception::Exception(std::string what) throw()
+  Exception::Exception(std::string what) throw(): mWhat(what) 
   {
-    this->mWhat = what;
   }
   
   const char* Exception::what() const throw()
   {
     return this->mWhat.c_str();
   }
+  
   Exception::~Exception() throw()
   {
   }
-};
+}
 
