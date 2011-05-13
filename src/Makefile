@@ -1,11 +1,7 @@
-WARNFLAGS := -pedantic -Wall -Warray-bounds -Wextra -Winit-self \
-             -Wpointer-arith -Wredundant-decls -Wuninitialized -Weffc++ \
-             -Wold-style-cast -Woverloaded-virtual -Wsign-promo \
-             -Wstrict-null-sentinel -Wctor-dtor-privacy
+include ../common.mk
+include deps.mk
 
-CXXFLAGS := -O3 -march=native -fomit-frame-pointer -pipe -I../inc $(WARNFLAGS)
-#CXXFLAGS := -g -pipe -I../inc
-
+SOURCES := exception.cpp loader.cpp main.cpp point.cpp vector.cpp
 OBJS := exception.o loader.o point.o vector.o
 MAIN := main.o
 
@@ -13,12 +9,16 @@ LIBS := -lboost_regex-mt
 
 OUT := raytracer
 
-.PHONY: all clean
+.PHONY: all clean deps
 
-all: $(OUT)
+all: deps $(OUT)
 
 clean:
-	$(RM) $(MAIN) $(OBJS) $(OUT)
+	$(RM) $(MAIN) $(OBJS) $(OUT) deps.mk
 
 $(OUT): $(MAIN) $(OBJS)
 	$(CXX) -o $(OUT) $(MAIN) -Wl,--as-needed $(OBJS) $(LIBS)
+
+deps.mk: $(SOURCES) $(HEADERS)
+	$(RM) deps.mk
+	for file in $(SOURCES); do $(CXX) $(CXXFLAGS) -M $$file >> deps.mk; done

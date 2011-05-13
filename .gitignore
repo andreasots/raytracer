@@ -1,3 +1,4 @@
 *.o
 *~
 src/raytracer
+src/deps.mk
