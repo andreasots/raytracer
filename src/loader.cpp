@@ -1,13 +1,17 @@
 #include "exception.h"
 #include "loader.h"
-//#include "scene.h"
+#include "point.h"
 #include "vector.h"
+#include "mesh.h"
+//#include "scene.h"
 
 #include <fstream>
 #include <iostream>
 #include <string>
 
 #include <boost/regex.hpp>
+
+#include "assimp.hpp"
 
 #define CPPSTRTOD(x) strtod((x).str().c_str(), NULL)
 

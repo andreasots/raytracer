@@ -1,0 +1,2 @@
+echo "Top-level directory: $PWD"
+sed "s|--TOPDIR--|$PWD|g" common.mk.in > common.mk

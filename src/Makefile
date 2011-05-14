@@ -1,8 +1,7 @@
 include ../common.mk
 include deps.mk
 
-SOURCES := exception.cpp loader.cpp main.cpp point.cpp vector.cpp
-OBJS := exception.o loader.o point.o vector.o
+OBJS := exception.o loader.o point.o triangle.o vector.o
 MAIN := main.o
 
 LIBS := -lboost_regex-mt
@@ -21,4 +20,4 @@ $(OUT): $(MAIN) $(OBJS)
 
 deps.mk: $(SOURCES) $(HEADERS)
 	$(RM) deps.mk
-	for file in $(SOURCES); do $(CXX) $(CXXFLAGS) -M $$file >> deps.mk; done
+	for file in $(SOURCES); do $(CXX) $(INCLUDES) -M $$file >> deps.mk; done
