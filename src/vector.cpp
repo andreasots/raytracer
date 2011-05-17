@@ -5,11 +5,11 @@
 
 namespace Raytracer
 {
-  Vector::Vector(double x, double y, double z, double w): Point(x, y, z, w)
+  Vector::Vector(float x, float y, float z, float w): Point(x, y, z, w)
   {
   }
   
-  Vector::Vector(double x, double y, double z): Point(x, y, z)
+  Vector::Vector(float x, float y, float z): Point(x, y, z)
   {
   }
   
@@ -36,14 +36,14 @@ namespace Raytracer
     return ret;
   }
   
-  Vector Vector::operator*(const double i) const
+  Vector Vector::operator*(const float i) const
   {
     Vector ret = *this;
     ret *= i;
     return ret;
   }
   
-  Vector Vector::operator/(const double i) const
+  Vector Vector::operator/(const float i) const
   {
     Vector ret = *this;
     ret *= 1/i;
@@ -64,7 +64,7 @@ namespace Raytracer
     return *this;
   }
   
-  Vector &Vector::operator*=(const double i)
+  Vector &Vector::operator*=(const float i)
   {
     this->mX *= i;
     this->mY *= i;
@@ -72,7 +72,7 @@ namespace Raytracer
     return *this;
   }
   
-  Vector &Vector::operator/=(const double i)
+  Vector &Vector::operator/=(const float i)
   {
     *this *= 1/i;
     return *this;
@@ -90,9 +90,9 @@ namespace Raytracer
              (SQ(v.x())+SQ(v.y())+SQ(v.z()));
   }
     
-  VecMult::operator double() const
+  VecMult::operator float() const
   {
-    double ret = this->mV.x()*this->mU.x();
+    float ret = this->mV.x()*this->mU.x();
     ret += this->mV.y()*this->mU.y();
     ret += this->mV.z()*this->mU.z();
     return ret;
@@ -100,7 +100,7 @@ namespace Raytracer
   
   VecMult::operator Vector() const
   {
-    double x, y, z;
+    float x, y, z;
     x = this->mV.y()*this->mU.z()-this->mV.z()*this->mU.y();
     y = this->mV.x()*this->mU.z()-this->mV.z()*this->mU.x();
     z = this->mV.x()*this->mU.y()-this->mV.y()*this->mU.x();

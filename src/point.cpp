@@ -4,12 +4,12 @@
 
 namespace Raytracer
 {
-    Point::Point(double x, double y, double z, double w): mX(x), mY(y), mZ(z), mW(w)
+    Point::Point(float x, float y, float z, float w): mX(x), mY(y), mZ(z), mW(w)
     {
         
     }
 
-    Point::Point(double x, double y, double z): mX(x), mY(y), mZ(z), mW(1)
+    Point::Point(float x, float y, float z): mX(x), mY(y), mZ(z), mW(1)
     {
     }
 
@@ -17,22 +17,22 @@ namespace Raytracer
     {
     }
 
-    double Point::x() const
+    float Point::x() const
     {
         return this->mX;
     }
 
-    double Point::y() const
+    float Point::y() const
     {
         return this->mY;
     }
 
-    double Point::z() const
+    float Point::z() const
     {
         return this->mZ;
     }
 
-    double Point::w() const
+    float Point::w() const
     {
         return this->mW;
     }

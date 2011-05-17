@@ -8,17 +8,17 @@ namespace Raytracer
   class Vector: public Point
   {
     public:
-      Vector(double x, double y, double z, double w);
-      Vector(double x, double y, double z);
+      Vector(float x, float y, float z, float w);
+      Vector(float x, float y, float z);
       Vector operator-() const;
       Vector operator+(const Vector v) const;
       Vector operator-(const Vector v) const;
-      Vector operator*(const double i) const;
-      Vector operator/(const double i) const;
+      Vector operator*(const float i) const;
+      Vector operator/(const float i) const;
       Vector &operator+=(const Vector v);
       Vector &operator-=(const Vector v);
-      Vector &operator*=(const double i);
-      Vector &operator/=(const double i);
+      Vector &operator*=(const float i);
+      Vector &operator/=(const float i);
       bool operator==(const Vector v) const;
       bool operator<(const Vector v) const;
   };
@@ -26,7 +26,7 @@ namespace Raytracer
   class VecMult
   {
     public:
-      operator double() const;
+      operator float() const;
       operator Vector() const;
       VecMult(Vector v, Vector u);
     private:
