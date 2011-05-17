@@ -6,7 +6,8 @@ WARNFLAGS := -pedantic -Wall -Warray-bounds -Wextra -Winit-self \
 
 INCLUDES := -I$(TOPDIR)/inc -I$(TOPDIR)/assimp/include
 
-CXXFLAGS := -O3 -march=native -fomit-frame-pointer -pipe $(INCLUDES) $(WARNFLAGS)
+CXXFLAGS := -O3 -march=native -fomit-frame-pointer -fno-builtin -pipe \
+            $(INCLUDES) $(WARNFLAGS)
 
 SOURCES := $(shell find -name "*.cpp")
 HEADERS := $(shell find ../inc -name "*.h")
