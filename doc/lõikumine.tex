@@ -1,0 +1,30 @@
+\documentclass[12pt,a4paper]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[estonian]{babel}
+\begin{document}
+  \section{Kiire lõikumine kolmurgaga}
+  http://en.wikipedia.org/w/index.php?title=Line-plane_intersection&oldid=420198019
+  
+  Olgu \(P_0\) punkt kolmnurgas ja punkt \(P_1\) kiire alguspunkt.
+   
+  Otsitav punkt \(P\) peab olema kolmnurgaga koplanaarne ja kiirega
+  kollineaarne. Seega:
+  \[\left\{\begin{array}{l}
+      (P-P_0)\cdot\vec n = 0\\
+      P=P_1+k\vec s
+    \end{array}\right.\]
+  Asendan kiire võrrandi tasandi võrrandisse.
+  \[(P_1+k\vec s-P_0)\cdot\vec n = 0\]
+  Avan sulud. \(P_1-P_0\) on vektor.
+  \[k\vec s\cdot\vec n+(P_1-P_0)\cdot\vec n = 0\]
+  \[k\vec s\cdot\vec n = (P_0-P_1)\cdot\vec n\]
+  Avaldan \(k\).
+  \[k=\frac{(P_0-P_1)\cdot\vec n}{\vec s\cdot\vec n}\]
+  Kui \(k = \frac n0\), siis on tasand ja kiir paralleelsed ja lõikumist ei
+  toimu. Kui \(k = \frac00\), siis asub kiir tasandil ja lõikumine toimub igas
+  kiire punktis. Kui \(k < 0\), on tasand kiire taga ja lõikumist ei toimu.
+  
+  Punkt \(P\):
+  \[P=P_1+\frac{(P_0-P_1)\cdot\vec n}{\vec s\cdot\vec n}\cdot\vec s\]
+  
+\end{document}

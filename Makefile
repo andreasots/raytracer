@@ -10,6 +10,6 @@ clean:
 deps.mk:
 	$(MAKE) -C src deps.mk || exit 2
 
-common.mk:
+common.mk: common.mk.in
 	@echo "Run ./configure before make."
 	@exit 1
