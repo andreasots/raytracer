@@ -5,10 +5,6 @@
 
 namespace Raytracer
 {
-  Vector::Vector(float x, float y, float z, float w): Point(x, y, z, w)
-  {
-  }
-  
   Vector::Vector(float x, float y, float z): Point(x, y, z)
   {
   }

@@ -4,12 +4,7 @@
 
 namespace Raytracer
 {
-    Point::Point(float x, float y, float z, float w): mX(x), mY(y), mZ(z), mW(w)
-    {
-        
-    }
-
-    Point::Point(float x, float y, float z): mX(x), mY(y), mZ(z), mW(1)
+    Point::Point(float x, float y, float z): mX(x), mY(y), mZ(z)
     {
     }
 
@@ -30,11 +25,6 @@ namespace Raytracer
     float Point::z() const
     {
         return this->mZ;
-    }
-
-    float Point::w() const
-    {
-        return this->mW;
     }
 
     Point Point::operator+(const Vector v) const
