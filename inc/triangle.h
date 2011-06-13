@@ -16,7 +16,7 @@ namespace Raytracer
         Triangle(Point a, Point b, Point c) throw();
         Triangle(Point a, Point b, Point c, Vector normal) throw();
 
-        Point intersect(const Ray r) throw(NoItersection);
+        Point intersect(const Ray r) throw(NoIntersection);
 
         Point A, B, C;
         Vector n;

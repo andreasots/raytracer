@@ -1,7 +1,7 @@
 include ../common.mk
 include deps.mk
 
-OBJS := exception.o loader.o point.o triangle.o vector.o
+OBJS := exception.o loader.o matrix.o point.o triangle.o vector.o
 MAIN := main.o
 
 LIBS := -lboost_regex-mt

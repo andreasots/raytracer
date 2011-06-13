@@ -2,3 +2,6 @@
 *~
 src/raytracer
 *.mk
+*.log
+*.aux
+*.pdf

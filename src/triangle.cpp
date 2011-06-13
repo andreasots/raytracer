@@ -20,9 +20,10 @@ namespace Raytracer
     {
     }
 
-    Point intersect(const Ray r) throw(NoInterection)
+/*    Point intersect(const Ray r) throw(NoInterection)
     {
         float distance = 0;
-        
-    }
+
+        return Point(0,0,0);
+    }*/
 }
