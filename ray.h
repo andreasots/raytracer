@@ -11,8 +11,8 @@ namespace Raytracer
             Point start() throw();
             Vector direction() throw();
         private:
-            Point mStart();
-            Vector mDirection();
-    }
+            Point mStart;
+            Vector mDirection;
+    };
 }
 #endif

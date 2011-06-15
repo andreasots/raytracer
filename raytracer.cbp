@@ -30,6 +30,7 @@
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
+			<Add directory="assimp/include" />
 		</Compiler>
 		<Linker>
 			<Add library="sfml-audio" />
@@ -37,7 +38,25 @@
 			<Add library="sfml-network" />
 			<Add library="sfml-system" />
 			<Add library="sfml-window" />
+			<Add library="boost_regex-mt" />
 		</Linker>
+		<Unit filename="exception.cpp" />
+		<Unit filename="exception.h" />
+		<Unit filename="loader.cpp" />
+		<Unit filename="loader.h" />
+		<Unit filename="main.cpp" />
+		<Unit filename="matrix.cpp" />
+		<Unit filename="matrix.h" />
+		<Unit filename="mesh.cpp" />
+		<Unit filename="mesh.h" />
+		<Unit filename="point.cpp" />
+		<Unit filename="point.h" />
+		<Unit filename="ray.cpp" />
+		<Unit filename="ray.h" />
+		<Unit filename="triangle.cpp" />
+		<Unit filename="triangle.h" />
+		<Unit filename="vector.cpp" />
+		<Unit filename="vector.h" />
 		<Extensions>
 			<code_completion />
 			<envvars />
