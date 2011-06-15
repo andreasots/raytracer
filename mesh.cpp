@@ -1,4 +1,4 @@
-#include <aiMesh.h>
+#include <assimp/aiMesh.h>
 #include "point.h"
 #include "vector.h"
 #include "mesh.h"
