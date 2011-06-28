@@ -1,7 +1,13 @@
 *.o
 *~
-src/raytracer
-*.mk
 *.log
 *.aux
 *.pdf
+*.out
+*.toc
+*.bbl
+*.bib
+*.blg
+*.lof
+*.lot
+

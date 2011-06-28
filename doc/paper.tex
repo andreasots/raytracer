@@ -1,0 +1,279 @@
+\documentclass[a4paper,12pt]{report}
+\usepackage{amsmath}
+\usepackage[estonian]{babel}
+\usepackage[bf]{caption}
+\usepackage[top=2.54cm, bottom=2.54cm, left=3cm, right=2cm]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage{sectsty}
+\usepackage[compact]{titlesec}
+\usepackage{wrapfig}
+\chapterfont{\fontsize{16pt}{19pt}\sffamily}
+\linespread{1.3}
+\renewcommand{\thechapter}{\arabic{chapter}.}
+\renewcommand{\thesection}{\thechapter\arabic{section}.}
+\renewcommand{\thesubsection}{\thesection\arabic{subsection}.}
+\renewcommand{\thesubsubsection}{\thesubsection\arabic{subsubsection}.}
+\renewcommand{\theequation}{\thechapter\arabic{equation}}
+\renewcommand{\thefigure}{\thechapter\arabic{figure}}
+
+% et nad kaklema ei läheks
+\usepackage[colorlinks=true]{hyperref}
+\usepackage[tocbib]{apacite}
+
+\pagestyle{empty}
+\begin{document}
+% apacite tõlked
+\renewcommand{\BUPhD}{Avaldamata doktoritöö}
+\renewcommand{\BAvailFrom}{Loetud:\ }
+\begin{center}
+Tallinna Reaalkool
+
+\vfill
+
+Kiirtejälitus\\
+Uurimistöö
+
+\vfill
+
+\end{center}
+
+\begin{raggedleft}
+
+Andreas Ots
+
+11a
+
+Juhendaja: õp Inga Petuhhov
+
+\end{raggedleft}
+
+\vfill
+
+\begin{center}
+
+Tallinn 2011
+
+\end{center}
+\clearpage
+
+\addtocontents{toc}{\protect\thispagestyle{empty}}
+\tableofcontents
+\listoffigures
+\listoftables
+
+\chapter*{Sissejuhatus}
+\addcontentsline{toc}{chapter}{Sissejuhatus}
+\pagestyle{plain}
+\thispagestyle{empty}
+Esimene lehekülg
+
+\clearpage
+
+Teine lehekülg
+
+\chapter{Kiirtejälitus}
+\section{Kolmnurga ja kiire lõikumine}
+
+\subsection{Tasand}
+\[
+  \left\{
+  \begin{array}{l}
+    P' = P + t\vec s \\
+    (P' - A)\cdot\vec n = 0
+  \end{array}
+  \right.
+\]
+
+\[(P + t\vec s - A)\cdot\vec n = 0\]
+
+\[(P - A)\cdot\vec n + t\vec s\cdot\vec n = 0\]
+
+\[t\vec s\cdot\vec n = (A - P)\cdot\vec n\]
+
+\[t = \frac{(A - P)\cdot\vec n}{\vec s\cdot\vec n}\]
+
+Kui \(t = \pm\inf\), kiir ei lõiku tasandiga. Kui \(t = \frac00\)\footnote{IEEE~
+754 standardi järgi \(\frac00=\)\texttt{NaN}.}
+
+\subsection{Barütsentrilised koordinaadid}
+\begin{wrapfigure}{r}{0.5\textwidth}
+  \begin{center}
+    \setlength{\unitlength}{5cm}
+    \begin{picture}(1.25,0.75)
+      \put(0.125,0.125){\line(1,0){1}}
+      \put(1.125,0.125){\line(-5,4){0.715}}
+      \put(0.125,0.125){\line(1,2){0.285}}
+      \put(0,0){\(A(1,0,0)\)}
+      \put(1,0){\(B(0,1,0)\)}
+      \put(0.35,0.75){\(C(0,0,1)\)}
+      \put(0.5,0.35){\circle*{.03}}
+      \put(0.3, 0.4){\(P(\lambda_1, \lambda_2, \lambda_3)\)}
+    \end{picture}
+    \[\forall i \in \{1,2,3\} \quad 0 \geq \lambda_i \geq 1\]
+  \end{center}
+  \caption{Barütsentrilised koordinaadid kolmnurgas}
+  \label{fig:bary}
+\end{wrapfigure}
+Barütsentrilised koordinaadid on ar\-vu\-kol\-mik \((\lambda_1, \lambda_2,\lambda_3\),
+mis tähistavad raskuseid etalonkolmnurga \(\triangle ABC\) tippudes. Need
+raskused omakorda määravad punkti \(P\), mis asub nende raskuste raskuskeskmes.
+Ba\-rü\-tsent\-ri\-li\-sed koordinaadid avastas August Ferdinand Möbius aastal 1827.
+Homogeensete barütsentriliste koordinaatide korral kehtib valem \ref{eq:bary}.
+\cite{mw:bary} Joonis \ref{fig:bary} näitab barütsentrilisi koordinaate
+kolmurgas.
+
+\begin{equation} \label{eq:bary}
+  \lambda_1 + \lambda_2 + \lambda_3 = 1
+\end{equation}
+
+Olgu \(A(x_1, y_1, z_1)\), \(B(x_2, y_2, z_2)\) ja \(C(x_3, y_3, z_3)\) mingi
+kolmnurga tipud ja punkt \(P(x, y, z)\) selle kolmurgaga samas tasandis asuv
+punkt.
+
+Punkti \(P\) saab määrata kolmnurga \(ABC\) barütsentriliste koordinaatidega
+\((\lambda_1, \lambda_2, \lambda_3)\). Barütsentrilised koordinaadid saab
+teisendada eukleidilise ruumi koordinaatideks valemiga \ref{eq:bary-1} või
+komponetide kaupa võrrandisüsteem \ref{eq:bary-1-exp}.
+
+\begin{minipage}{0.40\textwidth}
+  \begin{equation} \label{eq:bary-1}
+    P = \lambda_1A+\lambda_2B+\lambda_3C
+  \end{equation}
+\end{minipage}
+\begin{minipage}{0.55\textwidth}
+  \begin{equation} \label{eq:bary-1-exp}
+    \left\{
+    \begin{array}{l}
+      x = \lambda_1x_1+\lambda_2x_2+\lambda_3x_3 \\
+      y = \lambda_1y_1+\lambda_2y_2+\lambda_3y_3 \\
+      z = \lambda_1z_1+\lambda_2z_2+\lambda_3z_3
+    \end{array}
+    \right.
+  \end{equation}
+\end{minipage}
+
+Võrrandisüsteem \ref{eq:bary-2} on süsteemi \ref{eq:bary-1} lahend.
+
+\begin{center}
+\begin{minipage}{0.23\textwidth}
+  \[
+    D =
+    \begin{vmatrix}
+      x_1 & x_2 & x_3 \\
+      y_1 & y_2 & y_3 \\
+      z_1 & z_2 & z_3 \\
+    \end{vmatrix}
+  \]
+\end{minipage}
+\begin{minipage}{0.23\textwidth}
+  \[
+    D_{\lambda_1} =
+    \begin{vmatrix}
+      x & x_2 & x_3 \\
+      y & y_2 & y_3 \\
+      z & z_2 & z_3 \\
+    \end{vmatrix}
+  \]
+\end{minipage}
+\begin{minipage}{0.23\textwidth}
+  \[
+    D_{\lambda_2} = 
+    \begin{vmatrix}
+      x_1 & x & x_3 \\
+      y_1 & y & y_3 \\
+      z_1 & z & z_3 \\
+    \end{vmatrix}
+  \]
+\end{minipage}
+\begin{minipage}{0.23\textwidth}
+  \[
+    D_{\lambda_3} = 
+    \begin{vmatrix}
+      x_1 & x_2 & x \\
+      y_1 & y_2 & y \\
+      z_1 & z_2 & z \\
+    \end{vmatrix}
+  \]
+\end{minipage}
+\end{center}
+  
+\begin{equation} \label{eq:bary-2}  
+  \left\{
+  \begin{array}{l}
+    \lambda_1 = \frac{D_{\lambda_1}}{D} \\
+    \lambda_2 = \frac{D_{\lambda_2}}{D} \\
+    \lambda_3 = \frac{D_{\lambda_3}}{D}
+  \end{array}
+  \right.
+\end{equation}
+
+Kuid sellel meetodil üks viga, kolmerealise determinandi arvutamiseks on vaja
+teha 12 suhteliselt kallist korrutamistehet. Kaherealise determinandi
+arvutamiseks oleks vaja ainult kaks korrutamistehet. Võrrandisüsteemi
+\ref{eq:bary-1-exp} esimesed kaks rida kehtivad ka kahemõõtmelise ruumi puhul.
+Võrrandisüsteem \ref{eq:bary-1-2D} on teisendatud seose \ref{eq:bary} järgi ja
+lihtsustatud. Võrrandisüsteem \ref{eq:bary-3} on süsteemi \ref{eq:bary-1-2D}
+lahend.
+
+\begin{equation} \label{eq:bary-1-2D}
+  \left\{
+  \begin{array}{l}
+    x-x_3 = \lambda_1(x_1-x_3)+\lambda_2(x_2-y_3) \\
+    y-y_3 = \lambda_1(y_1-x_3)+\lambda_2(y_2-y_3) \\
+  \end{array}
+  \right.
+\end{equation}
+
+\begin{center}
+\begin{minipage}{0.3\textwidth}
+  \[
+    D =
+    \begin{vmatrix}
+      x_1 - x_3 & x_2 - x_3 \\
+      y_1 - y_3 & y_2 - y_3 \\
+    \end{vmatrix}
+  \]
+\end{minipage}
+\begin{minipage}{0.3\textwidth}
+  \[
+    D_{\lambda_1} =
+    \begin{vmatrix}
+      x - x_3 & x_2 - x_3 \\
+      y - y_3 & y_2 - y_3 \\
+    \end{vmatrix}
+  \]
+\end{minipage}
+\begin{minipage}{0.3\textwidth}
+  \[
+    D_{\lambda_2} = 
+    \begin{vmatrix}
+      x_1 - x_3 & x - x_3 \\
+      y_1 - y_3 & y - y_3 \\
+    \end{vmatrix}
+  \]
+\end{minipage}
+\end{center}
+  
+\begin{equation} \label{eq:bary-3}  
+  \left\{
+  \begin{array}{l}
+    \lambda_1 = \frac{D_{\lambda_1}}{D} \\
+    \lambda_2 = \frac{D_{\lambda_2}}{D} \\
+    \lambda_3 = 1-\lambda_1-\lambda_2
+  \end{array}
+  \right.
+\end{equation}
+
+Selle asemel, et kolmnurk pöörata vajalikku asendisse, mis on kulukas, sest
+vajab kolme 4x4 maatriksi korrutamist 1x4 maatriksiga, pakub Wald kolmnurga
+projitseerimist ühele kolmest koordinaattasandist. Suurema täpsuse saavutamiseks
+tuleks tema sõnul valida tasand, kus projektsiooni pindala on suurim. \cite[lk.~91]{wald::PhD}
+
+\chapter*{Kokkuvõte}
+\addcontentsline{toc}{chapter}{Kokkuvõte}
+
+% Kasutatud materjalid
+\renewcommand\bibname{Kasutatud materjalid}
+\bibliographystyle{apacite}
+\bibliography{paper}
+\end{document}
