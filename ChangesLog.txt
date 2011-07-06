@@ -1,0 +1,7 @@
+29 juuni 2011
+   released version 0.0.1 of raytracer
+
+     Change log:
+        -
+        -
+
