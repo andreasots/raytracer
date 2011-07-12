@@ -1,5 +1,7 @@
 #include <iostream>
 
+#include "raytracer/vector.h"
+
 #include "version.h"
 
 int main(int argc, char *argv[])
@@ -10,5 +12,6 @@ int main(int argc, char *argv[])
 
     std::cout << "Libraries: " << std::endl;
     std::cout << "\tAllegro: >5.0.0 (no exact version information)"<<std::endl;
+
     return 0;
 }

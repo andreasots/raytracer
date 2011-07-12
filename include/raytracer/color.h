@@ -1,10 +1,11 @@
 #ifndef RAYTRACER_COLOR_H
 #define RAYTRACER_COLOR_H
 #include <cmath>
+#include <algorithm>
 
-namespace raytracer
+namespace Raytracer
 {
-
+template<class T = float>
 class Color
 {
 public:
@@ -13,7 +14,7 @@ public:
      * \param g Green component
      * \param b Blue component
      */
-    Color(float r, float g, float b): m_r(r), m_g(g), m_b(b)
+    Color(T r, T g, T b): m_r(r), m_g(g), m_b(b)
     {
     }
 
@@ -25,7 +26,7 @@ public:
     /** Get red componet
      * \return The red component
      */
-    float r()
+    T r()
     {
         return m_r;
     }
@@ -33,7 +34,7 @@ public:
     /** Set red component
      * \param val The red component
      */
-    void r(float val)
+    void r(T val)
     {
         m_r = val;
     }
@@ -41,7 +42,7 @@ public:
     /** Access green component
      * \return The green component
      */
-    float g()
+    T g()
     {
         return m_g;
     }
@@ -49,7 +50,7 @@ public:
     /** Set green component
      * \param val The green component
      */
-    void g(float val)
+    void g(T val)
     {
         m_g = val;
     }
@@ -57,7 +58,7 @@ public:
     /** Access blue component
      * \return The blue component
      */
-    float b()
+    T b()
     {
         return m_b;
     }
@@ -65,21 +66,15 @@ public:
     /** Set blue component
      * \param val The blue component
      */
-    void b(float val)
+    void b(T val)
     {
         m_b = val;
-    }
-
-    /** Do gamma correction */
-    void gamma()
-    {
-        gamma(1/2.2);
     }
 
     /** Do gamma correction
      * \param Gamma The gamma value
      */
-    void gamma(float Gamma)
+    void gamma(T Gamma = 1/2.2)
     {
         r = std::pow(r, Gamma);
         g = std::pow(g, Gamma);
@@ -89,16 +84,23 @@ public:
     /** Clamp the values */
     void clamp()
     {
-        r = max(0.0f, min(r, 1.0f));
-        g = max(0.0f, min(g, 1.0f));
-        b = max(0.0f, min(b, 1.0f));
+        r = std::max(0, std::min(r, 1));
+        g = std::max(0, std::min(g, 1));
+        b = std::max(0, std::min(b, 1));
+    }
+
+    Color<T> &add(Color c)
+    {
+        r += c.r;
+        g += c.g;
+        b += c.b;
     }
 
 protected:
 private:
-    float m_r; //!< The red component
-    float m_g; //!< The green component
-    float m_b; //!< The blue component
+    T m_r; //!< The red component
+    T m_g; //!< The green component
+    T m_b; //!< The blue component
 };
 
 } // namespace raytracer

@@ -2,13 +2,28 @@
 <CodeBlocks_layout_file>
 	<ActiveTarget name="Debug" />
 	<File name="include/raytracer/color.h" open="0" top="0" tabpos="0">
-		<Cursor position="1186" topLine="0" />
+		<Cursor position="102" topLine="0" />
 	</File>
-	<File name="include/raytracer/vector.h" open="1" top="1" tabpos="0">
-		<Cursor position="0" topLine="0" />
+	<File name="include/raytracer/material.h" open="1" top="0" tabpos="5">
+		<Cursor position="160" topLine="0" />
 	</File>
-	<File name="src/raytracer/vector.cpp" open="1" top="0" tabpos="0">
-		<Cursor position="0" topLine="0" />
+	<File name="include/raytracer/object.h" open="1" top="0" tabpos="3">
+		<Cursor position="512" topLine="0" />
+	</File>
+	<File name="include/raytracer/ray.h" open="1" top="0" tabpos="8">
+		<Cursor position="796" topLine="0" />
+	</File>
+	<File name="include/raytracer/vector.h" open="1" top="1" tabpos="1">
+		<Cursor position="966" topLine="17" />
+	</File>
+	<File name="main.cpp" open="1" top="0" tabpos="2">
+		<Cursor position="432" topLine="0" />
+	</File>
+	<File name="src/raytracer/object.cpp" open="1" top="0" tabpos="4">
+		<Cursor position="324" topLine="0" />
+	</File>
+	<File name="src/raytracer/sphere.cpp" open="1" top="0" tabpos="7">
+		<Cursor position="217" topLine="0" />
 	</File>
 	<File name="version.h" open="0" top="0" tabpos="0">
 		<Cursor position="697" topLine="0" />
