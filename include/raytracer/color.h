@@ -76,24 +76,33 @@ public:
      */
     void gamma(T Gamma = 1/2.2)
     {
-        r = std::pow(r, Gamma);
-        g = std::pow(g, Gamma);
-        b = std::pow(b, Gamma);
+        m_r = std::pow(m_r, Gamma);
+        m_g = std::pow(m_g, Gamma);
+        m_b = std::pow(m_b, Gamma);
     }
 
     /** Clamp the values */
     void clamp()
     {
-        r = std::max(0, std::min(r, 1));
-        g = std::max(0, std::min(g, 1));
-        b = std::max(0, std::min(b, 1));
+        m_r = std::max(0, std::min(m_r, 1));
+        m_g = std::max(0, std::min(m_g, 1));
+        m_b = std::max(0, std::min(m_b, 1));
     }
 
     Color<T> &add(Color c)
     {
-        r += c.r;
-        g += c.g;
-        b += c.b;
+        m_r += c.r();
+        m_g += c.g();
+        m_b += c.b();
+    }
+
+    Color<T> mult(T x)
+    {
+        Color<T> ret = *this;
+        ret.m_r *= x;
+        ret.m_g *= x;
+        ret.m_b *= x;
+        return ret;
     }
 
 protected:
