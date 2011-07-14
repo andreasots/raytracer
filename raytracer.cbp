@@ -35,17 +35,9 @@
 		</Compiler>
 		<Unit filename="include/raytracer/color.h" />
 		<Unit filename="include/raytracer/material.h" />
-		<Unit filename="include/raytracer/object.h" />
-		<Unit filename="include/raytracer/plane.h" />
-		<Unit filename="include/raytracer/ray.h" />
 		<Unit filename="include/raytracer/scene.h" />
-		<Unit filename="include/raytracer/sphere.h" />
-		<Unit filename="include/raytracer/vector.h" />
 		<Unit filename="main.cpp" />
-		<Unit filename="src/raytracer/object.cpp" />
-		<Unit filename="src/raytracer/plane.cpp" />
 		<Unit filename="src/raytracer/scene.cpp" />
-		<Unit filename="src/raytracer/sphere.cpp" />
 		<Unit filename="version.h" />
 		<Extensions>
 			<envvars />
