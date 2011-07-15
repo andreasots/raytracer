@@ -5,7 +5,7 @@
 
 namespace Raytracer
 {
-template<class T = float>
+template<class T = FLOAT>
 class Color
 {
 public:

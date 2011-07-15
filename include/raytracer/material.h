@@ -7,7 +7,7 @@ namespace Raytracer
 {
     struct Material
     {
-        float reflect;
+        FLOAT reflect;
         Color<> diffuse;
         Color<> emit;
     };
