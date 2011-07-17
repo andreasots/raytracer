@@ -19,7 +19,13 @@ namespace gmtl
  *  @ingroup Defines
  * @see XYZ, ZYX, ZXY
  */
-struct RotationOrderBase { enum { IS_ROTORDER = 1 }; };
+struct RotationOrderBase
+{
+    virtual ~RotationOrderBase()
+    { }
+
+    enum { IS_ROTORDER = 1 };
+};
 
 /** XYZ Rotation order
  *  @ingroup Defines */

@@ -1,34 +1,52 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <CodeBlocks_layout_file>
-	<ActiveTarget name="Debug" />
-	<File name="include/gmtl/Intersection.h" open="1" top="0" tabpos="4">
-		<Cursor position="24736" topLine="753" />
+	<ActiveTarget name="Release" />
+	<File name="include/gmtl/Coord.h" open="0" top="0" tabpos="0">
+		<Cursor position="1477" topLine="33" />
+	</File>
+	<File name="include/gmtl/Helpers.h" open="0" top="0" tabpos="0">
+		<Cursor position="481" topLine="0" />
+	</File>
+	<File name="include/gmtl/Intersection.h" open="0" top="0" tabpos="4">
+		<Cursor position="16751" topLine="534" />
+	</File>
+	<File name="include/gmtl/Math.h" open="0" top="0" tabpos="0">
+		<Cursor position="603" topLine="2" />
+	</File>
+	<File name="include/gmtl/Matrix.h" open="0" top="0" tabpos="0">
+		<Cursor position="8668" topLine="222" />
 	</File>
 	<File name="include/gmtl/Plane.h" open="0" top="0" tabpos="0">
 		<Cursor position="0" topLine="39" />
 	</File>
+	<File name="include/gmtl/Point.h" open="0" top="0" tabpos="0">
+		<Cursor position="305" topLine="7" />
+	</File>
 	<File name="include/gmtl/Ray.h" open="0" top="0" tabpos="0">
-		<Cursor position="2" topLine="56" />
+		<Cursor position="1368" topLine="29" />
 	</File>
 	<File name="include/gmtl/RayOps.h" open="0" top="0" tabpos="0">
 		<Cursor position="0" topLine="20" />
 	</File>
+	<File name="include/gmtl/VecBase.h" open="0" top="0" tabpos="0">
+		<Cursor position="2703" topLine="82" />
+	</File>
 	<File name="include/gmtl/VecOps.h" open="0" top="0" tabpos="0">
-		<Cursor position="529" topLine="0" />
+		<Cursor position="11846" topLine="346" />
 	</File>
 	<File name="include/gmtl/Version.h" open="0" top="0" tabpos="0">
 		<Cursor position="4243" topLine="75" />
 	</File>
 	<File name="include/raytracer/material.h" open="0" top="0" tabpos="0">
-		<Cursor position="184" topLine="0" />
+		<Cursor position="302" topLine="0" />
 	</File>
-	<File name="include/raytracer/scene.h" open="1" top="0" tabpos="1">
+	<File name="include/raytracer/scene.h" open="0" top="0" tabpos="1">
 		<Cursor position="1027" topLine="0" />
 	</File>
-	<File name="main.cpp" open="1" top="0" tabpos="2">
-		<Cursor position="914" topLine="0" />
+	<File name="main.cpp" open="1" top="0" tabpos="1">
+		<Cursor position="265" topLine="0" />
 	</File>
-	<File name="src/raytracer/scene.cpp" open="1" top="1" tabpos="3">
-		<Cursor position="3061" topLine="86" />
+	<File name="src/raytracer/scene.cpp" open="1" top="1" tabpos="2">
+		<Cursor position="3031" topLine="184" />
 	</File>
 </CodeBlocks_layout_file>

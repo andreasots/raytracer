@@ -39,7 +39,6 @@
 			<Add option="-Wundef" />
 			<Add option="-Wfloat-equal" />
 			<Add option="-Winline" />
-			<Add option="-Wunreachable-code" />
 			<Add option="-Wmissing-declarations" />
 			<Add option="-Wmissing-include-dirs" />
 			<Add option="-Wswitch-enum" />
@@ -50,7 +49,7 @@
 			<Add option="-Wfatal-errors" />
 			<Add option="-Wextra" />
 			<Add option="-Wall" />
-			<Add option="-DFLOAT=double" />
+			<Add option="-DFLOAT=float" />
 			<Add directory="include" />
 		</Compiler>
 		<Unit filename="include/gmtl/AABox.h" />

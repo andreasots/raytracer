@@ -57,6 +57,9 @@ public:
       : expRep(rep)
    {;}
 
+   virtual ~VecBase()
+   { }
+
    /** Conversion operator to default vecbase type. */
    /*
    operator VecBase<DATA_TYPE,SIZE,meta::DefaultVecTag>()
@@ -108,6 +111,8 @@ public:
    enum Params { Size = SIZE };
 
 public:
+    virtual ~VecBase()
+    { }
    /**
     * Default constructor.
     * Does nothing, leaves data alone.

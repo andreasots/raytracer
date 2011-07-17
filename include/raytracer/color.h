@@ -14,7 +14,7 @@ public:
      * \param g Green component
      * \param b Blue component
      */
-    Color(T r, T g, T b): m_r(r), m_g(g), m_b(b)
+    Color(T _r, T _g, T _b): m_r(_r), m_g(_g), m_b(_b)
     {
     }
 
@@ -84,9 +84,9 @@ public:
     /** Clamp the values */
     void clamp()
     {
-        m_r = std::max(0, std::min(m_r, 1));
-        m_g = std::max(0, std::min(m_g, 1));
-        m_b = std::max(0, std::min(m_b, 1));
+        m_r = std::max<T>(0, std::min<T>(m_r, 1));
+        m_g = std::max<T>(0, std::min<T>(m_g, 1));
+        m_b = std::max<T>(0, std::min<T>(m_b, 1));
     }
 
     Color<T> &add(Color c)
@@ -94,15 +94,23 @@ public:
         m_r += c.r();
         m_g += c.g();
         m_b += c.b();
+        return *this;
     }
 
-    Color<T> mult(T x)
+    Color<T> &mult(T x)
     {
-        Color<T> ret = *this;
-        ret.m_r *= x;
-        ret.m_g *= x;
-        ret.m_b *= x;
-        return ret;
+        m_r *= x;
+        m_g *= x;
+        m_b *= x;
+        return *this;
+    }
+
+    Color<T> mult(Color<T> c)
+    {
+        m_r *= c.r();
+        m_g *= c.g();
+        m_b *= c.b();
+        return *this;
     }
 
 protected:

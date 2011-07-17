@@ -16,8 +16,8 @@
 
 namespace gmtl
 {
-   
-/** coord is a position/rotation pair. 
+
+/** coord is a position/rotation pair.
  *  coord consists of a position element and a rotation element.
  *
  * <h3> "How to define an Vector/Euler pair (32 bit float precision):" </h3>
@@ -30,7 +30,7 @@ namespace gmtl
  *    CoordVec3fEulerAngleXYZf myEulerCoord;
  *    Coord3fQuat myOtherEulerCoord;
  * \endcode
- * @see Vec, AxisAngle, EulerAngle 
+ * @see Vec, AxisAngle, EulerAngle
  * @ingroup Types
  */
 template <typename POS_TYPE, typename ROT_TYPE>
@@ -40,7 +40,7 @@ public:
    Coord() : mPos(), mRot()
    {
    }
-   
+
    typedef typename POS_TYPE::DataType DataType;
    typedef POS_TYPE PosDataType;
    typedef ROT_TYPE RotDataType;
@@ -49,16 +49,16 @@ public:
        PosSize = POS_TYPE::Size,
        RotSize = ROT_TYPE::Size
    };
-    
+
    Coord( const Coord<POS_TYPE, ROT_TYPE>& coord ) : mPos( coord.mPos ), mRot( coord.mRot )
    {
    }
-   
-   Coord( const POS_TYPE& pos, const ROT_TYPE& rot ) : mPos( pos ), mRot( rot )
+
+   Coord( const POS_TYPE& _pos, const ROT_TYPE& _rot ) : mPos( _pos ), mRot( _rot )
    {
    }
 
-   /** @name Multi-arg Constructors 
+   /** @name Multi-arg Constructors
    *  Construct objects from primitive types
    *  Just assigns values in order to the pos and rot members' members.
    */
@@ -70,7 +70,7 @@ public:
       if(PosSize == 3)
       {
          mPos[0] = a0; mPos[1] = a1; mPos[2] = a2;
-         mRot[0] = a3; mRot[1] = a4; mRot[2] = a5; 
+         mRot[0] = a3; mRot[1] = a4; mRot[2] = a5;
       }
       else
       {
@@ -84,12 +84,12 @@ public:
       if(PosSize == 3)
       {
          mPos[0] = a0; mPos[1] = a1; mPos[2] = a2;
-         mRot[0] = a3; mRot[1] = a4; mRot[2] = a5; mRot[3] = a6; 
+         mRot[0] = a3; mRot[1] = a4; mRot[2] = a5; mRot[3] = a6;
       }
       else if(PosSize == 4)
       {
          mPos[0] = a0; mPos[1] = a1; mPos[2] = a2; mPos[3] = a3;
-         mRot[0] = a4; mRot[1] = a5; mRot[2] = a6; 
+         mRot[0] = a4; mRot[1] = a5; mRot[2] = a6;
       }
       else
       {
@@ -97,7 +97,7 @@ public:
       }
 
    }
-  
+
    Coord( DataType a0, DataType a1, DataType a2, DataType a3, DataType a4, DataType a5, DataType a6, DataType a7 )
    {
       GMTL_STATIC_ASSERT(PosSize == 4, Using_incorrect_number_of_args_for_type_size);
@@ -105,7 +105,7 @@ public:
       if(PosSize == 4)
       {
          mPos[0] = a0; mPos[1] = a1; mPos[2] = a2; mPos[3] = a3;
-         mRot[0] = a4; mRot[1] = a5; mRot[2] = a6; mRot[3] = a7;   
+         mRot[0] = a4; mRot[1] = a5; mRot[2] = a6; mRot[3] = a7;
       }
       else
       {
@@ -116,16 +116,16 @@ public:
 
    const POS_TYPE& getPos() const { return mPos; }
    const ROT_TYPE& getRot() const { return mRot; }
-   
+
    /// @todo what about having a pos, and a const_pos naming convention?
    /// @todo what about having a rot, and a const_rot naming convention?
-   
+
    /** accessor to the position element */
    POS_TYPE& pos() { return mPos; }
 
    /** accessor to the rotation element */
    ROT_TYPE& rot() { return mRot; }
-   
+
    /** const accessor to the position element */
    //const POS_TYPE& pos() const { return mPos; }
 

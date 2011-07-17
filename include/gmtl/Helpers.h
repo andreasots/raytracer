@@ -18,8 +18,8 @@ struct ConstructorCounter
 {
    unsigned mCount;
 
-   ConstructorCounter()
-   { mCount = 0; }
+   ConstructorCounter(): mCount(0)
+   { }
 
    void inc()
    { mCount += 1; }

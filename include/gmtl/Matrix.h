@@ -210,7 +210,7 @@ public:
    };
 
    /** Default Constructor (Identity constructor) */
-   Matrix()
+   Matrix(): mState(IDENTITY)
    {
       /** @todo mp */
       for (unsigned int r = 0; r < ROWS; ++r)
@@ -224,11 +224,11 @@ public:
       {  this->operator()( x, x ) = (DATA_TYPE)1.0; }
 
       /** @todo Set initial state to IDENTITY and test other stuff */
-      mState = IDENTITY;
+      //mState = IDENTITY;
    }
 
    /** copy constructor */
-   Matrix( const Matrix<DATA_TYPE, ROWS, COLS>& matrix )
+   Matrix( const Matrix<DATA_TYPE, ROWS, COLS>& matrix ): mState(matrix.mState)
    {
       this->set( matrix.getData() );
       mState = matrix.mState;

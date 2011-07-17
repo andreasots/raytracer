@@ -11,20 +11,8 @@
 
 #include "version.h"
 #include <gmtl/Version.h>
-
-FLOAT clamp(FLOAT val)
-{
-    return val > 1 ? 1 : (val < 0 ? 0 : val);
-}
-
-FLOAT tan_fov_x, tan_fov_y;
+#define SAMPLES 4
 size_t w, h;
-
-void cam(FLOAT &x, FLOAT &y)
-{
-    x = tan_fov_x*(2*x-w)/w;
-    y = tan_fov_y*(2*y-h)/h;
-}
 
 int main(int argc, char *argv[])
 {
@@ -35,49 +23,53 @@ int main(int argc, char *argv[])
     std::cout << "Libraries: " << std::endl;
     std::cout << "\tGMTL: " << gmtl::getVersion() << std::endl;
 
-    w = 1024;
-    h = 786;
+    w = 512;
+    h = 512;
 
     FLOAT m_SX, m_SY;
     // screen plane in world space coordinates
-	FLOAT m_WX1 = -4, m_WX2 = 4, m_WY1 = 3, m_WY2 =  m_SY = -3;
+	FLOAT m_WX1 = -4, m_WX2 = 4, m_WY1 = 4, m_WY2 =  m_SY = -4;
 	// calculate deltas for interpolation
 	FLOAT m_DX = (m_WX2 - m_WX1) / w;
-	FLOAT m_DY = -(m_WY2 - m_WY1) / h;
-
-    Raytracer::Color<> pixel;
+	FLOAT m_DY = (m_WY2 - m_WY1) / h;
 
     Raytracer::Scene scene("");
 
     std::ofstream out("image.ppm");
-    out << "P3" << std::endl;
-    out << w << std::endl;
-    out << h << std::endl;
-    out << 255 << std::endl;
 
+    out << "P3" << std::endl << w << std::endl << h << std::endl << 255;
+    out << std::endl;
+
+    gmtl::Point<FLOAT, 3> pos(0,0,-5);
     for(size_t y = 0; y < h; y++)
     {
         std::cout << "Scanline " << y+1 << "/" << h << "\r" << std::flush;
-        m_SX = m_WX1;
         for(size_t x = 0; x < w; x++)
         {
-            gmtl::Point<FLOAT, 3> screen(m_SX, m_SY, 0), pos(0,0,-5);
-            gmtl::Vec<FLOAT, 3> dir = screen - pos;
-            gmtl::normalize(dir);
+            Raytracer::Color<> pixel;
+            for(size_t sample = 0; sample < SAMPLES; sample++)
+            {
+                m_SY = m_WY1 + m_DY*(drand48()+y);
+                m_SX = m_WX1 + m_DX*(drand48()+x);
 
-            gmtl::Ray<FLOAT> ray(pos, dir);
-            pixel = scene.radiance(ray, 0);
+                gmtl::Point<FLOAT, 3> screen(m_SX, m_SY, 0);
+                gmtl::Vec<FLOAT, 3> dir = screen - pos;
+                gmtl::normalize(dir);
 
-            out << static_cast<int>(clamp(pixel.r())*255) << " ";
-            out << static_cast<int>(clamp(pixel.g())*255) << " ";
-            out << static_cast<int>(clamp(pixel.b())*255) << " ";
-            m_SX += m_DX;
+                gmtl::Ray<FLOAT> ray(pos, dir);
+                pixel.add(scene.radiance(ray, 0));
+            }
+            pixel.mult(1.0/SAMPLES);
+            pixel.gamma();
+            pixel.clamp();
+
+            out << static_cast<int>(pixel.r()*255) << " ";
+            out << static_cast<int>(pixel.g()*255) << " ";
+            out << static_cast<int>(pixel.b()*255) << " ";
         }
         out << std::endl;
-        m_SY += m_DY;
     }
     std::endl(std::cout);
-    out << std::endl;
 
     scene.stats();
 

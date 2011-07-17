@@ -7,9 +7,12 @@ namespace Raytracer
 {
     struct Material
     {
-        FLOAT reflect;
-        Color<> diffuse;
-        Color<> emit;
+        FLOAT reflect, specular, spec_pow;
+        Color<> color;
+        bool emit;
+
+        Material(): reflect(0), specular(1), spec_pow(20), color(), emit(false)
+        { }
     };
 }
 

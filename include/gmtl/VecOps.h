@@ -367,10 +367,10 @@ template<class DATA_TYPE, unsigned SIZE>
 DATA_TYPE length(const Vec<DATA_TYPE, SIZE>& v1)
 {
    DATA_TYPE ret_val = lengthSquared(v1);
-   if (ret_val == DATA_TYPE(0.0f))
-      return DATA_TYPE(0.0f);
-   else
+   if (ret_val > 0)
       return Math::sqrt(ret_val);
+   else
+      return 0;
 }
 
 /**
@@ -414,7 +414,7 @@ DATA_TYPE normalize(Vec<DATA_TYPE, SIZE>& v1)
 {
    DATA_TYPE len = length(v1);
 
-   if(len != 0.0f)
+   if(len > 0)
    {
       for(unsigned i=0;i<SIZE;++i)
       {

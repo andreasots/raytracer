@@ -43,18 +43,15 @@ public:
       : mOrigin( origin ), mDir( dir )
    {}
 
-   
+
 
    /**
     * Constructs an exact duplicate of the given ray.
     *
     * @param lineseg    the ray to copy
     */
-   Ray( const Ray& lineseg )
-   {
-      mOrigin = lineseg.mOrigin;
-      mDir = lineseg.mDir;
-   }
+   Ray( const Ray& lineseg ): mOrigin(lineseg.mOrigin), mDir(lineseg.mDir)
+   { }
 
    /**
     * Gets the origin of the ray.
