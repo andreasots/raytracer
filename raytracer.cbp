@@ -51,7 +51,20 @@
 			<Add option="-Wall" />
 			<Add option="-DFLOAT=float" />
 			<Add directory="include" />
+			<Add directory="PixelToaster" />
 		</Compiler>
+		<Linker>
+			<Add library="assimp" />
+			<Add library="X11" />
+			<Add library="rt" />
+		</Linker>
+		<Unit filename="PixelToaster/PixelToaster.cpp" />
+		<Unit filename="PixelToaster/PixelToaster.h" />
+		<Unit filename="PixelToaster/PixelToasterApple.h" />
+		<Unit filename="PixelToaster/PixelToasterCommon.h" />
+		<Unit filename="PixelToaster/PixelToasterConversion.h" />
+		<Unit filename="PixelToaster/PixelToasterUnix.h" />
+		<Unit filename="PixelToaster/PixelToasterWindows.h" />
 		<Unit filename="include/gmtl/AABox.h" />
 		<Unit filename="include/gmtl/AABoxOps.h" />
 		<Unit filename="include/gmtl/AxisAngle.h" />
@@ -105,8 +118,10 @@
 		<Unit filename="include/gmtl/gmtl.h" />
 		<Unit filename="include/raytracer/color.h" />
 		<Unit filename="include/raytracer/material.h" />
+		<Unit filename="include/raytracer/octree.h" />
 		<Unit filename="include/raytracer/scene.h" />
 		<Unit filename="main.cpp" />
+		<Unit filename="src/raytracer/octree.cpp" />
 		<Unit filename="src/raytracer/scene.cpp" />
 		<Unit filename="version.h" />
 		<Extensions>

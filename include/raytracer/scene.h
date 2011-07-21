@@ -3,7 +3,9 @@
 
 #include "raytracer/color.h"
 #include "raytracer/material.h"
+#include "raytracer/octree.h"
 
+#include <gmtl/AABox.h>
 #include <gmtl/Ray.h>
 #include <gmtl/Sphere.h>
 #include <gmtl/Plane.h>
@@ -14,12 +16,6 @@
 #include <string>
 
 namespace Raytracer {
-enum ObjectType
-{
-    PLANE,
-    SPHERE,
-    TRI
-};
 class Scene
 {
     public:
@@ -36,6 +32,7 @@ class Scene
         std::vector<std::pair<gmtl::Sphere<FLOAT>, Material>> m_spheres;
         std::vector<std::pair<gmtl::Tri<FLOAT>, Material>> m_tris;
         unsigned long long m_intersections, m_hits;
+        gmtl::AABox<FLOAT> m_bbox;
 };
 
 } // namespace Raytracer

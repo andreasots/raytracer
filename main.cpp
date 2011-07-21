@@ -1,5 +1,5 @@
 #include <iostream>
-#include <fstream>
+#include <cassert>
 
 #include <gmtl/Ray.h>
 #include "raytracer/color.h"
@@ -7,11 +7,18 @@
 #include <gmtl/Vec.h>
 #include <gmtl/VecOps.h>
 
+#include <assimp/aiDefines.h>
+#include <assimp/aiVersion.h>
+
 #include <cmath>
 
 #include "version.h"
 #include <gmtl/Version.h>
-#define SAMPLES 4
+#include <PixelToaster.h>
+
+// Focal length in mm
+#define FOCAL_LENGTH 35.0
+#define DISTANCE 5.0
 size_t w, h;
 
 int main(int argc, char *argv[])
@@ -19,36 +26,44 @@ int main(int argc, char *argv[])
     std::cout << "Raytracer " << AutoVersion::FULLVERSION_STRING << " build ";
     std::cout << AutoVersion::BUILD << " (" << AutoVersion::STATUS << ")";
     std::endl(std::cout);
+    std::cout << std::endl;
 
     std::cout << "Libraries: " << std::endl;
+    std::cout << "\tAssimp: " << aiGetVersionMajor()<<'.'<<aiGetVersionMinor();
+    std::cout << '.' << aiGetVersionRevision() << std::endl;
     std::cout << "\tGMTL: " << gmtl::getVersion() << std::endl;
+    std::cout << "\tPixelToaster: " << PIXELTOASTER_VERSION << std::endl;
+    std::cout << std::endl;
 
-    w = 512;
-    h = 512;
+    w = 800/2;
+    h = 600/2;
+
+    PixelToaster::Display screen("Raytracer", w, h);
+    std::vector<PixelToaster::Pixel> fb(w*h);
 
     FLOAT m_SX, m_SY;
     // screen plane in world space coordinates
-	FLOAT m_WX1 = -4, m_WX2 = 4, m_WY1 = 4, m_WY2 =  m_SY = -4;
+	FLOAT m_WX1 = DISTANCE*18/FOCAL_LENGTH, m_WX2 = -m_WX1, m_WY1 = m_WX1*h/w, m_WY2 =  m_SY = -m_WY1;
 	// calculate deltas for interpolation
 	FLOAT m_DX = (m_WX2 - m_WX1) / w;
 	FLOAT m_DY = (m_WY2 - m_WY1) / h;
 
-    Raytracer::Scene scene("");
+    Raytracer::Scene scene(argv[1]);
 
-    std::ofstream out("image.ppm");
+    PixelToaster::Timer timer;
 
-    out << "P3" << std::endl << w << std::endl << h << std::endl << 255;
-    out << std::endl;
-
-    gmtl::Point<FLOAT, 3> pos(0,0,-5);
-    for(size_t y = 0; y < h; y++)
+    gmtl::Point<FLOAT, 3> pos(0,0,-DISTANCE);
+    bool render = true;
+    size_t sample = 1;
+    while(render)
     {
-        std::cout << "Scanline " << y+1 << "/" << h << "\r" << std::flush;
-        for(size_t x = 0; x < w; x++)
+        for(size_t y = 0; y < h; y++)
         {
-            Raytracer::Color<> pixel;
-            for(size_t sample = 0; sample < SAMPLES; sample++)
+            std::cout << "Sample " << sample << "; Scanline " << y+1 << '\r' << std::flush;
+            for(size_t x = 0; x < w; x++)
             {
+                Raytracer::Color<> pixel(fb[y*w+x]);
+                pixel.mult(sample-1);
                 m_SY = m_WY1 + m_DY*(drand48()+y);
                 m_SX = m_WX1 + m_DX*(drand48()+x);
 
@@ -58,20 +73,31 @@ int main(int argc, char *argv[])
 
                 gmtl::Ray<FLOAT> ray(pos, dir);
                 pixel.add(scene.radiance(ray, 0));
-            }
-            pixel.mult(1.0/SAMPLES);
-            pixel.gamma();
-            pixel.clamp();
 
-            out << static_cast<int>(pixel.r()*255) << " ";
-            out << static_cast<int>(pixel.g()*255) << " ";
-            out << static_cast<int>(pixel.b()*255) << " ";
+                pixel.mult(1.0/sample);
+
+                fb[y*w+x] = pixel.PT();
+            }
+            screen.update(fb);
+
+            if(!screen.open())
+            {
+                render = false;
+                break;
+            }
         }
-        out << std::endl;
+        sample++;
     }
-    std::endl(std::cout);
 
     scene.stats();
+    std::cout << "Number of samples per pixel: " << sample << std::endl;
+    std::cout << "Time: " << timer.time() << std::endl;
+
+    while(screen.open())
+    {
+        timer.wait(0.4);
+        screen.update(fb);
+    }
 
     return 0;
 }
