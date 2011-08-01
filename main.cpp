@@ -16,6 +16,10 @@
 #include <gmtl/Version.h>
 #include <PixelToaster.h>
 
+#undef FLOAT
+#include <ImfRgbaFile.h>
+#define FLOAT __FLOAT
+
 // Focal length in mm
 #define FOCAL_LENGTH 35.0
 #define DISTANCE 5.0
@@ -33,10 +37,11 @@ int main(int argc, char *argv[])
     std::cout << '.' << aiGetVersionRevision() << std::endl;
     std::cout << "\tGMTL: " << gmtl::getVersion() << std::endl;
     std::cout << "\tPixelToaster: " << PIXELTOASTER_VERSION << std::endl;
+    std::cout << "\tOpenEXR" << std::endl;
     std::cout << std::endl;
 
-    w = 800/2;
-    h = 600/2;
+    w = 800;
+    h = 600;
 
     PixelToaster::Display screen("Raytracer", w, h);
     std::vector<PixelToaster::Pixel> fb(w*h);
@@ -57,9 +62,11 @@ int main(int argc, char *argv[])
     size_t sample = 1;
     while(render)
     {
+        std::cout << "Sample " << sample << std::endl;
         for(size_t y = 0; y < h; y++)
         {
-            std::cout << "Sample " << sample << "; Scanline " << y+1 << '\r' << std::flush;
+            std::cout << "Scanline " << y+1 << '\r' << std::flush;
+            #pragma omp parallel for schedule(dynamic, 1)
             for(size_t x = 0; x < w; x++)
             {
                 Raytracer::Color<> pixel(fb[y*w+x]);
@@ -71,26 +78,34 @@ int main(int argc, char *argv[])
                 gmtl::Vec<FLOAT, 3> dir = screen - pos;
                 gmtl::normalize(dir);
 
-                gmtl::Ray<FLOAT> ray(pos, dir);
-                pixel.add(scene.radiance(ray, 0));
+                pixel.add(scene.radiance(gmtl::Ray<FLOAT>(pos, dir), 0));
 
                 pixel.mult(1.0/sample);
 
                 fb[y*w+x] = pixel.PT();
             }
             screen.update(fb);
-
             if(!screen.open())
             {
                 render = false;
                 break;
             }
         }
+        std::cout << std::endl;
+
+        Imf::Rgba *pixels = new Imf::Rgba[w*h];
+        for(size_t Y = 0; Y < h; Y++)
+            for(size_t X = 0; X < w; X++)
+                pixels[X+Y*w] = Imf::Rgba(fb[X+Y*w].r, fb[X+Y*w].g, fb[X+Y*w].b);
+        Imf::RgbaOutputFile file("image.exr", w, h, Imf::WRITE_RGBA);
+        file.setFrameBuffer(pixels, 1, w);
+        file.writePixels(h);
+
         sample++;
     }
 
     scene.stats();
-    std::cout << "Number of samples per pixel: " << sample << std::endl;
+    std::cout << "Number of samples per pixel: " << sample-1 << std::endl;
     std::cout << "Time: " << timer.time() << std::endl;
 
     while(screen.open())

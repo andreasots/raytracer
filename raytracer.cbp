@@ -49,7 +49,9 @@
 			<Add option="-Wfatal-errors" />
 			<Add option="-Wextra" />
 			<Add option="-Wall" />
+			<Add option="-fopenmp" />
 			<Add option="-DFLOAT=float" />
+			<Add option="-D__FLOAT=float" />
 			<Add directory="include" />
 			<Add directory="PixelToaster" />
 		</Compiler>
@@ -57,6 +59,7 @@
 			<Add library="assimp" />
 			<Add library="X11" />
 			<Add library="rt" />
+			<Add library="gomp" />
 		</Linker>
 		<Unit filename="PixelToaster/PixelToaster.cpp" />
 		<Unit filename="PixelToaster/PixelToaster.h" />
@@ -133,7 +136,9 @@
 				<Code header_guard="VERSION_H" namespace="AutoVersion" prefix="" />
 			</AutoVersioning>
 			<code_completion />
-			<lib_finder disable_auto="1" />
+			<lib_finder disable_auto="1">
+				<lib name="OpenEXR" />
+			</lib_finder>
 			<debugger />
 		</Extensions>
 	</Project>

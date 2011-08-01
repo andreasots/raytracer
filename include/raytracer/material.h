@@ -11,7 +11,7 @@ namespace Raytracer
         Color<> color;
         bool emit;
 
-        Material(): reflect(0), specular(1), spec_pow(20), color(), emit(false)
+        Material(): reflect(0), specular(0.5), spec_pow(20), color(), emit(false)
         { }
     };
 }

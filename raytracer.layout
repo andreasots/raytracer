@@ -4,7 +4,7 @@
 	<File name="PixelToaster/PixelToaster.h" open="0" top="0" tabpos="5">
 		<Cursor position="37510" topLine="1295" />
 	</File>
-	<File name="include/gmtl/AABox.h" open="1" top="0" tabpos="6">
+	<File name="include/gmtl/AABox.h" open="0" top="0" tabpos="6">
 		<Cursor position="515" topLine="0" />
 	</File>
 	<File name="include/gmtl/Coord.h" open="0" top="0" tabpos="0">
@@ -13,7 +13,7 @@
 	<File name="include/gmtl/Helpers.h" open="0" top="0" tabpos="0">
 		<Cursor position="481" topLine="0" />
 	</File>
-	<File name="include/gmtl/Intersection.h" open="1" top="0" tabpos="7">
+	<File name="include/gmtl/Intersection.h" open="0" top="0" tabpos="7">
 		<Cursor position="16751" topLine="24" />
 	</File>
 	<File name="include/gmtl/Math.h" open="0" top="0" tabpos="0">
@@ -34,6 +34,9 @@
 	<File name="include/gmtl/RayOps.h" open="0" top="0" tabpos="0">
 		<Cursor position="0" topLine="20" />
 	</File>
+	<File name="include/gmtl/Tri.h" open="1" top="0" tabpos="4">
+		<Cursor position="625" topLine="72" />
+	</File>
 	<File name="include/gmtl/VecBase.h" open="0" top="0" tabpos="0">
 		<Cursor position="2703" topLine="82" />
 	</File>
@@ -43,19 +46,25 @@
 	<File name="include/gmtl/Version.h" open="0" top="0" tabpos="0">
 		<Cursor position="4243" topLine="75" />
 	</File>
-	<File name="include/raytracer/color.h" open="0" top="0" tabpos="4">
+	<File name="include/raytracer/color.h" open="1" top="0" tabpos="5">
 		<Cursor position="444" topLine="0" />
 	</File>
-	<File name="include/raytracer/material.h" open="0" top="0" tabpos="2">
-		<Cursor position="302" topLine="0" />
+	<File name="include/raytracer/material.h" open="1" top="0" tabpos="6">
+		<Cursor position="267" topLine="0" />
+	</File>
+	<File name="include/raytracer/octree.h" open="0" top="0" tabpos="4">
+		<Cursor position="26" topLine="18" />
 	</File>
 	<File name="include/raytracer/scene.h" open="1" top="0" tabpos="3">
-		<Cursor position="587" topLine="0" />
+		<Cursor position="845" topLine="0" />
 	</File>
 	<File name="main.cpp" open="1" top="0" tabpos="1">
-		<Cursor position="1524" topLine="18" />
+		<Cursor position="334" topLine="0" />
 	</File>
-	<File name="src/raytracer/scene.cpp" open="1" top="0" tabpos="2">
-		<Cursor position="8439" topLine="237" />
+	<File name="src/raytracer/octree.cpp" open="0" top="0" tabpos="5">
+		<Cursor position="1742" topLine="72" />
+	</File>
+	<File name="src/raytracer/scene.cpp" open="1" top="1" tabpos="2">
+		<Cursor position="10269" topLine="73" />
 	</File>
 </CodeBlocks_layout_file>

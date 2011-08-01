@@ -28,11 +28,13 @@ class Scene
         void stats();
     protected:
     private:
+        Material getMat(ObjectType type, size_t id);
+        void octreeRegen();
         std::vector<std::pair<gmtl::Plane<FLOAT>, Material>> m_planes;
         std::vector<std::pair<gmtl::Sphere<FLOAT>, Material>> m_spheres;
         std::vector<std::pair<gmtl::Tri<FLOAT>, Material>> m_tris;
         unsigned long long m_intersections, m_hits;
-        gmtl::AABox<FLOAT> m_bbox;
+        Octree *m_octree;
 };
 
 } // namespace Raytracer
