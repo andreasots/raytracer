@@ -1,58 +1,20 @@
 #include "raytracer/octree.h"
 #include <gmtl/Intersection.h>
+#include <stdexcept>
+#include <iostream>
 
-inline bool within(const gmtl::AABox<FLOAT> &box1,
-                   const gmtl::AABox<FLOAT> &box2)
-{
-    if(box1.getMax()[0] < box2.getMax()[0])
-        return false;
-    if(box1.getMax()[1] < box2.getMax()[1])
-        return false;
-    if(box1.getMax()[2] < box2.getMax()[2])
-        return false;
-    if(box1.getMin()[0] > box2.getMin()[0])
-        return false;
-    if(box1.getMin()[1] > box2.getMin()[1])
-        return false;
-    if(box1.getMin()[2] > box2.getMin()[2])
-        return false;
-    return true;
-}
-
-inline gmtl::AABox<FLOAT> aabb(const gmtl::Sphere<FLOAT> &s)
-{
-    gmtl::Point<FLOAT, 3> max, min;
-    for(size_t i = 0; i < 3U; i++)
-    {
-        min[i] = s.getCenter()[i]-s.getRadius();
-        max[i] = s.getCenter()[i]+s.getRadius();
-    }
-    return gmtl::AABox<FLOAT>(min, max);
-}
-
-inline gmtl::AABox<FLOAT> aabb(const gmtl::Tri<FLOAT> &tri)
-{
-    gmtl::Point<FLOAT, 3> max, min;
-
-    for(size_t i = 0; i < 3U; i++)
-    {
-        min[i] = std::min(tri[0][i], std::min(tri[1][i], tri[2][i]));
-        max[i] = std::max(tri[0][i], std::max(tri[1][i], tri[2][i]));
-    }
-
-    return gmtl::AABox<FLOAT>(min, max);
-}
+#include <gmtl/Containment.h>
 
 namespace Raytracer {
 
-Octree::Octree()
-{
-}
-
 Octree::Octree(const gmtl::Point<FLOAT, 3>& min, const gmtl::Point<FLOAT, 3>& max, Octree *parent):
-    objects(), m_subnodes({NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL}),
-    AABox(min, max), m_parent(parent)
+    m_objects(), m_subnodes({NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL}),
+    // FIXME: Compiler is fucked up
+    /*AABox(min, max),*/ m_parent(parent)
 {
+    // FIXME: Compiler is fucked up
+    setMin(min);
+    setMax(max);
     setEmpty(true);
 }
 
@@ -62,33 +24,21 @@ Octree::~Octree()
         delete m_subnodes[i];
 }
 
-bool Octree::add(const gmtl::Tri<FLOAT> &tri, const size_t &id)
+bool Octree::add(Object *o, const size_t &id)
 {
-    if(within(*this, aabb(tri)))
+    bool e = isEmpty();
+    setEmpty(false);
+    if(gmtl::isInVolume(*this, o->bounds()))
     {
         createSubnodes();
         for(size_t i = 0; i < 8; i++)
-            if(m_subnodes[i]->add(tri, id))
+            if(m_subnodes[i]->add(o, id))
                 return true;
-        objects.push_back(std::make_pair(TRI, id));
+        m_objects.push_back(id);
         setEmpty(false);
         return true;
     }
-    return false;
-}
-
-bool Octree::add(const gmtl::Sphere<FLOAT> &sphere, const size_t &id)
-{
-    if(within(*this, aabb(sphere)))
-    {
-        createSubnodes();
-        for(size_t i = 0; i < 8; i++)
-            if(m_subnodes[i]->add(sphere, id))
-                return true;
-        objects.push_back(std::make_pair(SPHERE, id));
-        setEmpty(false);
-        return true;
-    }
+    setEmpty(e);
     return false;
 }
 
@@ -96,7 +46,7 @@ void Octree::prune()
 {
     for(size_t i = 0; i < 8; i++)
     {
-        if(m_subnodes[i]->isEmpty())
+        if(m_subnodes[i] && m_subnodes[i]->isEmpty())
         {
             delete m_subnodes[i];
             m_subnodes[i] = NULL;
@@ -105,17 +55,30 @@ void Octree::prune()
     }
 }
 
-bool Octree::intersect(const gmtl::Ray<FLOAT> &r,
-                       std::vector<Octree*> &nodes)
+bool Octree::intersect(const gmtl::Ray<FLOAT> &r, FLOAT &ret, size_t &id,
+                       const std::vector<Object *> &objects,
+                       unsigned long long &hits, unsigned long long &intersections)
 {
-    unsigned numHits;
     FLOAT tIn, tOut;
-    if(!gmtl::intersect(*this, r, numHits, tIn, tOut))
+    if(!gmtl::intersectAABoxRay(*this, r, tIn, tOut) || tIn >= ret || tOut <= 0)
         return false;
-    nodes.push_back(this);
+
+    for(auto i = m_objects.begin(); i != m_objects.end(); i++)
+    {
+        FLOAT t = objects[*i]->intersect(r);
+        if(t < ret)
+        {
+            ret = t;
+            id = *i;
+            hits++;
+        }
+        intersections++;
+    }
+
     for(size_t i = 0; i < 8; i++)
         if(m_subnodes[i])
-            m_subnodes[i]->intersect(r, nodes);
+            m_subnodes[i]->intersect(r, ret, id, objects, hits, intersections);
+
     return true;
 }
 

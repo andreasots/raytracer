@@ -19,20 +19,17 @@ namespace Raytracer {
 class Scene
 {
     public:
-        Scene(std::string file);
-        void add(gmtl::Sphere<FLOAT> sphere, Material mat);
-        void add(gmtl::Plane<FLOAT> plane, Material mat);
-        void add(gmtl::Tri<FLOAT> tri, Material mat);
-        FLOAT intersect(gmtl::Ray<FLOAT> r, ObjectType &type, size_t &id);
-        Color<> radiance(gmtl::Ray<FLOAT> r, size_t depth);
+        Scene();
+        void open(std::string file);
+        void add(Object *o);
+        FLOAT intersect(const gmtl::Ray<FLOAT> &r, size_t &id, FLOAT max = HUGE_VAL);
+        Color<> radiance(const gmtl::Ray<FLOAT> &r, size_t depth);
         void stats();
     protected:
     private:
-        Material getMat(ObjectType type, size_t id);
-        void octreeRegen();
-        std::vector<std::pair<gmtl::Plane<FLOAT>, Material>> m_planes;
-        std::vector<std::pair<gmtl::Sphere<FLOAT>, Material>> m_spheres;
-        std::vector<std::pair<gmtl::Tri<FLOAT>, Material>> m_tris;
+        void regenerate();
+        std::vector<Object *> m_objects;
+        std::vector<size_t> m_emit;
         unsigned long long m_intersections, m_hits;
         Octree *m_octree;
 };

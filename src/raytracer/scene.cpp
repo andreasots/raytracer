@@ -1,8 +1,13 @@
 #include "raytracer/scene.h"
 
+#include "raytracer/sphere.h"
+#include "raytracer/tri.h"
+
+#include <gmtl/Containment.h>
 #include <gmtl/Intersection.h>
 #include <gmtl/TriOps.h>
 #include <gmtl/VecOps.h>
+#include <gmtl/Output.h>
 
 #include <assimp/aiConfig.h>
 #include <assimp/aiMesh.h>
@@ -18,6 +23,7 @@
 #include <stdexcept>
 
 #define MAXDEPTH 128
+#define SAMPLES 2
 #define EPS static_cast<FLOAT>(0.001)
 
 inline Raytracer::Color<> BRDF(const gmtl::Vec<FLOAT, 3> &in,
@@ -33,63 +39,46 @@ inline Raytracer::Color<> BRDF(const gmtl::Vec<FLOAT, 3> &in,
     diffuse.mult(gmtl::dot(in, n));
     diffuse.mult(M_1_PI);
     diffuse.mult(1-mat.specular);
+    diffuse.mult(mat.color);
     ret.add(diffuse);
 
     // Specular reflection
     gmtl::Vec<FLOAT, 3> R;
     gmtl::reflect(R, in, n);
     Raytracer::Color<> specular = lambda;
-    specular.mult(std::pow(gmtl::dot(R, out), mat.spec_pow));
+    specular.mult(std::pow(std::max<FLOAT>(0,gmtl::dot(R, out)), mat.spec_pow));
     specular.mult((mat.spec_pow+2)/(M_PI*2));
-    diffuse.mult(mat.specular);
+    specular.mult(mat.specular);
     ret.add(specular);
 
     return ret;
-}
-
-inline FLOAT radius(const gmtl::Tri<FLOAT> &tri)
-{
-    FLOAT ret = HUGE_VAL;
-    gmtl::Point<FLOAT, 3> c = gmtl::center(tri);
-    for(size_t i = 0; i < 3; i++)
-    {
-        FLOAT l = gmtl::lengthSquared(gmtl::Vec<FLOAT, 3>(tri[i]-c));
-        if(l > ret)
-            ret = l;
-    }
-    return std::sqrt(ret);
-}
-
-inline gmtl::Point<FLOAT, 3> sphere(const FLOAT radius)
-{
-    FLOAT theta = 2*M_PI*drand48();
-    FLOAT cos_theta = std::cos(theta), sin_theta = std::sin(theta);
-    FLOAT cos_phi = drand48()*2-1;
-    FLOAT sin_phi = std::sqrt(1-cos_phi*cos_phi);
-    return gmtl::Point<FLOAT, 3>(radius*sin_phi*cos_theta, radius*sin_phi*sin_theta, radius*cos_phi);
 }
 
 inline gmtl::Vec<FLOAT, 3> hemisphere(const gmtl::Vec<FLOAT, 3> &n)
 {
     gmtl::Vec<FLOAT, 3> ret;
     gmtl::Point<FLOAT, 3> origin(0,0,0);
+    Raytracer::Sphere s(origin, 1, Raytracer::Material());
 
-    do
-        ret = sphere(1)-origin;
-    while(gmtl::dot(n, ret) < 0);
+    ret = s.random()-origin;
+    if(gmtl::dot(n, ret) < 0)
+        ret = -ret;
 
     return ret;
 }
 
 namespace Raytracer {
 
-Scene::Scene(std::string file): m_planes(), m_spheres(), m_tris(), m_intersections(0), m_hits(0)
+Scene::Scene(): m_objects(), m_intersections(0), m_hits(0), m_octree(NULL)
 {
-    Assimp::Importer importer;
+}
+
+void Scene::open(std::string file)
+{
+        Assimp::Importer importer;
     int pp = aiProcess_Triangulate;
     pp |= aiProcess_JoinIdenticalVertices | aiProcess_FindInvalidData;
     pp |= aiProcess_FindDegenerates | aiProcess_SortByPType;
-    pp |= aiProcess_RemoveRedundantMaterials;
     pp |= aiProcess_GenSmoothNormals | aiProcess_PreTransformVertices;
     pp |= aiProcess_OptimizeGraph | aiProcess_OptimizeMeshes;
     importer.SetPropertyInteger(AI_CONFIG_PP_SBP_REMOVE,
@@ -107,8 +96,21 @@ Scene::Scene(std::string file): m_planes(), m_spheres(), m_tris(), m_intersectio
         aiColor3D c;
         m->Get(AI_MATKEY_COLOR_DIFFUSE, c);
         mat.color = Color<>(c.r, c.g, c.b);
+        m->Get(AI_MATKEY_SHININESS, mat.spec_pow);
+
+        std::cout << "Material '" << name.data << "': ";
         if(std::string(name.data).substr(0, 5) == "LIGHT")
+        {
             mat.emit = true;
+            std::cout << "emissive" << std::endl;
+        }
+        else if(std::string(name.data).substr(0, 7) == "REFLECT")
+        {
+            mat.reflect = 0.75;
+            std::cout << "reflective" << std::endl;
+        }
+        else
+            std::cout << "regular" << std::endl;
 
         for(size_t j = 0; j < scene->mMeshes[i]->mNumFaces; j++)
         {
@@ -119,163 +121,61 @@ Scene::Scene(std::string file): m_planes(), m_spheres(), m_tris(), m_intersectio
             gmtl::Point<FLOAT, 3> B(v.x, v.y, v.z);
             v = scene->mMeshes[i]->mVertices[scene->mMeshes[i]->mFaces[j].mIndices[2]];
             gmtl::Point<FLOAT, 3> C(v.x, v.y, v.z);
-            add(gmtl::Tri<FLOAT>(A, B, C), mat);
+            Tri *tri = new Tri(A, B, C, mat);
+            v = scene->mMeshes[i]->mNormals[scene->mMeshes[i]->mFaces[j].mIndices[0]];
+            aiVector3D u(scene->mMeshes[i]->mNormals[scene->mMeshes[i]->mFaces[j].mIndices[1]]);
+            aiVector3D w(scene->mMeshes[i]->mNormals[scene->mMeshes[i]->mFaces[j].mIndices[2]]);
+            tri->normals(gmtl::Vec<FLOAT, 3>(v.x, v.y, v.z), gmtl::Vec<FLOAT, 3>(u.x, u.y, u.z), gmtl::Vec<FLOAT, 3>(w.x, w.y, w.z));
+            add(tri);
         }
     }
-    octreeRegen();
+    this->regenerate();
 }
 
-void Scene::add(gmtl::Sphere<FLOAT> sphere, Material mat)
+void Scene::add(Object *o)
 {
-    this->m_spheres.push_back(std::make_pair(sphere, mat));
+    m_objects.push_back(o);
 }
 
-void Scene::add(gmtl::Plane<FLOAT> plane, Material mat)
+FLOAT Scene::intersect(const gmtl::Ray<FLOAT> &r, size_t &id, FLOAT max)
 {
-    this->m_planes.push_back(std::make_pair(plane, mat));
-}
+    FLOAT ret = max;
 
-void Scene::add(gmtl::Tri<FLOAT> tri, Material mat)
-{
-    this->m_tris.push_back(std::make_pair(tri, mat));
-}
-
-FLOAT Scene::intersect(gmtl::Ray<FLOAT> r, ObjectType &type, size_t &id)
-{
-    FLOAT ret = HUGE_VAL;
-
-    unsigned numhits;
-    FLOAT t0 = 0, t1 = 0;
-    if(!gmtl::intersect(m_bbox, r, numhits, t0, t1))
-        return ret;
-
-    for(size_t i = 0; i < m_spheres.size(); i++)
-    {
-        int hits;
-        if(gmtl::intersect(m_spheres[i].first, r, hits, t0, t1))
-        {
-            assert(hits > 0);
-            if(t0 < ret && t0 > 0)
-            {
-                ret = t0;
-                type = SPHERE;
-                id = i;
-            }
-            if(t1 < ret && t1 > 0)
-            {
-                ret = t1;
-                type = SPHERE;
-                id = i;
-            }
-            m_hits++;
-        }
-        m_intersections++;
-    }
-
-    for(size_t i = 0; i < m_planes.size(); i++)
-    {
-        FLOAT t;
-        if(gmtl::intersect(m_planes[i].first, r, t) && t < ret && t > 0)
-        {
-            ret = t;
-            type = PLANE;
-            id = i;
-            m_hits++;
-        }
-        m_intersections++;
-    }
-
-    for(size_t i = 0; i < m_tris.size(); i++)
-    {
-        float t, u, v;
-        if(gmtl::intersect(m_tris[i].first, r, u, v, t) && t < ret && t > 0)
-        {
-            ret = t;
-            type = TRI;
-            id = i;
-            m_hits++;
-        }
-        m_intersections++;
-    }
+    if(m_octree)
+        m_octree->intersect(r, ret, id, m_objects, m_hits, m_intersections);
 
     return ret;
 }
 
-Color<> Scene::radiance(gmtl::Ray<FLOAT> r, size_t depth)
+Color<> Scene::radiance(const gmtl::Ray<FLOAT> &r, size_t depth)
 {
-    if(depth > MAXDEPTH)
+    Color<> c;
+    if(depth > MAXDEPTH || static_cast<FLOAT>(MAXDEPTH)/(depth*depth) < drand48())
         return Color<>();
     size_t id = 0;
-    ObjectType type;
-    FLOAT t = this->intersect(r, type, id);
-    Color<> c;
+    FLOAT t = this->intersect(r, id);
     if(t < HUGE_VAL)
     {
-        Material mat;
-        gmtl::Vec<FLOAT, 3> n;
         gmtl::Point<FLOAT, 3> p = r.getOrigin()+t*r.getDir();
-
-        switch(type)
-        {
-            case SPHERE:
-                mat = m_spheres[id].second;
-                n = p - m_spheres[id].first.getCenter();
-                gmtl::normalize(n);
-                break;
-            case PLANE:
-                mat = m_planes[id].second;
-                n = m_planes[id].first.getNormal();
-                break;
-            case TRI:
-                mat = m_tris[id].second;
-                n = gmtl::normal(m_tris[id].first);
-                break;
-            default:
-                throw std::out_of_range("Scene::radiance");
-        }
-
-// Texture mapping
-/*        if(type == TRI)
-        {
-            float T, u, v;
-            gmtl::intersect(m_tris[id].first, r, u, v, T);
-            mat.color = Color<>(u, v, 1-u-v);
-        }*/
-
-//      return mat.color;
+        Object *o = m_objects[id];
+        Material mat = o->material(p);
+        gmtl::Vec<FLOAT, 3> n = o->normal(p);
 
         if(mat.emit)
-            c.add(mat.color);
+            return mat.color;
 
-        for(size_t i = 0; i < m_spheres.size(); i++)
+        for(auto i = m_emit.begin(); i != m_emit.end(); i++)
         {
-            if(!m_spheres[i].second.emit)
-                continue;
-            gmtl::Vec<FLOAT, 3> dir = m_spheres[i].first.getCenter()+sphere(m_spheres[i].first.getRadius()*drand48())-p;
-            gmtl::normalize(dir);
-            if(!(intersect(gmtl::Ray<FLOAT>(p+EPS*dir, dir), type, id) && getMat(type, id).emit))
-                continue;
-            c.add(radiance(gmtl::Ray<FLOAT>(p+EPS*dir, dir), depth+1).mult(M_1_PI));
-        }
+            gmtl::Vec<FLOAT, 3> dir = m_objects[*i]->random() - p;
+            FLOAT T = gmtl::normalize(dir);
 
-        for(size_t i = 0; i < m_tris.size(); i++)
-        {
-            if(!m_tris[i].second.emit)
+            if(intersect(gmtl::Ray<FLOAT>(p, dir), id, T+EPS) == HUGE_VAL || *i != id)
                 continue;
-            gmtl::Vec<FLOAT, 3> dir = gmtl::center(m_tris[i].first)+sphere(radius(m_tris[i].first)*drand48())-p;
-            gmtl::normalize(dir);
-            if(!(intersect(gmtl::Ray<FLOAT>(p+EPS*dir, dir), type, id) && getMat(type, id).emit))
-                continue;
-            c.add(radiance(gmtl::Ray<FLOAT>(p+EPS*dir, dir), depth+1).mult(M_1_PI));
+            c.add(BRDF(dir, r.getDir(), n, mat, m_objects[*i]->material(p+t*dir).color));
         }
 
         gmtl::Vec<FLOAT, 3> dir = hemisphere(n);
-        Color<> lambda = radiance(gmtl::Ray<FLOAT>(p+EPS*dir, dir), depth+1);
-        lambda.mult(gmtl::dot(dir, n));
-        lambda.mult(M_1_PI);
-        c.add(lambda);
-
-        c.mult(mat.color);
+        c.add(BRDF(dir, r.getDir(), n, mat, radiance(gmtl::Ray<FLOAT>(p, dir), depth+1)));
     }
 
     return c;
@@ -284,69 +184,37 @@ Color<> Scene::radiance(gmtl::Ray<FLOAT> r, size_t depth)
 void Scene::stats()
 {
     std::cout << "\nSTATS" << std::endl;
-    std::cout << "Number of primitives: " << m_spheres.size()+m_planes.size()+m_tris.size() << std::endl;
+    std::cout << "Number of primitives: " << m_objects.size() << std::endl;
     std::cout << "Number of intersection tests: " << m_intersections << std::endl;
     std::cout << "Number of successful intersection tests: " << m_hits << std::endl;
 }
 
-Material Scene::getMat(ObjectType type, size_t id)
-{
-    switch(type)
-    {
-        case SPHERE:
-            return m_spheres[id].second;
-        case PLANE:
-            return m_planes[id].second;
-        case TRI:
-            return m_tris[id].second;
-        default:
-            throw std::out_of_range("Scene::getMat");
-    }
-}
-
-void Scene::octreeRegen()
+void Scene::regenerate()
 {
     if(m_octree)
         delete m_octree;
-    if(!(m_tris.size()+m_spheres.size()))
+    m_emit.clear();
+    if(!(m_objects.size()))
         return;
 
-    gmtl::Point<FLOAT, 3> min(HUGE_VAL, HUGE_VAL, HUGE_VAL);
-    gmtl::Point<FLOAT, 3> max(-HUGE_VAL, -HUGE_VAL, -HUGE_VAL);
+    gmtl::AABox<FLOAT> box;
 
-    for(size_t i = 0; i < m_tris.size(); i++)
+    for(size_t i = 0; i < m_objects.size(); i++)
     {
-        for(size_t j = 0; j < 3; j++)
-        {
-            for(size_t k = 0; k < 3; k++)
-            {
-                if(min[k] > m_tris[i].first[j][k])
-                    min[k] = m_tris[i].first[j][k];
-                if(max[k] < m_tris[i].first[j][k])
-                    min[k] = m_tris[i].first[j][k];
-            }
-        }
+        gmtl::extendVolume(box, m_objects[i]->bounds());
+        if(m_objects[i]->material().emit)
+            m_emit.push_back(i);
     }
 
-    for(size_t i = 0; i < m_spheres.size(); i++)
-    {
-        FLOAT r = m_spheres[i].first.getRadius();
-        for(size_t j = 0; j < 3; j++)
-        {
-            if(min[j] > m_spheres[i].first.getCenter()[j]-r)
-                min[j] = m_spheres[i].first.getCenter()[j]-r;
-            if(max[j] < m_spheres[i].first.getCenter()[j]+r)
-                max[j] = m_spheres[i].first.getCenter()[j]+r;
-        }
-    }
+    std::cout << std::endl;
+    std::cout << "Creating Octree: min: " << box.getMin() << std::endl;
+    std::cout << "                 max: " << box.getMax() << std::endl;
+    std::cout << std::endl;
 
-    m_octree = new Octree(min, max, NULL);
+    m_octree = new Octree(box.getMin(), box.getMax(), NULL);
 
-    for(size_t i = 0; i < m_tris.size(); i++)
-        m_octree->add(m_tris[i].first, i);
-
-    for(size_t i = 0; i < m_spheres.size(); i++)
-        m_octree->add(m_spheres[i].first, i);
+    for(size_t i = 0; i < m_objects.size(); i++)
+        m_octree->add(m_objects[i], i);
 
     m_octree->prune();
 }

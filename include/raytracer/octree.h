@@ -2,55 +2,31 @@
 #define RAYTRACER_OCTREE_H
 
 #include <gmtl/AABox.h>
-#include <gmtl/Tri.h>
-#include <gmtl/Sphere.h>
 #include <gmtl/Ray.h>
-#include <gmtl/Intersection.h>
 #include <vector>
 
-namespace Raytracer {
+#include "raytracer/object.h"
 
-enum ObjectType
-{
-    PLANE,
-    SPHERE,
-    TRI
-};
+namespace Raytracer {
 
 class Octree: public gmtl::AABox<FLOAT>
 {
     public:
-        Octree();
         Octree(const gmtl::Point<FLOAT, 3>& min,
                const gmtl::Point<FLOAT, 3>& max, Octree *parent);
-        ~Octree();
-        bool add(const gmtl::Tri<FLOAT> &tri, const size_t &id);
-        bool add(const gmtl::Sphere<FLOAT> &sphere, const size_t &id);
-        bool intersect(const gmtl::Ray<FLOAT> &r, std::vector<Octree*> &nodes);
+        virtual ~Octree();
+        bool add(Object *o, const size_t &id);
+        bool intersect(const gmtl::Ray<FLOAT> &r, FLOAT &ret, size_t &id,
+                       const std::vector<Object *> &objects,
+                       unsigned long long &hits, unsigned long long &intersections);
         void prune();
         void createSubnodes();
-        std::vector<std::pair<ObjectType, size_t>> objects;
     protected:
+        std::vector<size_t> m_objects;
         Octree *m_subnodes[8];
         Octree *m_parent;
 };
 
-class cmpOctree
-{
-    public:
-    gmtl::Ray<FLOAT> r;
-    cmpOctree(gmtl::Ray<FLOAT> _r): r(_r)
-    {
-    }
-
-    bool operator()(Octree* a, Octree* b)
-    {
-        FLOAT tInA, tOutA, tInB, tOutB;
-        gmtl::intersectAABoxRay(*a, r, tInA, tOutA);
-        gmtl::intersectAABoxRay(*b, r, tInB, tOutB);
-        return tInA < tInB;
-    }
-};
 } // namespace Raytracer
 
 #endif // RAYTRACER_OCTREE_H

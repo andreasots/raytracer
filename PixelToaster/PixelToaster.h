@@ -15,10 +15,10 @@
 	   claim that you wrote the original software. If you use this software
 	   in a product, an acknowledgment in the product documentation would be
 	   appreciated but is not required.
-	
+
 	2. Altered source versions must be plainly marked as such, and must not be
 	   misrepresented as being the original software.
-	
+
 	3. This notice may not be removed or altered from any source distribution.
 
 	Glenn Fiedler
@@ -143,77 +143,69 @@ namespace PixelToaster
 	/** \brief Represents a pixel in floating point color mode.
 
 		Each pixel is made up of three components: red, green and blue.
-	
+
 		In floating point color each component is represented by a floating point value.
 		0.0 is minimum intensity and 1.0 is maximum intensity.
-	
+
 		Some examples:
-		
+
 			- black (0.0, 0.0, 0.0)
 			- white (1.0, 1.0, 1.0)
 			- grey (0.5, 0.5, 0.5)
 			- red (1.0, 0.0, 0.0)
 			- purple (1.0, 0.0, 1.0)
 			- green (0.0, 1.0, 0.0)
-		
+
 		Any component less than zero is treated as black, and any value greater than 1.0
 		is treated as full intensity. You do not need to clamp the component values manually!
-	
+
 		You can acheive special effects by exploiting the so called "high dynamic range" available in
 		floating point color. See http://www.debevec.org for information on this technique.
-	
-		Also, please note that each floating point pixel contains an alpha value
-		which you are free to use however you like. For example, it could be used as a z-buffer 
-		for a software renderer, or simply as 4 bytes of storage per pixel for any purpose. 
-	
-		If you dont have any use for the alpha value, its safe to just ignore it. 
 
-		\note You can refer to this class simply as "Pixel" if you like because floating point color 
+		Also, please note that each floating point pixel contains an alpha value
+		which you are free to use however you like. For example, it could be used as a z-buffer
+		for a software renderer, or simply as 4 bytes of storage per pixel for any purpose.
+
+		If you dont have any use for the alpha value, its safe to just ignore it.
+
+		\note You can refer to this class simply as "Pixel" if you like because floating point color
 		      is the default in Pixel Toaster. See the floating point example source code for details.
 	**/
-        
+
     class FloatingPointPixel
     {
     public:
-		
+
 		/// The default constructor sets the pixel to black.
 
-		FloatingPointPixel()
+		FloatingPointPixel(): r(0), g(0), b(0), a(0)
 		{
-			r = 0.0f;
-			g = 0.0f;
-			b = 0.0f;
-			a = 0.0f;
 		}
 
 		/// This convenience constructor lets you specify color and alpha values at creation
 
-		FloatingPointPixel( float r, float g, float b, float a = 0.0f )
+		FloatingPointPixel( float _r, float _g, float _b, float _a = 0.0f ): r(_r), g(_g), b(_b), a(_a)
 		{
-			this->r = r;
-			this->g = g;
-			this->b = b;
-			this->a = a;
 		}
 
         float r;        ///< red component
         float g;        ///< green component
         float b;        ///< blue component
         float a;        ///< alpha component (unused)
-    };          
+    };
 
 	/// since floating point color is the default, we setup a typedef to allow users to shortcut it just to "Pixel"
 
-	typedef FloatingPointPixel Pixel;		
+	typedef FloatingPointPixel Pixel;
 
 	/** \brief Represents a pixel in truecolor mode.
 
 		Each pixel consists of three 8 bit color values packed into a 32 bit integer.
 
 		The color components are stored in the integer in rgb order. The high 8 bits are referred to as 'alpha' but are not used.
-	
+
 		Here are some examples:
-		
+
 			- black = 0x00000000
 			- white = 0x00FFFFFF
 			- grey = 0x007F7F7F
@@ -221,7 +213,7 @@ namespace PixelToaster
 			- purple = 0x00FF00FF
 			- green = 0x0000FF00
 
-		Obviously it can get quite tedious manipulating the integer directly, so this union gives you 
+		Obviously it can get quite tedious manipulating the integer directly, so this union gives you
 		the option of directly accessing the integer, or manipulating each of the 8 bit component values
 		directly:
 
@@ -235,7 +227,7 @@ namespace PixelToaster
 		stay within the [0,255] range or they will wrap around and the pixel color will not
 		be what you intended.
 
-		\note The top 8 bits of the integer are unused and are referred to as 'alpha'. 
+		\note The top 8 bits of the integer are unused and are referred to as 'alpha'.
 		      You can use these bits for 8 bits of per-pixel storage, or ignore them completely,
 		      they have absolutely no effect on the pixel color.
 
@@ -246,30 +238,25 @@ namespace PixelToaster
 	{
 		/// The default constructor sets the pixel to black.
 
-		TrueColorPixel()
+		TrueColorPixel(): integer(0), r(0), g(0), b(0), a(0)
 		{
-			integer = 0;
 		}
-		
+
 		/// This convenience constructor lets you specify color and alpha values at creation
 
-		TrueColorPixel( integer8 r, integer8 g, integer8 b, integer8 a = 0 )
+		TrueColorPixel( integer8 _r, integer8 _g, integer8 _b, integer8 _a = 0 ): r(_r), g(_g), b(_b), a(_a)
 		{
-			this->r = r;
-			this->g = g;
-			this->b = b;
-			this->a = a;
 		}
 
 		/// Construct from an integer
-		
+
 		explicit TrueColorPixel( integer32 i )
 		{
 			integer = i;
 		}
 
 		integer32 integer;			///< you can work directly with the truecolor integer if you like, but be careful about endianness!
-		
+
 		struct
 		{
 			#ifdef PIXELTOASTER_LITTLE_ENDIAN
@@ -295,11 +282,11 @@ namespace PixelToaster
 		Floating point color represents each pixel as four floating point values, while
 		truecolor packs the color information into a 32bit integer. See FloatingPointPixel and TrueColorPixel for more information.
 
-		Please note that this class is just a simple wrapper around an enumeration. 
+		Please note that this class is just a simple wrapper around an enumeration.
 		This is done so that you can refer to modes as Mode::TrueColor and Mode::FloatingPoint in your code.
 
 		You can assign and compare instances of this class as if they were the enumeration itself.
-		
+
 		Here is some example code to demonstrate:
 
 		\code
@@ -351,18 +338,16 @@ if ( display.open() )
         /// The mode default constuctor sets the enumeration value to FloatingPoint.
 		/// Floating point color to considered to be the default throughout the Pixel Toaster API.
 
-        Mode()
+        Mode(): enumeration(FloatingPoint)
         {
-            enumeration = FloatingPoint;
         }
 
 		/// This constructor enables automatic conversion from the enumeration type to a mode object.
 		/// For example: Mode mode = Mode::FloatingPoint;
         /// @param enumeration the enumeration value.
 
-        Mode( Enumeration enumeration )
+        Mode( Enumeration _enumeration ): enumeration(enumeration)
         {
-            this->enumeration = enumeration;
         }
 
         /// Cast from mode object to enumeration.
@@ -406,18 +391,16 @@ if ( display.open() )
 
 		/// The default constructor sets the enumeration value to Unknown.
 
-        Format()
+        Format(): enumeration(Unknown)
         {
-            enumeration = Unknown;
         }
 
 		/// This constructor enables automatic conversion from the enumeration type to a format object.
 		/// For example: Format format = Format::RGB565;
         /// @param enumeration the enumeration value.
 
-		Format( Enumeration enumeration )
+		Format( Enumeration _enumeration ): enumeration(_enumeration)
         {
-            this->enumeration = enumeration;
         }
 
         /// Cast from format object to enumeration.
@@ -437,11 +420,11 @@ if ( display.open() )
     /** \brief Lets you chose between fullscreen and windowed when opening a display.
 
 		Display output can be either "windowed" or "fullscreen". Windowed output opens a display window on the desktop
-		and draws your pixels inside this window. Fullscreen output switches to the best display mode mode and fills the 
+		and draws your pixels inside this window. Fullscreen output switches to the best display mode mode and fills the
 		entire screen with your pixels.
-		
+
 		An additional "default" output type is used to indicate that you want to open a display and use the 'best'
-		output mode for the current platform. This is a rather nebulous concept. Currently the default output mode just 
+		output mode for the current platform. This is a rather nebulous concept. Currently the default output mode just
 		maps to windowed mode, but this may change in the future. The bottom line is that if you absolutely require
 		fullscreen or windowed output, you should specify this, or the display will just do whatever it thinks is best.
 
@@ -511,17 +494,15 @@ if ( display.open() )
 
         /// The default constructor sets the enumeration value to Default.
 
-        Output()
+        Output(): enumeration(Default)
         {
-            enumeration = Default;
         }
 
         /// This constructor enables automatic conversion from the enumeration type to an output object.
 		/// @param enumeration the enumeration value.
 
-        Output( Enumeration enumeration )
+        Output( Enumeration _enumeration ): enumeration(_enumeration)
         {
-            this->enumeration = enumeration;
         }
 
         /// Cast from output object to enumeration.
@@ -547,7 +528,7 @@ if ( display.open() )
 		\note The mouse position is stored as floating point values because the coordinates are relative to the size
 		      of the display, not the size of the window. So if you open a display with dimensions 100x100 then the user
 			  resizes the window to 200x100, then you will get x mouse coordinates 100.5, 101.0, 101.5, 102.0, 102.5 etc...
-	 **/ 
+	 **/
 
     class Mouse
     {
@@ -723,18 +704,16 @@ assert( ! (a == b) );
         };
 
         /// The default constructor sets the key code to Undefined.
-        
-        Key()
+
+        Key(): code(Undefined)
         {
-            code = Undefined;
         }
 
         /// Automatically converts from key code enumeration values to key objects.
         /// @param code the key code.
 
-        Key( Code code )
+        Key( Code _code ): code(_code)
         {
-            this->code = code;
         }
 
         /// Cast from key object to code.
@@ -752,7 +731,7 @@ assert( ! (a == b) );
     };
 
 	// Rectangular range of pixels: [xBegin, xEnd) x [yBegin, yEnd)
-	// 
+	//
 	struct Rectangle
 	{
 		int xBegin;	///< first column in range
@@ -822,7 +801,7 @@ while ( display.open() )
 			- Create an array of pixels to work with
 			- Loop and update the pixels to the display
 
-		All you need to do is implement your rendering code and do it each frame before you update the display. 
+		All you need to do is implement your rendering code and do it each frame before you update the display.
 		Each time display update is called the array of pixels are copied to the display, so you can see them!
 
 		Now lets actually draw something. Here is the same code again, but this time each update we set a random pixel to the color blue:
@@ -855,7 +834,7 @@ while ( display.open() )
         /// Creates the display object but does not open the display.
         /// You need to call Display::open first before you can copy pixels to the display with Display::update.
 
-        Display()
+        Display(): internal(NULL)
         {
             internal = createDisplay();
 			internal->wrapper( this );
@@ -864,12 +843,12 @@ while ( display.open() )
 		/// Create and open display in one step.
 		/// This is equivalent to creating a display using the default constructor then calling Display::open.
 		/// \see Display::open
-		
-		Display( const char title[], int width, int height, Output output = Output::Default, Mode mode = Mode::FloatingPoint )
+
+		Display( const char _title[], int _width, int _height, Output _output = Output::Default, Mode _mode = Mode::FloatingPoint ): internal(NULL)
 		{
             internal = createDisplay();
 			internal->wrapper( this );
-			open( title, width, height, output, mode );
+			open( _title, _width, _height, _output, _mode );
 		}
 
         /// Destructor.
@@ -893,10 +872,10 @@ while ( display.open() )
         /// @param mode the mode of operation for the display. you can choose between true color mode and floating point color mode.
         /// @returns true if the display open was successful.
 
-        bool open( const char title[], int width, int height, Output output = Output::Default, Mode mode = Mode::FloatingPoint )
+        bool open( const char _title[], int _width, int _height, Output _output = Output::Default, Mode _mode = Mode::FloatingPoint )
         {
             if ( internal )
-                return internal->open( title, width, height, output, mode );
+                return internal->open( _title, _width, _height, _output, _mode );
             else
                 return false;
         }
@@ -931,7 +910,7 @@ while ( display.open() )
 		/// The dirty box acts as a @b hint to the update function that only pixels inside that box have been changed
 		/// since last update.  The update function does not need to respect this hint and may do a full update
 		/// instead.  In particular, it will do this if it can avoid a buffer copy when matching formats are found.
-		/// That's why you still need to provide a full buffer of pixels, and the ones outside dirtyBox should 
+		/// That's why you still need to provide a full buffer of pixels, and the ones outside dirtyBox should
 		/// be the same pixels as the previous call.
 		///
         /// @param pixels the pixels to copy to the screen.
@@ -956,7 +935,7 @@ while ( display.open() )
 		/// The dirty box acts as a @b hint to the update function that only pixels inside that box have been changed
 		/// since last update.  The update function does not need to respect this hint and may do a full update
 		/// instead.  In particular, it will do this if it can avoid a buffer copy when matching formats are found.
-		/// That's why you still need to provide a full buffer of pixels, and the ones outside dirtyBox should 
+		/// That's why you still need to provide a full buffer of pixels, and the ones outside dirtyBox should
 		/// be the same pixels as the previous call.
 		///
         /// @param pixels the pixels to copy to the screen.
@@ -1007,10 +986,10 @@ while ( display.open() )
 
 		/// Set display title
 
-		void title( const char title[] )
+		void title( const char _title[] )
 		{
 			if (internal)
-				internal->title(title);
+				internal->title(_title);
 		}
 
         /// Get display width
@@ -1044,7 +1023,7 @@ while ( display.open() )
         }
 
         /// Get display output
-        
+
         Output output() const
         {
             if ( internal )
@@ -1057,10 +1036,10 @@ while ( display.open() )
 		/// Implement the Listener interface and pass in an pointer to an instance of your object to recieve display events such as keyboard and mouse input.
 		///	@param listener the listener object. pass in 0 if you want to remove the current listener.
 
-        void listener( class Listener * listener )
+        void listener( class Listener * _listener )
         {
             if (internal)
-                internal->listener( listener );
+                internal->listener( _listener );
         }
 
 		/// Get current listener object.
@@ -1074,7 +1053,7 @@ while ( display.open() )
 				return 0;
 		}
 
-		void wrapper( class DisplayInterface * wrapper ) 
+		void wrapper( class DisplayInterface * _wrapper )
 		{
 			// wrapper is always this
 		}
@@ -1135,7 +1114,7 @@ while ( display.open() )
 
         /// The default constructor sets the current time to zero and starts the timer.
 
-        Timer()
+        Timer(): internal(NULL)
         {
             internal = createTimer();
         }
@@ -1204,7 +1183,7 @@ while ( display.open() )
     };
 
     /** \brief Implement the listener interface and register with a display to receive events.
-		
+
 		This interface defines all the callback functions for display events.
 		It gives you keyboard and mouse input, plus useful system events for window activation
 		and close window requests.
@@ -1220,7 +1199,7 @@ while ( display.open() )
 
 		But when you do want to listen to input, just implement this interface in your own class,
 		and register your listener with the display using Display::listener.
-		
+
 		Here is a quick example to demonstrate:
 
 		\code
@@ -1320,7 +1299,7 @@ int main()
 
 		\endcode
 
-		There can only be a single listener	registered per display object. Once you register a listener, 
+		There can only be a single listener	registered per display object. Once you register a listener,
 		all the default behavior goes away, and you are responsible for handling close requests and
 		keyboard and mouse events. For example, if you register a listener but neglect to handle onClose,
 		then your user will press Alt-F4 or click on the close button, and nothing will happen!
@@ -1335,7 +1314,7 @@ int main()
     public:
 
 		virtual ~Listener() {};
-		
+
 		/// Called by display to ask if you want default key handlers to be applied,
 		/// eg. Escape quits without you needing to do anything. default is true.
 		/// override and return false if you dont want default key handlers.
