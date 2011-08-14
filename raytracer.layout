@@ -50,7 +50,7 @@
 		<Cursor position="2703" topLine="82" />
 	</File>
 	<File name="include/gmtl/VecOps.h" open="0" top="0" tabpos="0">
-		<Cursor position="11846" topLine="346" />
+		<Cursor position="11846" topLine="415" />
 	</File>
 	<File name="include/gmtl/Version.h" open="0" top="0" tabpos="0">
 		<Cursor position="4243" topLine="75" />
@@ -79,16 +79,19 @@
 	<File name="main.cpp" open="0" top="0" tabpos="1">
 		<Cursor position="334" topLine="0" />
 	</File>
+	<File name="src/kdtree.cpp" open="1" top="0" tabpos="2">
+		<Cursor position="20" topLine="0" />
+	</File>
 	<File name="src/raytracer/octree.cpp" open="0" top="0" tabpos="2">
 		<Cursor position="1728" topLine="35" />
 	</File>
-	<File name="src/raytracer/scene.cpp" open="1" top="1" tabpos="0">
-		<Cursor position="4919" topLine="133" />
+	<File name="src/raytracer/scene.cpp" open="0" top="0" tabpos="0">
+		<Cursor position="2578" topLine="75" />
 	</File>
 	<File name="src/raytracer/sphere.cpp" open="0" top="0" tabpos="0">
-		<Cursor position="585" topLine="0" />
+		<Cursor position="281" topLine="0" />
 	</File>
 	<File name="src/raytracer/tri.cpp" open="0" top="0" tabpos="4">
-		<Cursor position="2057" topLine="1" />
+		<Cursor position="1444" topLine="19" />
 	</File>
 </CodeBlocks_layout_file>

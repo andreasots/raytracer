@@ -1,6 +1,7 @@
 #include "raytracer/tri.h"
 
 #include <gmtl/TriOps.h>
+#include <gmtl/VecOps.h>
 #include <gmtl/Intersection.h>
 
 #include <cassert>
@@ -50,7 +51,9 @@ gmtl::Vec<FLOAT, 3> Tri::normal(const gmtl::Point<FLOAT, 3> &p)
         FLOAT u, v, w;
         UV(*this, p, u, v);
         w = 1 - u - v;
-        return m_normals[0]*w+m_normals[1]*v+m_normals[2]*u;
+        gmtl::Vec<FLOAT, 3> ret = m_normals[0]*w+m_normals[1]*v+m_normals[2]*u;
+        gmtl::normalize(ret);
+        return ret;
     }
 }
 

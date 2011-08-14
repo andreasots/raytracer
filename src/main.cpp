@@ -47,12 +47,16 @@ int main(int argc, char *argv[])
     std::vector<PixelToaster::Pixel> fb(w*h); // Front buffer
     std::vector<Raytracer::Color<>> bb(w*h); // Back buffer
 
-    FLOAT m_SX, m_SY;
-    // screen plane in world space coordinates
-	FLOAT m_WX1 = -DISTANCE*18/FOCAL_LENGTH, m_WX2 = -m_WX1, m_WY1 = m_WX2*h/w, m_WY2 =  m_SY = -m_WY1;
-	// calculate deltas for interpolation
-	FLOAT m_DX = (m_WX2 - m_WX1) / w;
-	FLOAT m_DY = (m_WY2 - m_WY1) / h;
+    gmtl::Point<FLOAT, 3> top, bottom;
+    bottom[0] = DISTANCE*18/FOCAL_LENGTH;
+	top[0] = -bottom[0];
+	top[1] = bottom[0]*h/w;
+	bottom[1] = -top[1];
+	top[2] = bottom[2] = -DISTANCE;
+
+	gmtl::Vec<FLOAT, 3> delta_x, delta_y;
+	delta_x[0] = (bottom[0] - top[0]) / w;
+	delta_y[1] = (bottom[1] - top[1]) / h;
 
     Raytracer::Scene scene;
     scene.open(argv[1]);
@@ -73,10 +77,8 @@ int main(int argc, char *argv[])
             {
                 Raytracer::Color<> pixel(bb[y*w+x]);
                 pixel.mult(sample-1);
-                m_SY = m_WY1 + m_DY*(drand48()+y);
-                m_SX = m_WX1 + m_DX*(drand48()+x);
 
-                gmtl::Point<FLOAT, 3> scr(m_SX, m_SY, -DISTANCE);
+                gmtl::Point<FLOAT, 3> scr = top + delta_y*static_cast<FLOAT>(drand48()+y) + delta_x*static_cast<FLOAT>(drand48()+x);
                 gmtl::Vec<FLOAT, 3> dir = scr - pos;
                 gmtl::normalize(dir);
 

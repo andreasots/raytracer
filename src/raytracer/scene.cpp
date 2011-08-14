@@ -43,11 +43,11 @@ inline Raytracer::Color<> BRDF(const gmtl::Vec<FLOAT, 3> &in,
     ret.add(diffuse);
 
     // Specular reflection
-    gmtl::Vec<FLOAT, 3> R;
-    gmtl::reflect(R, in, n);
+    gmtl::Vec<FLOAT, 3> H = in+out;
+    gmtl::normalize(H);
     Raytracer::Color<> specular = lambda;
-    specular.mult(std::pow(std::max<FLOAT>(0,gmtl::dot(R, out)), mat.spec_pow));
-    specular.mult((mat.spec_pow+2)/(M_PI*2));
+    specular.mult(std::pow(std::max<FLOAT>(0,gmtl::dot(H, n)), mat.spec_pow));
+    specular.mult((mat.spec_pow+8)/(M_PI*8));
     specular.mult(mat.specular);
     ret.add(specular);
 
@@ -85,6 +85,7 @@ void Scene::open(std::string file)
                                 aiPrimitiveType_POINT | aiPrimitiveType_LINE);
     importer.SetPropertyInteger(AI_CONFIG_PP_RVC_FLAGS,
                                aiComponent_BONEWEIGHTS|aiComponent_ANIMATIONS);
+    importer.SetPropertyFloat(AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE, 80);
     const aiScene *scene = importer.ReadFile(file, pp);
 
     for(size_t i = 0; i < scene->mNumMeshes; i++)
@@ -171,11 +172,11 @@ Color<> Scene::radiance(const gmtl::Ray<FLOAT> &r, size_t depth)
 
             if(intersect(gmtl::Ray<FLOAT>(p, dir), id, T+EPS) == HUGE_VAL || *i != id)
                 continue;
-            c.add(BRDF(dir, r.getDir(), n, mat, m_objects[*i]->material(p+t*dir).color));
+            c.add(BRDF(dir, -r.getDir(), n, mat, m_objects[*i]->material(p+t*dir).color));
         }
 
         gmtl::Vec<FLOAT, 3> dir = hemisphere(n);
-        c.add(BRDF(dir, r.getDir(), n, mat, radiance(gmtl::Ray<FLOAT>(p, dir), depth+1)));
+        c.add(BRDF(dir, -r.getDir(), n, mat, radiance(gmtl::Ray<FLOAT>(p, dir), depth+1)));
     }
 
     return c;

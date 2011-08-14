@@ -119,6 +119,7 @@
 		<Unit filename="include/gmtl/Version.h" />
 		<Unit filename="include/gmtl/Xforms.h" />
 		<Unit filename="include/gmtl/gmtl.h" />
+		<Unit filename="include/raytracer/kdtree.h" />
 		<Unit filename="include/raytracer/color.h" />
 		<Unit filename="include/raytracer/material.h" />
 		<Unit filename="include/raytracer/object.h" />
@@ -126,22 +127,23 @@
 		<Unit filename="include/raytracer/scene.h" />
 		<Unit filename="include/raytracer/sphere.h" />
 		<Unit filename="include/raytracer/tri.h" />
-		<Unit filename="main.cpp" />
+		<Unit filename="src/main.cpp" />
+		<Unit filename="src/raytracer/kdtree.cpp" />
 		<Unit filename="src/raytracer/octree.cpp" />
 		<Unit filename="src/raytracer/scene.cpp" />
 		<Unit filename="src/raytracer/sphere.cpp" />
 		<Unit filename="src/raytracer/tri.cpp" />
-		<Unit filename="version.h" />
+		<Unit filename="include/version.h" />
 		<Extensions>
 			<envvars />
 			<AutoVersioning>
 				<Scheme minor_max="10" build_max="0" rev_max="0" rev_rand_max="10" build_times_to_increment_minor="10000" />
-				<Settings autoincrement="1" date_declarations="1" do_auto_increment="1" ask_to_increment="0" language="C++" svn="0" svn_directory="" header_path="version.h" />
+				<Settings autoincrement="1" date_declarations="1" do_auto_increment="1" ask_to_increment="0" language="C++" svn="0" svn_directory="" header_path="include/version.h" />
 				<Changes_Log show_changes_editor="0" app_title="released version %M.%m.%b of %p" changeslog_path="ChangesLog.txt" />
 				<Code header_guard="VERSION_H" namespace="AutoVersion" prefix="" />
 			</AutoVersioning>
 			<code_completion />
-			<lib_finder disable_auto="1">
+			<lib_finder disable_auto="0">
 				<lib name="OpenEXR" />
 			</lib_finder>
 			<debugger />
