@@ -13,6 +13,9 @@ namespace Raytracer {
 class Object
 {
     public:
+        Object(Material mat): m_mat(mat)
+        {
+        }
         /** Default destructor */
         virtual ~Object()
         {

@@ -6,6 +6,9 @@
 
 #include <cassert>
 
+#define ku modulo[m_k+1]
+#define kv modulo[m_k+2]
+
 inline void UV(const Raytracer::Tri &t, const gmtl::Point<FLOAT, 3> p, FLOAT &u, FLOAT &v)
 {
     // Compute vectors
@@ -24,12 +27,35 @@ inline void UV(const Raytracer::Tri &t, const gmtl::Point<FLOAT, 3> p, FLOAT &u,
 namespace Raytracer {
 
 Tri::Tri(const gmtl::Point<FLOAT, 3>& p1, const gmtl::Point<FLOAT, 3>& p2,
-         const gmtl::Point<FLOAT, 3>& p3, Material mat)/*: Tri(p1, p2, p3), m_mat(mat)*/
+         const gmtl::Point<FLOAT, 3>& p3, Material mat): gmtl::Tri<FLOAT>(p1, p2, p3), Object(mat), m_hasNormals(false)
 {
-    set(p1, p2, p3);
-    m_mat = mat;
-    m_hasNormals = false;
+/*    gmtl::Vec<FLOAT, 3> N;
+    N = gmtl::normal(*this);
     //ctor
+    char modulo[] = {0,1,2,0,1};
+    if(std::abs(N[0]) > std::abs(N[1]))
+        if(std::abs(N[0]) > abs(N[2]))
+            m_k = 0;
+        else
+            m_k = 2;
+    else
+        if(std::abs(N[1]) > abs(N[2]))
+            m_k = 1;
+        else
+            m_k = 2;
+    m_n_u = N[ku] / N[m_k];
+    m_n_v = N[kv] / N[m_k];
+    m_n_d = gmtl::dot(N, mVerts[0])/ N[m_k];
+
+    gmtl::Vec<FLOAT, 3> b = mVerts[2] - mVerts[0];
+    gmtl::Vec<FLOAT, 3> c = mVerts[1] - mVerts[0];
+
+    FLOAT invDet = (b[ku] * c[kv] - b[kv] * c[ku]);
+
+    m_b_nu = b[ku] * invDet;
+    m_b_nv = -b[kv] * invDet;
+    m_c_nu = c[kv] * invDet;
+    m_c_nv = -c[ku] * invDet;*/
 }
 
 Tri::~Tri()
@@ -57,11 +83,34 @@ gmtl::Vec<FLOAT, 3> Tri::normal(const gmtl::Point<FLOAT, 3> &p)
     }
 }
 
+// Projected triangle intersection test by Ingo Wald
+// Modifications by Jacco Bikker
 FLOAT Tri::intersect(const gmtl::Ray<FLOAT> &r)
 {
+/*    char modulo[] = {0,1,2,0,1};
+    FLOAT nd = 1./(r.getDir()[m_k] + m_n_u * r.getDir()[ku] + m_n_v * r.getDir()[kv]);
+    FLOAT f = (m_n_d - r.getOrigin()[m_k] - m_n_u * r.getOrigin()[ku] - m_n_v * r.getOrigin()[kv]) * nd;
+
+    if(f < 0)
+        return HUGE_VAL;
+
+    FLOAT hu = r.getOrigin()[ku] + f * r.getDir()[ku] - mVerts[0][ku];
+    FLOAT hv = r.getOrigin()[kv] + f * r.getDir()[kv] - mVerts[0][ku];
+
+    FLOAT lambda = hv * m_b_nu + hu * m_b_nv;
+    if(lambda < 0)
+        return HUGE_VAL;
+
+    FLOAT mue = hu * m_c_nu + hv * m_c_nv;
+    if(mue < 0)
+        return HUGE_VAL;
+    if(lambda+mue > 1)
+        return HUGE_VAL;
+    return f;*/
     float t, u, v;
-    if(gmtl::intersect(*this, r, u, v, t) && t > 0)
-        return t;
+    if(gmtl::intersect(*this, r, u, v, t))
+        if(t > 0)
+            return t;
     return HUGE_VAL;
 }
 
@@ -84,19 +133,16 @@ gmtl::AABox<FLOAT> Tri::bounds()
 
 gmtl::Point<FLOAT, 3> Tri::random()
 {
-    FLOAT A = drand48(), B = drand48(), C;
-    if(A+B <= 1)
-        C = 1-A-B;
-    else
+    gmtl::Vec<FLOAT, 3> v1 = mVerts[1] - mVerts[0], v2 = mVerts[2] - mVerts[0];
+    FLOAT a1, a2;
+    do
     {
-        C = drand48();
-        FLOAT l = 1/(A+B+C);
-        A *= l;
-        B *= l;
-        C *= l;
+        a1 = drand48();
+        a2 = drand48();
     }
+    while(a1+a2 > 1);
 
-    return mVerts[0]*A + mVerts[1]*B + mVerts[2]*C;
+    return mVerts[0] + v1*a1 + v2*a2;
 }
 
 void Tri::normals(const gmtl::Vec<FLOAT, 3> &n1, const gmtl::Vec<FLOAT, 3> &n2, const gmtl::Vec<FLOAT, 3> &n3)

@@ -25,6 +25,10 @@ class Scene
         FLOAT intersect(const gmtl::Ray<FLOAT> &r, size_t &id, FLOAT max = HUGE_VAL);
         Color<> radiance(const gmtl::Ray<FLOAT> &r, size_t depth);
         void stats();
+        void explicitLights(bool b)
+        {
+            m_explicitLights = b;
+        }
     protected:
     private:
         void regenerate();
@@ -32,6 +36,7 @@ class Scene
         std::vector<size_t> m_emit;
         unsigned long long m_intersections, m_hits;
         Octree *m_octree;
+        bool m_explicitLights;
 };
 
 } // namespace Raytracer

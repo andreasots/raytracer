@@ -36,7 +36,7 @@ inline Raytracer::Color<> BRDF(const gmtl::Vec<FLOAT, 3> &in,
 
     // Diffuse reflection
     Raytracer::Color<> diffuse = lambda;
-    diffuse.mult(gmtl::dot(in, n));
+    diffuse.mult(std::max<FLOAT>(0, gmtl::dot(in, n)));
     diffuse.mult(M_1_PI);
     diffuse.mult(1-mat.specular);
     diffuse.mult(mat.color);
@@ -56,6 +56,7 @@ inline Raytracer::Color<> BRDF(const gmtl::Vec<FLOAT, 3> &in,
 
 inline gmtl::Vec<FLOAT, 3> hemisphere(const gmtl::Vec<FLOAT, 3> &n)
 {
+    // Uniform random hemisphere sampling
     gmtl::Vec<FLOAT, 3> ret;
     gmtl::Point<FLOAT, 3> origin(0,0,0);
     Raytracer::Sphere s(origin, 1, Raytracer::Material());
@@ -67,17 +68,37 @@ inline gmtl::Vec<FLOAT, 3> hemisphere(const gmtl::Vec<FLOAT, 3> &n)
     return ret;
 }
 
+//  http://en.wikipedia.org/wiki/Solid_angle#Tetrahedron
+inline FLOAT pdf(Raytracer::Tri *t)
+{
+    gmtl::Vec<FLOAT, 3> c;
+    FLOAT det = std::abs(gmtl::dot(t->mVerts[0], gmtl::cross(c, gmtl::Vec<FLOAT, 3>(t->mVerts[1]), t->mVerts[2])));
+
+    FLOAT al = gmtl::length(t->mVerts[0]);
+    FLOAT bl = gmtl::length(t->mVerts[1]);
+    FLOAT cl = gmtl::length(t->mVerts[2]);
+
+    FLOAT div = al*bl*cl + gmtl::dot(t->mVerts[0],t->mVerts[1])*cl + dot(t->mVerts[0],t->mVerts[2])*bl + dot(t->mVerts[1],t->mVerts[2])*al;
+    FLOAT at = std::atan2(det, div);
+    if(at < 0)
+        at += M_PI; // If det>0 && div<0 atan2 returns < 0, so add pi.
+    FLOAT omega = 2 * at;
+
+    FLOAT PDF = omega / (2 * M_PI);
+
+    return PDF;
+}
+
 namespace Raytracer {
 
-Scene::Scene(): m_objects(), m_intersections(0), m_hits(0), m_octree(NULL)
+Scene::Scene(): m_objects(), m_intersections(0), m_hits(0), m_octree(NULL), m_explicitLights(true)
 {
 }
 
 void Scene::open(std::string file)
 {
         Assimp::Importer importer;
-    int pp = aiProcess_Triangulate;
-    pp |= aiProcess_JoinIdenticalVertices | aiProcess_FindInvalidData;
+    int pp = aiProcess_Triangulate | aiProcess_FindInvalidData;
     pp |= aiProcess_FindDegenerates | aiProcess_SortByPType;
     pp |= aiProcess_GenSmoothNormals | aiProcess_PreTransformVertices;
     pp |= aiProcess_OptimizeGraph | aiProcess_OptimizeMeshes;
@@ -85,7 +106,7 @@ void Scene::open(std::string file)
                                 aiPrimitiveType_POINT | aiPrimitiveType_LINE);
     importer.SetPropertyInteger(AI_CONFIG_PP_RVC_FLAGS,
                                aiComponent_BONEWEIGHTS|aiComponent_ANIMATIONS);
-    importer.SetPropertyFloat(AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE, 80);
+    importer.SetPropertyFloat(AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE, /*80*/1);
     const aiScene *scene = importer.ReadFile(file, pp);
 
     for(size_t i = 0; i < scene->mNumMeshes; i++)
@@ -164,20 +185,24 @@ Color<> Scene::radiance(const gmtl::Ray<FLOAT> &r, size_t depth)
 
         if(mat.emit)
             return mat.color;
-
-        for(auto i = m_emit.begin(); i != m_emit.end(); i++)
+        if(m_explicitLights)
         {
-            gmtl::Vec<FLOAT, 3> dir = m_objects[*i]->random() - p;
-            FLOAT T = gmtl::normalize(dir);
+            for(auto i = m_emit.begin(); i != m_emit.end(); i++)
+            {
+                gmtl::Vec<FLOAT, 3> dir = m_objects[*i]->random() - p;
+                FLOAT T = gmtl::normalize(dir);
 
-            if(intersect(gmtl::Ray<FLOAT>(p, dir), id, T+EPS) == HUGE_VAL || *i != id)
-                continue;
-            c.add(BRDF(dir, -r.getDir(), n, mat, m_objects[*i]->material(p+t*dir).color));
+                if(intersect(gmtl::Ray<FLOAT>(p, dir), id, T+EPS) == HUGE_VAL || *i != id)
+                    continue;
+                c.add(BRDF(dir, -r.getDir(), n, mat, m_objects[*i]->material(p+t*dir).color));
+            }
         }
 
         gmtl::Vec<FLOAT, 3> dir = hemisphere(n);
         c.add(BRDF(dir, -r.getDir(), n, mat, radiance(gmtl::Ray<FLOAT>(p, dir), depth+1)));
     }
+    else
+        c = Color<>(0.05, 0.05, 0.05);
 
     return c;
 }

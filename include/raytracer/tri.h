@@ -26,6 +26,10 @@ class Tri : public Object, public gmtl::Tri<FLOAT>
     protected:
         bool m_hasNormals;
         gmtl::Vec<FLOAT, 3> m_normals[3];
+
+        FLOAT m_n_u, m_n_v, m_n_d;
+        char m_k;
+        FLOAT m_b_nu, m_b_nv, m_c_nu, m_c_nv;
     private:
 };
 

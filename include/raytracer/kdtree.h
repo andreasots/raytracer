@@ -16,8 +16,9 @@ class KdTree
                         const std::vector<Object*> &objects,
                         unsigned long long &tests,
                         unsigned long long &hits);
-        void generate();
+        void generate(const std::vector<Object*> &objects);
     protected:
+        FLOAT cost();
         size_t data;
         FLOAT pos;
     private:

@@ -5,12 +5,9 @@
 
 namespace Raytracer {
 
-Sphere::Sphere(gmtl::Point<FLOAT, 3> o, FLOAT r, Material mat)/*: Sphere(o, r), m_mat(mat)*/
+Sphere::Sphere(gmtl::Point<FLOAT, 3> o, FLOAT r, Material mat): gmtl::Sphere<FLOAT>(o, r), Object(mat)
 {
     //ctor
-    setCenter(o);
-    setRadius(r);
-    m_mat = mat;
 }
 
 Sphere::~Sphere()
