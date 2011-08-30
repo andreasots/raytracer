@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <cassert>
 
 #include <gmtl/Ray.h>
@@ -6,6 +7,8 @@
 #include "raytracer/scene.h"
 #include <gmtl/Vec.h>
 #include <gmtl/VecOps.h>
+#include <gmtl/Xforms.h>
+#include <gmtl/Output.h>
 
 #include <assimp/aiDefines.h>
 #include <assimp/aiVersion.h>
@@ -16,9 +19,7 @@
 #include <gmtl/Version.h>
 #include <PixelToaster.h>
 
-#undef FLOAT
 #include <ImfRgbaFile.h>
-#define FLOAT __FLOAT
 
 // Focal length in mm
 #define FOCAL_LENGTH 35.0
@@ -47,29 +48,46 @@ int main(int argc, char *argv[])
     std::vector<PixelToaster::Pixel> fb(w*h); // Front buffer
     std::vector<Raytracer::Color<>> bb(w*h); // Back buffer
 
-    gmtl::Point<FLOAT, 3> top, bottom;
-    bottom[0] = DISTANCE*18/FOCAL_LENGTH;
-	top[0] = -bottom[0];
-	top[1] = bottom[0]*h/w;
-	bottom[1] = -top[1];
-	top[2] = bottom[2] = -DISTANCE;
+    RT_FLOAT x = -DISTANCE * 18 / FOCAL_LENGTH;
+    RT_FLOAT y = -x*h/w;
+    RT_FLOAT z = -DISTANCE;
 
-	gmtl::Vec<FLOAT, 3> delta_x, delta_y;
-	delta_x[0] = (bottom[0] - top[0]) / w;
-	delta_y[1] = (bottom[1] - top[1]) / h;
+    gmtl::Point<RT_FLOAT, 3> scr_pos(x, y, z);
+    gmtl::Point<RT_FLOAT, 3> scr_x(-x, y, z);
+    gmtl::Point<RT_FLOAT, 3> scr_y(x, -y, z);
+    gmtl::Point<RT_FLOAT, 3> pos(0,0,0);
+
+	try
+	{
+        std::ifstream cam("camera.xform");
+        cam.exceptions(std::ios::eofbit | std::ios::failbit | std::ios::badbit);
+        gmtl::Matrix<RT_FLOAT, 4, 4> mat;
+        RT_FLOAT data[16];
+        for(size_t i = 0; i < 16; i++)
+            cam >> data[i];
+        mat.set/*Transpose*/(data);
+        pos = mat * pos;
+        scr_pos = mat * scr_pos;
+        scr_x = mat * scr_x;
+        scr_y = mat * scr_y;
+	}
+	catch(...)
+	{
+	}
+
+	gmtl::Vec<RT_FLOAT, 3> delta_x = (scr_x-scr_pos)/static_cast<RT_FLOAT>(w);
+	gmtl::Vec<RT_FLOAT, 3> delta_y = (scr_y-scr_pos)/static_cast<RT_FLOAT>(h);
 
     Raytracer::Scene scene;
     scene.open(argv[1]);
 
-    PixelToaster::Timer timer;
-
-    gmtl::Point<FLOAT, 3> pos(0,0,0);
+    PixelToaster::Timer timer, updated;
     bool render = true;
     size_t sample = 1;
     while(render)
     {
         std::cout << "Sample " << sample << std::endl;
-        for(size_t y = 0; y < h; y++)
+        for(size_t y = 0; y < h && render; y++)
         {
             std::cout << "Scanline " << y+1 << '\r' << std::flush;
             #pragma omp parallel for schedule(dynamic, 1)
@@ -78,25 +96,26 @@ int main(int argc, char *argv[])
                 Raytracer::Color<> pixel(bb[y*w+x]);
                 pixel.mult(sample-1);
 
-                gmtl::Point<FLOAT, 3> scr = top + delta_y*static_cast<FLOAT>(drand48()+y) + delta_x*static_cast<FLOAT>(drand48()+x);
-                gmtl::Vec<FLOAT, 3> dir = scr - pos;
+                gmtl::Point<RT_FLOAT, 3> scr = scr_pos + delta_y*static_cast<RT_FLOAT>(drand48()+y) + delta_x*static_cast<RT_FLOAT>(drand48()+x);
+                gmtl::Vec<RT_FLOAT, 3> dir = scr - pos;
                 gmtl::normalize(dir);
 
-                pixel.add(scene.radiance(gmtl::Ray<FLOAT>(pos, dir), 0));
+                pixel.add(scene.radiance(gmtl::Ray<RT_FLOAT>(pos, dir), 0));
 
-                pixel.mult(1.0/sample);
+                pixel.div(sample);
 
                 bb[y*w+x] = pixel;
                 pixel.gamma();
                 fb[y*w+x] = pixel.PT();
+                #pragma omp critical
+                if(updated.time() > 1)
+                {
+                    screen.update(fb);
+                    updated.reset();
+                }
+                if(!screen.open())
+                    render = false;
             }
-            screen.update(fb);
-            if(!screen.open())
-            {
-                render = false;
-                break;
-            }
-
         }
         std::cout << std::endl;
 
@@ -107,7 +126,7 @@ int main(int argc, char *argv[])
         Imf::RgbaOutputFile file("image.exr", w, h, Imf::WRITE_RGBA);
         file.setFrameBuffer(pixels, 1, w);
         file.writePixels(h);
-
+        delete[] pixels;
         sample++;
     }
 

@@ -7,7 +7,7 @@
 
 namespace Raytracer {
 
-Octree::Octree(const gmtl::Point<FLOAT, 3>& min, const gmtl::Point<FLOAT, 3>& max, Octree *parent):
+Octree::Octree(const gmtl::Point<RT_FLOAT, 3>& min, const gmtl::Point<RT_FLOAT, 3>& max, Octree *parent):
     m_objects(), m_subnodes({NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL}),
     // FIXME: Compiler is fucked up
     /*AABox(min, max),*/ m_parent(parent)
@@ -55,21 +55,24 @@ void Octree::prune()
     }
 }
 
-bool Octree::intersect(const gmtl::Ray<FLOAT> &r, FLOAT &ret, size_t &id,
+bool Octree::intersect(const gmtl::Ray<RT_FLOAT> &r, RT_FLOAT &ret, size_t &id, RT_FLOAT &u, RT_FLOAT &v,
                        const std::vector<Object *> &objects,
                        unsigned long long &hits, unsigned long long &intersections)
 {
-    FLOAT tIn, tOut;
+    RT_FLOAT tIn, tOut;
     if(!gmtl::intersectAABoxRay(*this, r, tIn, tOut) || tIn >= ret || tOut <= 0)
         return false;
 
     for(auto i = m_objects.begin(); i != m_objects.end(); i++)
     {
-        FLOAT t = objects[*i]->intersect(r);
+        RT_FLOAT U, V;
+        RT_FLOAT t = objects[*i]->intersect(r, U, V);
         if(t < ret)
         {
             ret = t;
             id = *i;
+            u = U;
+            v = V;
             hits++;
         }
         intersections++;
@@ -77,21 +80,21 @@ bool Octree::intersect(const gmtl::Ray<FLOAT> &r, FLOAT &ret, size_t &id,
 
     for(size_t i = 0; i < 8; i++)
         if(m_subnodes[i])
-            m_subnodes[i]->intersect(r, ret, id, objects, hits, intersections);
+            m_subnodes[i]->intersect(r, ret, id, u, v, objects, hits, intersections);
 
     return true;
 }
 
 void Octree::createSubnodes()
 {
-    FLOAT xHeight = (mMax[0]-mMin[0])/2, x[] = {mMin[0], mMin[0]+xHeight};
-    FLOAT yHeight = (mMax[1]-mMin[1])/2, y[] = {mMin[1], mMin[1]+yHeight};
-    FLOAT zHeight = (mMax[2]-mMin[2])/2, z[] = {mMin[2], mMin[2]+zHeight};
+    RT_FLOAT xHeight = (mMax[0]-mMin[0])/2, x[] = {mMin[0], mMin[0]+xHeight};
+    RT_FLOAT yHeight = (mMax[1]-mMin[1])/2, y[] = {mMin[1], mMin[1]+yHeight};
+    RT_FLOAT zHeight = (mMax[2]-mMin[2])/2, z[] = {mMin[2], mMin[2]+zHeight};
     for(size_t i = 0; i < 8; i++)
     {
         if(m_subnodes[i])
             continue;
-        gmtl::Point<FLOAT, 3> min, max;
+        gmtl::Point<RT_FLOAT, 3> min, max;
         // x-axis
         min[0] = x[i&1];
         max[0] = x[i&1]+xHeight;

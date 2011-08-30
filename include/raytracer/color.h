@@ -6,7 +6,7 @@
 
 namespace Raytracer
 {
-template<class T = FLOAT>
+template<class T = RT_FLOAT>
 class Color
 {
 public:
@@ -16,6 +16,10 @@ public:
      * \param b Blue component
      */
     Color(T _r, T _g, T _b): m_r(_r), m_g(_g), m_b(_b)
+    {
+    }
+
+    Color(T val): m_r(val), m_g(val), m_b(val)
     {
     }
 
@@ -127,6 +131,11 @@ public:
         m_g *= x;
         m_b *= x;
         return *this;
+    }
+
+    Color<T> &div(T x)
+    {
+        return this->mult(1/x);
     }
 
     Color<T> mult(Color<T> c)

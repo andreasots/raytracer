@@ -238,13 +238,23 @@ namespace PixelToaster
 	{
 		/// The default constructor sets the pixel to black.
 
-		TrueColorPixel(): integer(0), r(0), g(0), b(0), a(0)
+		TrueColorPixel(): integer(0),
+		#ifdef PIXELTOASTER_LITTLE_ENDIAN
+		b(0), g(0), r(0), a(0)
+		#else
+		a(0), r(0), g(0), b(0)
+		#endif
 		{
 		}
 
 		/// This convenience constructor lets you specify color and alpha values at creation
 
-		TrueColorPixel( integer8 _r, integer8 _g, integer8 _b, integer8 _a = 0 ): r(_r), g(_g), b(_b), a(_a)
+		TrueColorPixel( integer8 _r, integer8 _g, integer8 _b, integer8 _a = 0 ):
+		#ifdef PIXELTOASTER_LITTLE_ENDIAN
+		b(_b), g(_g), r(_r), a(_a)
+		#else
+		a(_a), r(_r), g(_g), b(_b)
+		#endif
 		{
 		}
 

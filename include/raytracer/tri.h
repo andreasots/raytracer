@@ -1,35 +1,33 @@
 #ifndef RAYTRACER_TRI_H
 #define RAYTRACER_TRI_H
 
-#include <gmtl/Tri.h>
+#include <gmtl/AABox.h>
 #include "raytracer/object.h"
 
 namespace Raytracer {
 
-class Tri : public Object, public gmtl::Tri<FLOAT>
+class Tri : public Object
 {
     public:
         /** Default constructor */
-        Tri(const gmtl::Point<FLOAT, 3>& p1, const gmtl::Point<FLOAT, 3>& p2, const gmtl::Point<FLOAT, 3>& p3, Material mat);
+        Tri(const gmtl::Point<RT_FLOAT, 3>& p1, const gmtl::Point<RT_FLOAT, 3>& p2, const gmtl::Point<RT_FLOAT, 3>& p3, Material mat);
         /** Default destructor */
         virtual ~Tri();
-        virtual const Material &material(const gmtl::Point<FLOAT, 3> &p);
+        virtual const Material &material(RT_FLOAT u, RT_FLOAT v);
         virtual const Material &material()
         {
             return m_mat;
         }
-        virtual gmtl::Vec<FLOAT, 3> normal(const gmtl::Point<FLOAT, 3> &p);
-        virtual FLOAT intersect(const gmtl::Ray<FLOAT> &r);
-        virtual gmtl::AABox<FLOAT> bounds();
-        virtual gmtl::Point<FLOAT, 3> random();
-        void normals(const gmtl::Vec<FLOAT, 3> &n1, const gmtl::Vec<FLOAT, 3> &n2, const gmtl::Vec<FLOAT, 3> &n3);
+        virtual gmtl::Vec<RT_FLOAT, 3> normal(RT_FLOAT u, RT_FLOAT v);
+        virtual RT_FLOAT intersect(const gmtl::Ray<RT_FLOAT> &r, RT_FLOAT &u, RT_FLOAT &v);
+        virtual gmtl::AABox<RT_FLOAT> bounds();
+        void normals(const gmtl::Vec<RT_FLOAT, 3> &n1, const gmtl::Vec<RT_FLOAT, 3> &n2, const gmtl::Vec<RT_FLOAT, 3> &n3);
+        RT_FLOAT nu, nv, np, pu, pv, e0u, e0v, e1u, e1v;
+        int ci;
     protected:
+        gmtl::Vec<RT_FLOAT, 3> m_normals[3];
         bool m_hasNormals;
-        gmtl::Vec<FLOAT, 3> m_normals[3];
-
-        FLOAT m_n_u, m_n_v, m_n_d;
-        char m_k;
-        FLOAT m_b_nu, m_b_nv, m_c_nu, m_c_nv;
+        gmtl::AABox<RT_FLOAT> *m_bbox;
     private:
 };
 

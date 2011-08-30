@@ -12,15 +12,15 @@ class KdTree
     public:
         /** Default constructor */
         KdTree();
-        FLOAT intersect(const gmtl::Ray<FLOAT> &r,
+        RT_FLOAT intersect(const gmtl::Ray<RT_FLOAT> &r,
                         const std::vector<Object*> &objects,
                         unsigned long long &tests,
                         unsigned long long &hits);
         void generate(const std::vector<Object*> &objects);
     protected:
-        FLOAT cost();
+        RT_FLOAT cost();
         size_t data;
-        FLOAT pos;
+        RT_FLOAT pos;
     private:
 };
 

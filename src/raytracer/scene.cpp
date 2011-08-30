@@ -23,81 +23,26 @@
 #include <stdexcept>
 
 #define MAXDEPTH 128
-#define SAMPLES 2
-#define EPS static_cast<FLOAT>(0.001)
-
-inline Raytracer::Color<> BRDF(const gmtl::Vec<FLOAT, 3> &in,
-                               const gmtl::Vec<FLOAT, 3> &out,
-                               const gmtl::Vec<FLOAT, 3> &n,
-                               const Raytracer::Material &mat,
-                               const Raytracer::Color<> &lambda)
-{
-    Raytracer::Color<> ret;
-
-    // Diffuse reflection
-    Raytracer::Color<> diffuse = lambda;
-    diffuse.mult(std::max<FLOAT>(0, gmtl::dot(in, n)));
-    diffuse.mult(M_1_PI);
-    diffuse.mult(1-mat.specular);
-    diffuse.mult(mat.color);
-    ret.add(diffuse);
-
-    // Specular reflection
-    gmtl::Vec<FLOAT, 3> H = in+out;
-    gmtl::normalize(H);
-    Raytracer::Color<> specular = lambda;
-    specular.mult(std::pow(std::max<FLOAT>(0,gmtl::dot(H, n)), mat.spec_pow));
-    specular.mult((mat.spec_pow+8)/(M_PI*8));
-    specular.mult(mat.specular);
-    ret.add(specular);
-
-    return ret;
-}
-
-inline gmtl::Vec<FLOAT, 3> hemisphere(const gmtl::Vec<FLOAT, 3> &n)
-{
-    // Uniform random hemisphere sampling
-    gmtl::Vec<FLOAT, 3> ret;
-    gmtl::Point<FLOAT, 3> origin(0,0,0);
-    Raytracer::Sphere s(origin, 1, Raytracer::Material());
-
-    ret = s.random()-origin;
-    if(gmtl::dot(n, ret) < 0)
-        ret = -ret;
-
-    return ret;
-}
-
-//  http://en.wikipedia.org/wiki/Solid_angle#Tetrahedron
-inline FLOAT pdf(Raytracer::Tri *t)
-{
-    gmtl::Vec<FLOAT, 3> c;
-    FLOAT det = std::abs(gmtl::dot(t->mVerts[0], gmtl::cross(c, gmtl::Vec<FLOAT, 3>(t->mVerts[1]), t->mVerts[2])));
-
-    FLOAT al = gmtl::length(t->mVerts[0]);
-    FLOAT bl = gmtl::length(t->mVerts[1]);
-    FLOAT cl = gmtl::length(t->mVerts[2]);
-
-    FLOAT div = al*bl*cl + gmtl::dot(t->mVerts[0],t->mVerts[1])*cl + dot(t->mVerts[0],t->mVerts[2])*bl + dot(t->mVerts[1],t->mVerts[2])*al;
-    FLOAT at = std::atan2(det, div);
-    if(at < 0)
-        at += M_PI; // If det>0 && div<0 atan2 returns < 0, so add pi.
-    FLOAT omega = 2 * at;
-
-    FLOAT PDF = omega / (2 * M_PI);
-
-    return PDF;
-}
 
 namespace Raytracer {
 
-Scene::Scene(): m_objects(), m_intersections(0), m_hits(0), m_octree(NULL), m_explicitLights(true)
+Scene::Scene(): m_objects(), m_intersections(0), m_hits(0), m_octree(NULL)
 {
+}
+
+Scene::~Scene()
+{
+    delete m_octree;
+    while(!m_objects.empty())
+    {
+        delete m_objects.back();
+        m_objects.pop_back();
+    }
 }
 
 void Scene::open(std::string file)
 {
-        Assimp::Importer importer;
+    Assimp::Importer importer;
     int pp = aiProcess_Triangulate | aiProcess_FindInvalidData;
     pp |= aiProcess_FindDegenerates | aiProcess_SortByPType;
     pp |= aiProcess_GenSmoothNormals | aiProcess_PreTransformVertices;
@@ -106,7 +51,7 @@ void Scene::open(std::string file)
                                 aiPrimitiveType_POINT | aiPrimitiveType_LINE);
     importer.SetPropertyInteger(AI_CONFIG_PP_RVC_FLAGS,
                                aiComponent_BONEWEIGHTS|aiComponent_ANIMATIONS);
-    importer.SetPropertyFloat(AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE, /*80*/1);
+    importer.SetPropertyFloat(AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE, 30);
     const aiScene *scene = importer.ReadFile(file, pp);
 
     for(size_t i = 0; i < scene->mNumMeshes; i++)
@@ -119,17 +64,15 @@ void Scene::open(std::string file)
         m->Get(AI_MATKEY_COLOR_DIFFUSE, c);
         mat.color = Color<>(c.r, c.g, c.b);
         m->Get(AI_MATKEY_SHININESS, mat.spec_pow);
+        //Y = 0.2126 R + 0.7152 G + 0.0722 B
+        m->Get(AI_MATKEY_COLOR_SPECULAR, c);
+        mat.specular = 0.2126*c.r + 0.7152*c.g + 0.0722*c.b;
 
         std::cout << "Material '" << name.data << "': ";
         if(std::string(name.data).substr(0, 5) == "LIGHT")
         {
             mat.emit = true;
             std::cout << "emissive" << std::endl;
-        }
-        else if(std::string(name.data).substr(0, 7) == "REFLECT")
-        {
-            mat.reflect = 0.75;
-            std::cout << "reflective" << std::endl;
         }
         else
             std::cout << "regular" << std::endl;
@@ -138,16 +81,16 @@ void Scene::open(std::string file)
         {
             assert(scene->mMeshes[i]->mFaces[j].mNumIndices == 3);
             aiVector3D v(scene->mMeshes[i]->mVertices[scene->mMeshes[i]->mFaces[j].mIndices[0]]);
-            gmtl::Point<FLOAT, 3> A(v.x, v.y, v.z);
+            gmtl::Point<RT_FLOAT, 3> A(v.x, v.y, v.z);
             v = scene->mMeshes[i]->mVertices[scene->mMeshes[i]->mFaces[j].mIndices[1]];
-            gmtl::Point<FLOAT, 3> B(v.x, v.y, v.z);
+            gmtl::Point<RT_FLOAT, 3> B(v.x, v.y, v.z);
             v = scene->mMeshes[i]->mVertices[scene->mMeshes[i]->mFaces[j].mIndices[2]];
-            gmtl::Point<FLOAT, 3> C(v.x, v.y, v.z);
+            gmtl::Point<RT_FLOAT, 3> C(v.x, v.y, v.z);
             Tri *tri = new Tri(A, B, C, mat);
             v = scene->mMeshes[i]->mNormals[scene->mMeshes[i]->mFaces[j].mIndices[0]];
             aiVector3D u(scene->mMeshes[i]->mNormals[scene->mMeshes[i]->mFaces[j].mIndices[1]]);
             aiVector3D w(scene->mMeshes[i]->mNormals[scene->mMeshes[i]->mFaces[j].mIndices[2]]);
-            tri->normals(gmtl::Vec<FLOAT, 3>(v.x, v.y, v.z), gmtl::Vec<FLOAT, 3>(u.x, u.y, u.z), gmtl::Vec<FLOAT, 3>(w.x, w.y, w.z));
+            tri->normals(gmtl::Vec<RT_FLOAT, 3>(v.x, v.y, v.z), gmtl::Vec<RT_FLOAT, 3>(u.x, u.y, u.z), gmtl::Vec<RT_FLOAT, 3>(w.x, w.y, w.z));
             add(tri);
         }
     }
@@ -159,50 +102,43 @@ void Scene::add(Object *o)
     m_objects.push_back(o);
 }
 
-FLOAT Scene::intersect(const gmtl::Ray<FLOAT> &r, size_t &id, FLOAT max)
+RT_FLOAT Scene::intersect(const gmtl::Ray<RT_FLOAT> &r, size_t &id, RT_FLOAT &u, RT_FLOAT &v, RT_FLOAT max)
 {
-    FLOAT ret = max;
+    RT_FLOAT ret = max;
 
     if(m_octree)
-        m_octree->intersect(r, ret, id, m_objects, m_hits, m_intersections);
+        m_octree->intersect(r, ret, id, u, v, m_objects, m_hits, m_intersections);
 
     return ret;
 }
 
-Color<> Scene::radiance(const gmtl::Ray<FLOAT> &r, size_t depth)
+Color<> Scene::radiance(const gmtl::Ray<RT_FLOAT> &r, size_t depth)
 {
     Color<> c;
-    if(depth > MAXDEPTH || static_cast<FLOAT>(MAXDEPTH)/(depth*depth) < drand48())
+    if(depth > MAXDEPTH)
         return Color<>();
-    size_t id = 0;
-    FLOAT t = this->intersect(r, id);
+    size_t id;
+    RT_FLOAT u, v;
+    RT_FLOAT t = this->intersect(r, id, u, v);
     if(t < HUGE_VAL)
     {
-        gmtl::Point<FLOAT, 3> p = r.getOrigin()+t*r.getDir();
+        gmtl::Point<RT_FLOAT, 3> p = r.getOrigin()+t*r.getDir();
         Object *o = m_objects[id];
-        Material mat = o->material(p);
-        gmtl::Vec<FLOAT, 3> n = o->normal(p);
+        Material mat = o->material(u, v);
+        gmtl::Vec<RT_FLOAT, 3> n = o->normal(u, v);
 
         if(mat.emit)
-            return mat.color;
-        if(m_explicitLights)
+            c.add(mat.color);
+
+        if(gmtl::dot(r.getDir(), n) < 0)
         {
-            for(auto i = m_emit.begin(); i != m_emit.end(); i++)
-            {
-                gmtl::Vec<FLOAT, 3> dir = m_objects[*i]->random() - p;
-                FLOAT T = gmtl::normalize(dir);
-
-                if(intersect(gmtl::Ray<FLOAT>(p, dir), id, T+EPS) == HUGE_VAL || *i != id)
-                    continue;
-                c.add(BRDF(dir, -r.getDir(), n, mat, m_objects[*i]->material(p+t*dir).color));
-            }
+            RT_FLOAT u = drand48();
+            if(mat.diffuse > u)
+                c.add(mat.diffuseCalc(radiance(gmtl::Ray<RT_FLOAT>(p, mat.diffuseSample(n)), depth+1)));
+            else if(mat.diffuse+mat.specular > u)
+                c.add(mat.specularCalc(radiance(gmtl::Ray<RT_FLOAT>(p, mat.specularSample(n, r.getDir())), depth+1)));
         }
-
-        gmtl::Vec<FLOAT, 3> dir = hemisphere(n);
-        c.add(BRDF(dir, -r.getDir(), n, mat, radiance(gmtl::Ray<FLOAT>(p, dir), depth+1)));
     }
-    else
-        c = Color<>(0.05, 0.05, 0.05);
 
     return c;
 }
@@ -219,18 +155,13 @@ void Scene::regenerate()
 {
     if(m_octree)
         delete m_octree;
-    m_emit.clear();
     if(!(m_objects.size()))
         return;
 
-    gmtl::AABox<FLOAT> box;
+    gmtl::AABox<RT_FLOAT> box;
 
     for(size_t i = 0; i < m_objects.size(); i++)
-    {
         gmtl::extendVolume(box, m_objects[i]->bounds());
-        if(m_objects[i]->material().emit)
-            m_emit.push_back(i);
-    }
 
     std::cout << std::endl;
     std::cout << "Creating Octree: min: " << box.getMin() << std::endl;

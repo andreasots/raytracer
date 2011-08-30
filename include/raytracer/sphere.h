@@ -7,22 +7,21 @@
 
 namespace Raytracer {
 
-class Sphere : public Raytracer::Object, public gmtl::Sphere<FLOAT>
+class Sphere : public Raytracer::Object, public gmtl::Sphere<RT_FLOAT>
 {
     public:
         /** Default constructor */
-        Sphere(gmtl::Point<FLOAT, 3> o, FLOAT r, Material mat);
+        Sphere(gmtl::Point<RT_FLOAT, 3> o, RT_FLOAT r, Material mat);
         /** Default destructor */
         virtual ~Sphere();
-        virtual const Material &material(const gmtl::Point<FLOAT, 3> &p);
+        virtual const Material &material(RT_FLOAT u, RT_FLOAT v);
         virtual const Material &material()
         {
             return m_mat;
         }
-        virtual gmtl::Vec<FLOAT, 3> normal(const gmtl::Point<FLOAT, 3> &p);
-        virtual FLOAT intersect(const gmtl::Ray<FLOAT> &r);
-        virtual gmtl::AABox<FLOAT> bounds();
-        virtual gmtl::Point<FLOAT, 3> random();
+        virtual gmtl::Vec<RT_FLOAT, 3> normal(RT_FLOAT u, RT_FLOAT v);
+        virtual RT_FLOAT intersect(const gmtl::Ray<RT_FLOAT> &r, RT_FLOAT &u, RT_FLOAT &v);
+        virtual gmtl::AABox<RT_FLOAT> bounds();
     protected:
     private:
 };

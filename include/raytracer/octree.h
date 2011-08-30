@@ -9,14 +9,14 @@
 
 namespace Raytracer {
 
-class Octree: public gmtl::AABox<FLOAT>
+class Octree: public gmtl::AABox<RT_FLOAT>
 {
     public:
-        Octree(const gmtl::Point<FLOAT, 3>& min,
-               const gmtl::Point<FLOAT, 3>& max, Octree *parent);
+        Octree(const gmtl::Point<RT_FLOAT, 3>& min,
+               const gmtl::Point<RT_FLOAT, 3>& max, Octree *parent);
         virtual ~Octree();
         bool add(Object *o, const size_t &id);
-        bool intersect(const gmtl::Ray<FLOAT> &r, FLOAT &ret, size_t &id,
+        bool intersect(const gmtl::Ray<RT_FLOAT> &r, RT_FLOAT &ret, size_t &id, RT_FLOAT &u, RT_FLOAT &v,
                        const std::vector<Object *> &objects,
                        unsigned long long &hits, unsigned long long &intersections);
         void prune();

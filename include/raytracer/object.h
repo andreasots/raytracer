@@ -21,12 +21,11 @@ class Object
         {
 
         }
-        virtual const Material &material(const gmtl::Point<FLOAT, 3> &p) = 0;
+        virtual const Material &material(RT_FLOAT u, RT_FLOAT v) = 0;
         virtual const Material &material() = 0;
-        virtual gmtl::Vec<FLOAT, 3> normal(const gmtl::Point<FLOAT, 3> &p) = 0;
-        virtual FLOAT intersect(const gmtl::Ray<FLOAT> &r) = 0;
-        virtual gmtl::AABox<FLOAT> bounds() = 0;
-        virtual gmtl::Point<FLOAT, 3> random() = 0;
+        virtual gmtl::Vec<RT_FLOAT, 3> normal(RT_FLOAT u, RT_FLOAT v) = 0;
+        virtual RT_FLOAT intersect(const gmtl::Ray<RT_FLOAT> &r, RT_FLOAT &u, RT_FLOAT &v) = 0;
+        virtual gmtl::AABox<RT_FLOAT> bounds() = 0;
     protected:
         Material m_mat;
     private:
