@@ -1,25 +1,19 @@
 #include "raytracer/tri.h"
 
-#include <gmtl/TriOps.h>
-#include <gmtl/VecOps.h>
-#include <gmtl/Intersection.h>
-#include <gmtl/Output.h>
-
 #include <cassert>
 #include <limits>
 
 inline bool equal(const RT_FLOAT &a, const RT_FLOAT &b)
 {
-    return std::abs(a-b) <= std::numeric_limits<RT_FLOAT>::epsilon()*std::max<RT_FLOAT>(1, std::max(std::abs(a), std::abs(b)));
+    return std::abs(a-b) <= 10*std::numeric_limits<RT_FLOAT>::epsilon()*std::max<RT_FLOAT>(1, std::max(std::abs(a), std::abs(b)));
 }
 
 namespace Raytracer {
 
-Tri::Tri(const gmtl::Point<RT_FLOAT, 3>& p1, const gmtl::Point<RT_FLOAT, 3>& p2,
-         const gmtl::Point<RT_FLOAT, 3>& p3, Material mat): Object(mat), m_hasNormals(false)
+Tri::Tri(const SIMD::Point& p1, const SIMD::Point& p2,
+         const SIMD::Point& p3, Material mat): Object(mat), m_hasNormals(false)
 {
-    gmtl::Vec<RT_FLOAT, 3> e0 = p2-p1, e1 = p3-p1, n;
-    gmtl::cross(n, e0, e1);
+    SIMD::Vec e0 = p2-p1, e1 = p3-p1, n = e0.cross(e1);
     RT_FLOAT nw = -1;
     int w;
     for(size_t i = 0; i < 3U; i++)
@@ -49,24 +43,9 @@ Tri::Tri(const gmtl::Point<RT_FLOAT, 3>& p1, const gmtl::Point<RT_FLOAT, 3>& p2,
     if(equal(nu, 0) && equal(nv, 0))
         ci |= 8;
 
-    gmtl::Point<RT_FLOAT, 3> min = p1;
-    gmtl::Point<RT_FLOAT, 3> max = p1;
-    for(size_t j = 0; j < 3; j++)
-    {
-        if(min[j] > p2[j])
-            min[j] = p2[j];
-        if(max[j] < p2[j])
-            max[j] = p2[j];
-    }
-    for(size_t j = 0; j < 3; j++)
-    {
-        if(min[j] > p3[j])
-            min[j] = p3[j];
-        if(max[j] < p3[j])
-            max[j] = p3[j];
-    }
-    m_bbox = new gmtl::AABox<RT_FLOAT>(min, max);
-
+    m_bbox = new SIMD::AABox(p1, p1);
+    m_bbox->extend(SIMD::AABox(p2, p2));
+    m_bbox->extend(SIMD::AABox(p3, p3));
 }
 
 Tri::~Tri()
@@ -80,31 +59,33 @@ const Material &Tri::material(RT_FLOAT u, RT_FLOAT v)
     return m_mat;
 }
 
-gmtl::Vec<RT_FLOAT, 3> Tri::normal(RT_FLOAT u, RT_FLOAT v)
+SIMD::Vec Tri::normal(RT_FLOAT u, RT_FLOAT v)
 {
-    gmtl::Vec<RT_FLOAT, 3> ret;
+    SIMD::Vec ret;
     if(!m_hasNormals)
     {
-        ret[ci&3] = 1;
-        ret[ci&3 == 0? 1: 0] = nu;
-        ret[ci&3 == 2? 1: 2] = nv;
+        float v[3];
+        v[ci&3] = 1;
+        v[ci&3 == 0? 1: 0] = nu;
+        v[ci&3 == 2? 1: 2] = nv;
+        ret = SIMD::Vec(v[0], v[1], v[2]);
     }
     else
     {
         RT_FLOAT w = 1 - u - v;
         ret = m_normals[0]*w+m_normals[1]*u+m_normals[2]*v;
     }
-    gmtl::normalize(ret);
+    ret.normalize();
     return ret;
 }
 
-RT_FLOAT Tri::intersect(const gmtl::Ray<RT_FLOAT> &r, RT_FLOAT &_u, RT_FLOAT &_v)
+RT_FLOAT Tri::intersect(const SIMD::Ray &r, RT_FLOAT &_u, RT_FLOAT &_v)
 {
     const int w = ci & 3;
     const int u = (w == 0? 1: 0);
     const int v = (w == 2? 1: 2);
-    const gmtl::Point<RT_FLOAT, 3> o = r.getOrigin();
-    const gmtl::Vec<RT_FLOAT, 3> d = r.getDir();
+    const SIMD::Point o = r.origin;
+    const SIMD::Vec d = r.direction;
 
     RT_FLOAT det, dett;
     // AA case
@@ -144,13 +125,13 @@ RT_FLOAT Tri::intersect(const gmtl::Ray<RT_FLOAT> &r, RT_FLOAT &_u, RT_FLOAT &_v
     return t;
 }
 
-gmtl::AABox<RT_FLOAT> Tri::bounds()
+SIMD::AABox Tri::bounds()
 {
     return *m_bbox;
 }
 
 
-void Tri::normals(const gmtl::Vec<RT_FLOAT, 3> &n1, const gmtl::Vec<RT_FLOAT, 3> &n2, const gmtl::Vec<RT_FLOAT, 3> &n3)
+void Tri::normals(const SIMD::Vec &n1, const SIMD::Vec &n2, const SIMD::Vec &n3)
 {
     m_hasNormals = true;
     m_normals[0] = n1;

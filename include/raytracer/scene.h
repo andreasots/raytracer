@@ -5,11 +5,8 @@
 #include "raytracer/material.h"
 #include "raytracer/octree.h"
 
-#include <gmtl/AABox.h>
-#include <gmtl/Ray.h>
-#include <gmtl/Sphere.h>
-#include <gmtl/Plane.h>
-#include <gmtl/Tri.h>
+#include <SIMD/AABox.h>
+#include <SIMD/Ray.h>
 
 #include <vector>
 #include <utility>
@@ -23,8 +20,8 @@ class Scene
         virtual ~Scene();
         void open(std::string file);
         void add(Object *o);
-        RT_FLOAT intersect(const gmtl::Ray<RT_FLOAT> &r, size_t &id, RT_FLOAT &u, RT_FLOAT &v, RT_FLOAT max = HUGE_VAL);
-        Color<> radiance(const gmtl::Ray<RT_FLOAT> &r, size_t depth);
+        RT_FLOAT intersect(const SIMD::Ray &r, size_t &id, RT_FLOAT &u, RT_FLOAT &v, RT_FLOAT max = HUGE_VAL);
+        Color<> radiance(const SIMD::Ray &r, size_t depth);
         void stats();
     protected:
     private:

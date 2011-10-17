@@ -249,18 +249,27 @@ namespace PixelToaster
 
 		/// This convenience constructor lets you specify color and alpha values at creation
 
-		TrueColorPixel( integer8 _r, integer8 _g, integer8 _b, integer8 _a = 0 ):
+		TrueColorPixel( integer8 _r, integer8 _g, integer8 _b, integer8 _a = 0 ): integer(0),
 		#ifdef PIXELTOASTER_LITTLE_ENDIAN
 		b(_b), g(_g), r(_r), a(_a)
 		#else
 		a(_a), r(_r), g(_g), b(_b)
 		#endif
 		{
+		    r = _r;
+		    g = _g;
+		    b = _b;
+		    a = _a;
 		}
 
 		/// Construct from an integer
 
-		explicit TrueColorPixel( integer32 i )
+		explicit TrueColorPixel( integer32 i ): integer(i),
+		#ifdef PIXELTOASTER_LITTLE_ENDIAN
+		b(0), g(0), r(0), a(0)
+		#else
+		a(0), r(0), g(0), b()
+		#endif
 		{
 			integer = i;
 		}
@@ -356,7 +365,7 @@ if ( display.open() )
 		/// For example: Mode mode = Mode::FloatingPoint;
         /// @param enumeration the enumeration value.
 
-        Mode( Enumeration _enumeration ): enumeration(enumeration)
+        Mode( Enumeration _enumeration ): enumeration(_enumeration)
         {
         }
 
@@ -1066,6 +1075,7 @@ while ( display.open() )
 		void wrapper( class DisplayInterface * _wrapper )
 		{
 			// wrapper is always this
+			(void)(_wrapper);
 		}
 
 		class DisplayInterface * wrapper()
@@ -1336,55 +1346,86 @@ int main()
 		/// @param display the display sending the event
         /// @param key the key event data.
 
-		virtual void onKeyDown( DisplayInterface & display, Key key ) { }
+		virtual void onKeyDown( DisplayInterface & display, Key key )
+		{
+		    (void)(display);
+		    (void)(key);
+		}
 
         /// On key pressed.
         /// Called multiple times while a key is pressed and held including the initial event.
 		/// @param display the display sending the event
         /// @param key the key event data.
 
-		virtual void onKeyPressed( DisplayInterface & display, Key key ) {}
+		virtual void onKeyPressed( DisplayInterface & display, Key key )
+		{
+		    (void)(display);
+		    (void)(key);
+		}
 
         /// On key up.
         /// Called when a key is released.
 		/// @param display the display sending the event
         /// @param key the key event data.
 
-		virtual void onKeyUp( DisplayInterface & display, Key key ) {}
+		virtual void onKeyUp( DisplayInterface & display, Key key )
+		{
+		    (void)(display);
+		    (void)(key);
+		}
 
         /// On mouse button down.
         /// Called once only when a mouse button is initially pressed.
 		/// @param display the display sending the event
         /// @param mouse the mouse event data.
 
-		virtual void onMouseButtonDown( DisplayInterface & display, Mouse mouse ) {}
+		virtual void onMouseButtonDown( DisplayInterface & display, Mouse mouse )
+		{
+		    (void)(display);
+		    (void)(mouse);
+		}
 
         /// On mouse button up.
         /// Called when a mouse button is released.
 		/// @param display the display sending the event
         /// @param mouse the mouse event data.
 
-		virtual void onMouseButtonUp( DisplayInterface & display, Mouse mouse ) {}
+		virtual void onMouseButtonUp( DisplayInterface & display, Mouse mouse )
+		{
+		    (void)(display);
+		    (void)(mouse);
+		}
 
         /// On mouse move.
         /// Called when the mouse is moved.
 		/// @param display the display sending the event
         /// @param mouse the mouse event data.
 
-		virtual void onMouseMove( DisplayInterface & display, Mouse mouse ) {}
+		virtual void onMouseMove( DisplayInterface & display, Mouse mouse )
+		{
+		    (void)(display);
+		    (void)(mouse);
+		}
 
         /// On activate.
         /// Called when the display window is activated or deactivated.
 		/// @param display the display sending the event
         /// @param active true if the window is being activated, false if it is being deactivated.
 
-		virtual void onActivate( DisplayInterface & display, bool active ) {}
+		virtual void onActivate( DisplayInterface & display, bool active )
+		{
+		    (void)(display);
+		    (void)(active);
+		}
 
 		/// On open.
 		/// Called when a display is opened successfully.
 		/// @param display the display sending the event
 
-		virtual void onOpen( DisplayInterface & display ) {}
+		virtual void onOpen( DisplayInterface & display )
+		{
+		    (void)(display);
+		}
 
         /// On close.
         /// Called when the window has been requested to close by the user.
@@ -1395,7 +1436,11 @@ int main()
 		/// will remain open and the close will be ignored. true is default.
 		/// @param display the display sending the event
 
-		virtual bool onClose( DisplayInterface & display ) { return true; }
+		virtual bool onClose( DisplayInterface & display )
+		{
+		    (void)(display);
+		    return true;
+        }
     };
 
 	// internal converter interface

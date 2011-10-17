@@ -24,6 +24,7 @@
 					<Add option="-fomit-frame-pointer" />
 					<Add option="-O3" />
 					<Add option="-march=native" />
+					<Add option="-funroll-loops" />
 					<Add option="-DNDEBUG" />
 				</Compiler>
 				<Linker>
@@ -50,10 +51,10 @@
 			<Add option="-Wextra" />
 			<Add option="-Wall" />
 			<Add option="-fopenmp" />
-			<Add option="-DRT_FLOAT=double" />
-			<Add option="-DRT_INT=int64_t" />
-			<Add option="-DRT_UINT=uint64_t" />
-			<Add option='-DRT_MSB=&quot;(UINT64_MAX-INT64_MAX)&quot;' />
+			<Add option="-DRT_FLOAT=float" />
+			<Add option="-DRT_INT=int32_t" />
+			<Add option="-DRT_UINT=uint32_t" />
+			<Add option='-DRT_MSB=&quot;(UINT32_MAX-INT32_MAX)&quot;' />
 			<Add directory="include" />
 			<Add directory="PixelToaster" />
 		</Compiler>
@@ -70,59 +71,12 @@
 		<Unit filename="PixelToaster/PixelToasterConversion.h" />
 		<Unit filename="PixelToaster/PixelToasterUnix.h" />
 		<Unit filename="PixelToaster/PixelToasterWindows.h" />
-		<Unit filename="include/gmtl/AABox.h" />
-		<Unit filename="include/gmtl/AABoxOps.h" />
-		<Unit filename="include/gmtl/AxisAngle.h" />
-		<Unit filename="include/gmtl/AxisAngleOps.h" />
-		<Unit filename="include/gmtl/Comparitors.h" />
-		<Unit filename="include/gmtl/Config.h" />
-		<Unit filename="include/gmtl/Containment.h" />
-		<Unit filename="include/gmtl/Coord.h" />
-		<Unit filename="include/gmtl/CoordOps.h" />
-		<Unit filename="include/gmtl/Defines.h" />
-		<Unit filename="include/gmtl/EulerAngle.h" />
-		<Unit filename="include/gmtl/EulerAngleOps.h" />
-		<Unit filename="include/gmtl/External/OpenSGConvert.h" />
-		<Unit filename="include/gmtl/Fit/GaussPointsFit.h" />
-		<Unit filename="include/gmtl/Frustum.h" />
-		<Unit filename="include/gmtl/FrustumOps.h" />
-		<Unit filename="include/gmtl/Generate.h" />
-		<Unit filename="include/gmtl/Helpers.h" />
-		<Unit filename="include/gmtl/Intersection.h" />
-		<Unit filename="include/gmtl/LineSeg.h" />
-		<Unit filename="include/gmtl/LineSegOps.h" />
-		<Unit filename="include/gmtl/Math.h" />
-		<Unit filename="include/gmtl/Matrix.h" />
-		<Unit filename="include/gmtl/MatrixOps.h" />
-		<Unit filename="include/gmtl/Misc/MatrixConvert.h" />
-		<Unit filename="include/gmtl/Numerics/Eigen.h" />
-		<Unit filename="include/gmtl/OOBox.h" />
-		<Unit filename="include/gmtl/Output.h" />
-		<Unit filename="include/gmtl/ParametricCurve.h" />
-		<Unit filename="include/gmtl/Plane.h" />
-		<Unit filename="include/gmtl/PlaneOps.h" />
-		<Unit filename="include/gmtl/Point.h" />
-		<Unit filename="include/gmtl/Quat.h" />
-		<Unit filename="include/gmtl/QuatOps.h" />
-		<Unit filename="include/gmtl/Ray.h" />
-		<Unit filename="include/gmtl/RayOps.h" />
-		<Unit filename="include/gmtl/Sphere.h" />
-		<Unit filename="include/gmtl/SphereOps.h" />
-		<Unit filename="include/gmtl/Tri.h" />
-		<Unit filename="include/gmtl/TriOps.h" />
-		<Unit filename="include/gmtl/Util/Assert.h" />
-		<Unit filename="include/gmtl/Util/Meta.h" />
-		<Unit filename="include/gmtl/Util/StaticAssert.h" />
-		<Unit filename="include/gmtl/Vec.h" />
-		<Unit filename="include/gmtl/VecBase.h" />
-		<Unit filename="include/gmtl/VecExprMeta.h" />
-		<Unit filename="include/gmtl/VecOps.h" />
-		<Unit filename="include/gmtl/VecOpsMeta.h" />
-		<Unit filename="include/gmtl/Version.h" />
-		<Unit filename="include/gmtl/Xforms.h" />
-		<Unit filename="include/gmtl/gmtl.h" />
+		<Unit filename="include/SIMD/AABox.h" />
+		<Unit filename="include/SIMD/Matrix.h" />
+		<Unit filename="include/SIMD/Point.h" />
+		<Unit filename="include/SIMD/Ray.h" />
+		<Unit filename="include/SIMD/Vec.h" />
 		<Unit filename="include/raytracer/color.h" />
-		<Unit filename="include/raytracer/kdtree.h" />
 		<Unit filename="include/raytracer/material.h" />
 		<Unit filename="include/raytracer/object.h" />
 		<Unit filename="include/raytracer/octree.h" />
@@ -131,7 +85,6 @@
 		<Unit filename="include/raytracer/tri.h" />
 		<Unit filename="include/version.h" />
 		<Unit filename="src/main.cpp" />
-		<Unit filename="src/raytracer/kdtree.cpp" />
 		<Unit filename="src/raytracer/octree.cpp" />
 		<Unit filename="src/raytracer/scene.cpp" />
 		<Unit filename="src/raytracer/sphere.cpp" />

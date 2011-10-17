@@ -3,10 +3,10 @@
 
 #include "raytracer/material.h"
 
-#include <gmtl/Point.h>
-#include <gmtl/Vec.h>
-#include <gmtl/Ray.h>
-#include <gmtl/AABox.h>
+#include <SIMD/Point.h>
+#include <SIMD/Vec.h>
+#include <SIMD/Ray.h>
+#include <SIMD/AABox.h>
 
 namespace Raytracer {
 
@@ -23,9 +23,9 @@ class Object
         }
         virtual const Material &material(RT_FLOAT u, RT_FLOAT v) = 0;
         virtual const Material &material() = 0;
-        virtual gmtl::Vec<RT_FLOAT, 3> normal(RT_FLOAT u, RT_FLOAT v) = 0;
-        virtual RT_FLOAT intersect(const gmtl::Ray<RT_FLOAT> &r, RT_FLOAT &u, RT_FLOAT &v) = 0;
-        virtual gmtl::AABox<RT_FLOAT> bounds() = 0;
+        virtual SIMD::Vec normal(RT_FLOAT u, RT_FLOAT v) = 0;
+        virtual RT_FLOAT intersect(const SIMD::Ray &r, RT_FLOAT &u, RT_FLOAT &v) = 0;
+        virtual SIMD::AABox bounds() = 0;
     protected:
         Material m_mat;
     private:

@@ -1,21 +1,14 @@
 #include "raytracer/octree.h"
-#include <gmtl/Intersection.h>
 #include <stdexcept>
 #include <iostream>
-
-#include <gmtl/Containment.h>
+#define RT_INF (static_cast<RT_FLOAT>(HUGE_VAL))
 
 namespace Raytracer {
 
-Octree::Octree(const gmtl::Point<RT_FLOAT, 3>& min, const gmtl::Point<RT_FLOAT, 3>& max, Octree *parent):
-    m_objects(), m_subnodes({NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL}),
-    // FIXME: Compiler is fucked up
-    /*AABox(min, max),*/ m_parent(parent)
+Octree::Octree(const SIMD::Point& _min, const SIMD::Point& _max, Octree *parent):
+    SIMD::AABox(_min, _max), empty(true), m_objects(), m_subnodes({NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL}),
+    m_parent(parent)
 {
-    // FIXME: Compiler is fucked up
-    setMin(min);
-    setMax(max);
-    setEmpty(true);
 }
 
 Octree::~Octree()
@@ -26,41 +19,77 @@ Octree::~Octree()
 
 bool Octree::add(Object *o, const size_t &id)
 {
-    bool e = isEmpty();
-    setEmpty(false);
-    if(gmtl::isInVolume(*this, o->bounds()))
+    if(encloses(o->bounds()))
     {
         createSubnodes();
         for(size_t i = 0; i < 8; i++)
             if(m_subnodes[i]->add(o, id))
                 return true;
         m_objects.push_back(id);
-        setEmpty(false);
         return true;
     }
-    setEmpty(e);
     return false;
 }
 
-void Octree::prune()
+void Octree::prune(const std::vector<Object *> &objects)
 {
     for(size_t i = 0; i < 8; i++)
+        if(m_subnodes[i])
+            m_subnodes[i]->prune(objects);
+
+    size_t nodes = 8;
+    for(size_t i = 0; i < 8; i++)
     {
-        if(m_subnodes[i] && m_subnodes[i]->isEmpty())
+        if(m_subnodes[i] && m_subnodes[i]->empty)
         {
             delete m_subnodes[i];
             m_subnodes[i] = NULL;
-            continue;
+            nodes--;
         }
     }
+
+    if(m_parent && nodes == 1 && m_objects.size() == 0)
+    {
+        size_t from, to;
+        for(size_t i = 0; i < 8; i++)
+        {
+            if(m_parent->m_subnodes[i] == this)
+                to = i;
+            if(m_subnodes[i])
+                from = i;
+        }
+        m_parent->m_subnodes[to] = m_subnodes[from];
+        m_subnodes[from] = NULL;
+        delete this;
+        return;
+    }
+    RT_FLOAT _min[] = {RT_INF, RT_INF, RT_INF};
+    RT_FLOAT _max[] = {-RT_INF, -RT_INF, -RT_INF};
+    for(size_t i = 0; i < 8; i++)
+    {
+        if(m_subnodes[i])
+        {
+                _max[0] = std::max(m_subnodes[i]->max()[0], _max[0]);
+                _min[0] = std::min(m_subnodes[i]->min()[0], _min[0]);
+                _max[1] = std::max(m_subnodes[i]->max()[1], _max[1]);
+                _min[1] = std::min(m_subnodes[i]->min()[1], _min[1]);
+                _max[2] = std::max(m_subnodes[i]->max()[2], _max[2]);
+                _min[2] = std::min(m_subnodes[i]->min()[2], _min[2]);
+        }
+    }
+
+    setMin(SIMD::Point(_min[0], _min[1], _min[2]));
+    setMax(SIMD::Point(_max[0], _max[1], _max[2]));
+    for(size_t i = 0; i < m_objects.size(); i++)
+        extend(objects[m_objects[i]]->bounds());
 }
 
-bool Octree::intersect(const gmtl::Ray<RT_FLOAT> &r, RT_FLOAT &ret, size_t &id, RT_FLOAT &u, RT_FLOAT &v,
+bool Octree::intersect(const SIMD::Ray &r, RT_FLOAT &ret, size_t &id, RT_FLOAT &u, RT_FLOAT &v,
                        const std::vector<Object *> &objects,
                        unsigned long long &hits, unsigned long long &intersections)
 {
     RT_FLOAT tIn, tOut;
-    if(!gmtl::intersectAABoxRay(*this, r, tIn, tOut) || tIn >= ret || tOut <= 0)
+    if(!reinterpret_cast<SIMD::AABox*>(this)->intersect(r, tIn, tOut) || tIn >= ret || tOut <= 0)
         return false;
 
     for(auto i = m_objects.begin(); i != m_objects.end(); i++)
@@ -87,24 +116,24 @@ bool Octree::intersect(const gmtl::Ray<RT_FLOAT> &r, RT_FLOAT &ret, size_t &id, 
 
 void Octree::createSubnodes()
 {
-    RT_FLOAT xHeight = (mMax[0]-mMin[0])/2, x[] = {mMin[0], mMin[0]+xHeight};
-    RT_FLOAT yHeight = (mMax[1]-mMin[1])/2, y[] = {mMin[1], mMin[1]+yHeight};
-    RT_FLOAT zHeight = (mMax[2]-mMin[2])/2, z[] = {mMin[2], mMin[2]+zHeight};
+    RT_FLOAT xHeight = (max()[0]-min()[0])/2, x[] = {min()[0], min()[0]+xHeight};
+    RT_FLOAT yHeight = (max()[1]-min()[1])/2, y[] = {min()[1], min()[1]+yHeight};
+    RT_FLOAT zHeight = (max()[2]-min()[2])/2, z[] = {min()[2], min()[2]+zHeight};
     for(size_t i = 0; i < 8; i++)
     {
         if(m_subnodes[i])
             continue;
-        gmtl::Point<RT_FLOAT, 3> min, max;
+        RT_FLOAT _min[3], _max[3];
         // x-axis
-        min[0] = x[i&1];
-        max[0] = x[i&1]+xHeight;
+        _min[0] = x[i&1];
+        _max[0] = x[i&1]+xHeight;
         // y-axis
-        min[1] = y[i&2>>1];
-        max[1] = y[i&2>>1]+yHeight;
+        _min[1] = y[i&2>>1];
+        _max[1] = y[i&2>>1]+yHeight;
         // z-axis
-        min[2] = z[i&4>>2];
-        max[2] = z[i&4>>2]+zHeight;
-        m_subnodes[i] = new Octree(min, max, this);
+        _min[2] = z[i&4>>2];
+        _max[2] = z[i&4>>2]+zHeight;
+        m_subnodes[i] = new Octree(SIMD::Point(_min[0], _min[1], _min[2]), SIMD::Point(_max[0], _max[1], _max[2]), this);
     }
 }
 

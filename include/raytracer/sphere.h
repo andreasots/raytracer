@@ -2,16 +2,15 @@
 #define RAYTRACER_SPHERE_H
 
 #include "raytracer/object.h"
-
-#include <gmtl/Sphere.h>
+#include <SIMD/Point.h>
 
 namespace Raytracer {
 
-class Sphere : public Raytracer::Object, public gmtl::Sphere<RT_FLOAT>
+class Sphere : public Raytracer::Object
 {
     public:
         /** Default constructor */
-        Sphere(gmtl::Point<RT_FLOAT, 3> o, RT_FLOAT r, Material mat);
+        Sphere(SIMD::Point o, RT_FLOAT r, Material mat);
         /** Default destructor */
         virtual ~Sphere();
         virtual const Material &material(RT_FLOAT u, RT_FLOAT v);
@@ -19,10 +18,12 @@ class Sphere : public Raytracer::Object, public gmtl::Sphere<RT_FLOAT>
         {
             return m_mat;
         }
-        virtual gmtl::Vec<RT_FLOAT, 3> normal(RT_FLOAT u, RT_FLOAT v);
-        virtual RT_FLOAT intersect(const gmtl::Ray<RT_FLOAT> &r, RT_FLOAT &u, RT_FLOAT &v);
-        virtual gmtl::AABox<RT_FLOAT> bounds();
+        virtual SIMD::Vec normal(RT_FLOAT u, RT_FLOAT v);
+        virtual RT_FLOAT intersect(const SIMD::Ray &r, RT_FLOAT &u, RT_FLOAT &v);
+        virtual SIMD::AABox bounds();
     protected:
+        SIMD::Point mO;
+        RT_FLOAT mR;
     private:
 };
 

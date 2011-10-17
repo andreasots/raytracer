@@ -1,11 +1,9 @@
 #include "raytracer/sphere.h"
-
-#include <gmtl/Containment.h>
-#include <gmtl/Intersection.h>
+#include <cmath>
 
 namespace Raytracer {
 
-Sphere::Sphere(gmtl::Point<RT_FLOAT, 3> o, RT_FLOAT r, Material mat): gmtl::Sphere<RT_FLOAT>(o, r), Object(mat)
+Sphere::Sphere(SIMD::Point o, RT_FLOAT r, Material mat): mO(o), mR(r), Object(mat)
 {
     //ctor
 }
@@ -17,42 +15,47 @@ Sphere::~Sphere()
 
 const Material &Sphere::material(RT_FLOAT u, RT_FLOAT v)
 {
-    // Texture coordinates:
-    // RT_FLOAT cos_theta = gmtl::dot(z, n);
-    // RT_FLOAT cos_phi = gmtl::dot(x, n);
-
     return m_mat;
 }
 
-gmtl::Vec<RT_FLOAT, 3> Sphere::normal(RT_FLOAT u, RT_FLOAT v)
+SIMD::Vec Sphere::normal(RT_FLOAT u, RT_FLOAT v)
 {
-    gmtl::Vec<RT_FLOAT, 3> n(getRadius()*std::cos(u)*std::sin(v), getRadius()*std::sin(u)*std::sin(v), getRadius()*std::cos(v));
-    gmtl::normalize(n);
+    RT_FLOAT phi = v*M_PI;
+    RT_FLOAT theta = u*2*M_PI;
+    SIMD::Vec n(std::cos(theta)*std::sin(phi), std::sin(theta)*std::sin(phi), std::cos(phi));
     return n;
 }
 
-RT_FLOAT Sphere::intersect(const gmtl::Ray<RT_FLOAT> &r, RT_FLOAT &u, RT_FLOAT &v)
+RT_FLOAT Sphere::intersect(const SIMD::Ray &r, RT_FLOAT &u, RT_FLOAT &v)
 {
-    int hits;
-    RT_FLOAT t0, t1, t = HUGE_VAL;
-    if(gmtl::intersect(*this, r, hits, t0, t1))
-    {
-        if(t0 > 0)
-            t = t0;
-        else if(t1 > 0 && t1 < t)
-            t = t1;
-        gmtl::Point<RT_FLOAT, 3> p = r.getOrigin()+t*r.getDir()-getCenter();
-        u = std::atan(p[1]/p[0]);
-        v = std::acos(p[2]/getRadius());
-    }
+    RT_FLOAT p = r.direction.dot(r.origin-mO);
+    RT_FLOAT det = p*p-(r.origin-mO).length2()+mR*mR;
+    if(det < 0)
+        return HUGE_VAL;
+    det = std::sqrt(det);
+    RT_FLOAT t = std::min((p+det) < 0 ? HUGE_VAL: p+det, (p-det) < 0? HUGE_VAL: p-det);
+
+    // Ray Tracing: Graphics for the Masses
+    // by Paul Rademacher
+    // http://www.cs.unc.edu/~rademach/xroads-RT/RTarticle.html
+
+    SIMD::Vec Vp = r.origin+t*r.direction - mO;
+    Vp.normalize();
+    SIMD::Vec Vn(0, 0, 1), Ve(1, 0, 0);
+
+    v = std::acos(-Vn.dot(Vp));
+    u = (std::acos(Vp.dot(Ve))/std::sin(v))*0.5*M_1_PI;
+    v *= M_1_PI;
+    if(Vp.dot(Vn.cross(Ve)) < 0)
+        u = 1 - u;
+
     return t;
 }
 
-gmtl::AABox<RT_FLOAT> Sphere::bounds()
+SIMD::AABox Sphere::bounds()
 {
-    gmtl::AABox<RT_FLOAT> box;
-    gmtl::makeVolume(box, *this);
-    return box;
+    SIMD::Vec v(mR, mR, mR);
+    return SIMD::AABox(mO-v, mO+v);
 }
 
 } // namespace Raytracer
