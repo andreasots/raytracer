@@ -3,6 +3,8 @@
 #include <cassert>
 #include <limits>
 
+#include <iostream>
+
 inline bool equal(const RT_FLOAT &a, const RT_FLOAT &b)
 {
     return std::abs(a-b) <= 10*std::numeric_limits<RT_FLOAT>::epsilon()*std::max<RT_FLOAT>(1, std::max(std::abs(a), std::abs(b)));
@@ -42,7 +44,6 @@ Tri::Tri(const SIMD::Point& p1, const SIMD::Point& p2,
     ci = w;
     if(equal(nu, 0) && equal(nv, 0))
         ci |= 8;
-
     m_bbox = new SIMD::AABox(p1, p1);
     m_bbox->extend(SIMD::AABox(p2, p2));
     m_bbox->extend(SIMD::AABox(p3, p3));
@@ -65,9 +66,9 @@ SIMD::Vec Tri::normal(RT_FLOAT u, RT_FLOAT v)
     if(!m_hasNormals)
     {
         float v[3];
-        v[ci&3] = 1;
-        v[ci&3 == 0? 1: 0] = nu;
-        v[ci&3 == 2? 1: 2] = nv;
+        v[(ci&3)] = 1;
+        v[(ci&3) == 0? 1: 0] = nu;
+        v[(ci&3) == 2? 1: 2] = nv;
         ret = SIMD::Vec(v[0], v[1], v[2]);
     }
     else
@@ -124,7 +125,6 @@ RT_FLOAT Tri::intersect(const SIMD::Ray &r, RT_FLOAT &_u, RT_FLOAT &_v)
         return HUGE_VAL;
     return t;
 }
-
 SIMD::AABox Tri::bounds()
 {
     return *m_bbox;

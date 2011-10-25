@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <cmath>
 #include <ostream>
+#include <iostream>
 namespace SIMD
 {
 class Vec
@@ -17,7 +18,7 @@ class Vec
 		{
 		}
 
-		Vec(float x, float y, float z, float w = 0) throw(): mData(_mm_setr_ps(x, y, z, w))
+		Vec(float x, float y, float z, float w = 0) throw(): mData(_mm_set_ps(x, y, z, w))
 		{
 		}
 
@@ -25,56 +26,56 @@ class Vec
 		{
 		}
 
-		Vec operator+(const Vec &v) const throw()
+		inline Vec operator+(const Vec &v) const throw()
 		{
 			return _mm_add_ps(mData, v.mData);
 		}
 
-		Vec &operator+=(const Vec &v) throw()
+		inline Vec &operator+=(const Vec &v) throw()
 		{
 			mData = _mm_add_ps(mData, v.mData);
 			return *this;
 		}
 
-        Vec operator-() const throw()
+        inline Vec operator-() const throw()
         {
             return _mm_sub_ps(_mm_setzero_ps(), mData);
         }
 
-		Vec operator-(const Vec &v) const throw()
+		inline Vec operator-(const Vec &v) const throw()
 		{
 			return _mm_sub_ps(mData, v.mData);
 		}
 
-		Vec &operator-=(const Vec &v) throw()
+		inline Vec &operator-=(const Vec &v) throw()
 		{
 			mData = _mm_sub_ps(mData, v.mData);
 			return *this;
 		}
 
-		Vec operator*(float f) const throw()
+		inline Vec operator*(float f) const throw()
 		{
 			return _mm_mul_ps(mData, _mm_load1_ps(&f));
 		}
 
-		Vec &operator*=(float f) throw()
+		inline Vec &operator*=(float f) throw()
 		{
 			mData = _mm_mul_ps(mData, _mm_load1_ps(&f));
 			return *this;
 		}
 
-		Vec operator/(float f) const throw()
+		inline Vec operator/(float f) const throw()
 		{
 			return _mm_div_ps(mData, _mm_load1_ps(&f));
 		}
 
-		Vec &operator/=(float f) throw()
+		inline Vec &operator/=(float f) throw()
 		{
 			mData = _mm_div_ps(mData, _mm_load1_ps(&f));
 			return *this;
 		}
 
-		float operator[](size_t i) const throw(std::out_of_range)
+		inline float operator[](size_t i) const throw(std::out_of_range)
 		{
 			if(i & ~3U)
 				throw std::out_of_range("Vec::operator[]");
@@ -83,54 +84,44 @@ class Vec
             return val[i];
 		}
 
-		float dot(const Vec &v) const throw()
-		{
-			return dot4(v);
-		}
-
-		float dot4(const Vec &v) const throw()
+		inline float dot(const Vec &v) const throw()
 		{
 			return _mm_cvtss_f32(_mm_dp_ps(mData, v.mData, 0xF1));
 		}
 
-		float dot3(const Vec &v) const throw()
-		{
-			return _mm_cvtss_f32(_mm_dp_ps(mData, v.mData, 0xE1));
+ 		inline Vec cross(const Vec &v) const throw()
+        {
+			return _mm_sub_ps(
+                     _mm_mul_ps(_mm_shuffle_ps(mData, mData,
+                                               _MM_SHUFFLE(2, 1, 3, 0)),
+                                _mm_shuffle_ps(v.mData, v.mData,
+                                               _MM_SHUFFLE(1, 3, 2, 0))),
+                     _mm_mul_ps(_mm_shuffle_ps(mData, mData,
+                                               _MM_SHUFFLE(1, 3, 2, 0)),
+                                _mm_shuffle_ps(v.mData, v.mData,
+                                               _MM_SHUFFLE(2, 1, 3, 0))));
 		}
 
-		float dot2(const Vec &v) const throw()
+		inline float length() const throw()
 		{
-			return _mm_cvtss_f32(_mm_dp_ps(mData, v.mData, 0xB1));
+			return std::sqrt(dot(mData));
 		}
 
- 		Vec cross(Vec v) const throw()
+		inline float length2() const throw()
 		{
-			__m128 a1 = _mm_setr_ps((*this)[1], (*this)[2], (*this)[2], (*this)[0]);
-			__m128 a2 = _mm_setr_ps((*this)[0], (*this)[1], 0, 0);
-			__m128 b1 = _mm_setr_ps(v[2], v[1], v[0], v[2]);
-			__m128 b2 = _mm_setr_ps(v[1], v[0], 0, 0);
-			return _mm_hsub_ps(_mm_mul_ps(a1, b1), _mm_mul_ps(a2, b2));
+		    return dot(mData);
 		}
 
-		float length() const throw()
-		{
-			return std::sqrt(dot4(*this));
-		}
-
-		float length2() const throw()
-		{
-		    return dot4(*this);
-		}
-
-		void normalize() throw()
+		inline void normalize() throw()
 		{
 			mData = _mm_mul_ps(mData, _mm_rsqrt_ps(_mm_dp_ps(mData, mData, 0xFF)));
 		}
 
-		__m128 data() const throw()
+		inline __m128 data() const throw()
 		{
 		    return mData;
 		}
+		friend inline std::ostream &operator<<(std::ostream &out, const Vec &v);
 };
 
 inline Vec operator*(float f, Vec v)

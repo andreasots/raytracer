@@ -8,6 +8,7 @@
 
 #include "raytracer/color.h"
 #include "raytracer/scene.h"
+#include "raytracer/sphere.h"
 
 #include <assimp/aiDefines.h>
 #include <assimp/aiVersion.h>
@@ -38,8 +39,10 @@ int main(int argc, char *argv[])
     std::cout << "\tOpenEXR" << std::endl;
     std::cout << std::endl;
 
-    w = 800/16;
-    h = 600/16;
+    w = 1024;
+    h = 768;
+
+    std::cout << SIMD::Vec(1, 0, 0).cross(SIMD::Vec(0, 1, 0)) << std::endl;
 
     PixelToaster::Display screen("Raytracer", w, h);
     std::vector<PixelToaster::Pixel> fb(w*h); // Front buffer
@@ -83,10 +86,10 @@ int main(int argc, char *argv[])
     size_t sample = 1;
     while(render)
     {
-        std::cout << "Sample " << sample << std::endl;
+        std::cout << "\r\033[K[" << timer.time() <<  "] Sample " << sample << std::endl;
         for(size_t y = 0; y < h && render; y++)
         {
-            //#pragma omp parallel for schedule(dynamic, 1)
+            #pragma omp parallel for schedule(dynamic, 1)
             for(size_t x = 0; x < w; x++)
             {
                 Raytracer::Color<> pixel(bb[y*w+x]);
@@ -108,24 +111,22 @@ int main(int argc, char *argv[])
                 {
                     screen.update(fb);
                     updated.reset();
-//                    std::cout << "\r\033[K[" << timer.time() <<  "] Scanline " << y+1 << ' ' << std::flush;
                 }
                 if(!screen.open())
                     render = false;
             }
         }
-        std::cout << "\r\033[K[" << timer.time() <<  "] Scanline " << h << std::endl;
         sample++;
     }
 
-/*    Imf::Rgba *pixels = new Imf::Rgba[w*h];
+    Imf::Rgba *pixels = new Imf::Rgba[w*h];
     for(size_t Y = 0; Y < h; Y++)
         for(size_t X = 0; X < w; X++)
             pixels[X+Y*w] = Imf::Rgba(bb[X+Y*w].r(), bb[X+Y*w].g(), bb[X+Y*w].b());
     Imf::RgbaOutputFile file("image.exr", w, h, Imf::WRITE_RGBA);
     file.setFrameBuffer(pixels, 1, w);
     file.writePixels(h);
-    delete[] pixels;*/
+    delete[] pixels;
 
     scene.stats();
     std::cout << "Number of samples per pixel: " << sample-1 << std::endl;

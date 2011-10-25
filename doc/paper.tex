@@ -22,9 +22,6 @@
 
 \pagestyle{empty}
 \begin{document}
-% apacite tõlked
-\renewcommand{\BUPhD}{Avaldamata doktoritöö}
-\renewcommand{\BAvailFrom}{Loetud:\ }
 \begin{center}
 Tallinna Reaalkool
 
@@ -72,202 +69,53 @@ Esimene lehekülg
 Teine lehekülg
 
 \chapter{Kiirtejälitus}
-\section{Kolmnurga ja kiire lõikumine}
+\section{Visualiseerimisvõrrand}
+Aastal 1986 pakkus James Kajiya välja võrrandi erinevate
+visualiseerimisalgoritmide ül\-dis\-ta\-mi\-seks
+(võrrand~\ref{eq:rendering-kajiya86}). \cite{kajiya86}
 
-\subsection{Tasand}
-\[
-  \left\{
-  \begin{array}{l}
-    P' = P + t\vec s \\
-    (P' - A)\cdot\vec n = 0
-  \end{array}
-  \right.
-\]
-
-\[(P + t\vec s - A)\cdot\vec n = 0\]
-
-\[(P - A)\cdot\vec n + t\vec s\cdot\vec n = 0\]
-
-\[t\vec s\cdot\vec n = (A - P)\cdot\vec n\]
-
-\[t = \frac{(A - P)\cdot\vec n}{\vec s\cdot\vec n}\]
-
-Kui \(t = \pm\inf\), kiir ei lõiku tasandiga. Kui \(t = \frac00\)\footnote{IEEE~
-754 standardi järgi \(\frac00=\)\texttt{NaN}.}
-
-\subsection{Barütsentrilised koordinaadid}
-\begin{wrapfigure}{r}{0.5\textwidth}
-  \begin{center}
-    \setlength{\unitlength}{5cm}
-    \begin{picture}(1.25,0.75)
-      \put(0.125,0.125){\line(1,0){1}}
-      \put(1.125,0.125){\line(-5,4){0.715}}
-      \put(0.125,0.125){\line(1,2){0.285}}
-      \put(0,0){\(A(1,0,0)\)}
-      \put(1,0){\(B(0,1,0)\)}
-      \put(0.35,0.75){\(C(0,0,1)\)}
-      \put(0.5,0.35){\circle*{.03}}
-      \put(0.3, 0.4){\(P(\lambda_1, \lambda_2, \lambda_3)\)}
-    \end{picture}
-    \[\forall i \in \{1,2,3\} \quad 0 \geq \lambda_i \geq 1\]
-  \end{center}
-  \caption{Barütsentrilised koordinaadid kolmnurgas}
-  \label{fig:bary}
-\end{wrapfigure}
-Barütsentrilised koordinaadid on ar\-vu\-kol\-mik \((\lambda_1, \lambda_2,\lambda_3\),
-mis tähistavad raskuseid etalonkolmnurga \(\triangle ABC\) tippudes. Need
-raskused omakorda määravad punkti \(P\), mis asub nende raskuste raskuskeskmes.
-Ba\-rü\-tsent\-ri\-li\-sed koordinaadid avastas August Ferdinand Möbius aastal 1827.
-Homogeensete barütsentriliste koordinaatide korral kehtib valem \ref{eq:bary}.
-\cite{mw:bary} Joonis \ref{fig:bary} näitab barütsentrilisi koordinaate
-kolmurgas.
-
-\begin{equation} \label{eq:bary}
-  \lambda_1 + \lambda_2 + \lambda_3 = 1
+\begin{equation} \label{eq:rendering-kajiya86}
+I(X, X') = g(X, X')\left[\epsilon(X, X')+\int_S\rho(X, X', X'')
+I(X', X'')dX''\right]
 \end{equation}
 
-Olgu \(A(x_1, y_1, z_1)\), \(B(x_2, y_2, z_2)\) ja \(C(x_3, y_3, z_3)\) mingi
-kolmnurga tipud ja punkt \(P(x, y, z)\) selle kolmurgaga samas tasandis asuv
-punkt.
+\begin{tabular}{l p{0.75\textwidth}}
+\(I(X, X')\) & Valguse heledus, mis jõuab punktist \(X'\) punkti \(X\)\\
+\(g(X, X')\) & Geomeetriline tegur. Näitab, kui palju punktist \(X'\)
+	väljuvat valgust jõuab punkti \(X\) \\
+\(\epsilon(X, X')\) & Valguse heledus, mis kiirgub punktist \(X'\)
+	punkti \(X\) \\
+\(\rho(X, X', X'')\) & Peegeldustegur. Näitab, kui palju punktist
+	\(X''\) väljuvat valgust jõuab läbi punkti \(X'\) punkti \(X\) \\
+\(S\) & Esemete hulk, millest koosneb visualiseeritav stseen \\
+ & \\
+\end{tabular}
 
-Punkti \(P\) saab määrata kolmnurga \(ABC\) barütsentriliste koordinaatidega
-\((\lambda_1, \lambda_2, \lambda_3)\). Barütsentrilised koordinaadid saab
-teisendada eukleidilise ruumi koordinaatideks valemiga \ref{eq:bary-1} või
-komponetide kaupa võrrandisüsteem \ref{eq:bary-1-exp}.
 
-\begin{minipage}{0.40\textwidth}
-  \begin{equation} \label{eq:bary-1}
-    P = \lambda_1A+\lambda_2B+\lambda_3C
-  \end{equation}
-\end{minipage}
-\begin{minipage}{0.55\textwidth}
-  \begin{equation} \label{eq:bary-1-exp}
-    \left\{
-    \begin{array}{l}
-      x = \lambda_1x_1+\lambda_2x_2+\lambda_3x_3 \\
-      y = \lambda_1y_1+\lambda_2y_2+\lambda_3y_3 \\
-      z = \lambda_1z_1+\lambda_2z_2+\lambda_3z_3
-    \end{array}
-    \right.
-  \end{equation}
-\end{minipage}
+Probleem selle valemiga on see, et seob lineaarselt pinna heleduse
+esemete arvuga. Üks võimalus on võrrand \ref{eq:rendering-kajiya86}
+kirjutada vektorkujul (võrrand \ref{eq:rendering-vec}).
 
-Võrrandisüsteem \ref{eq:bary-2} on süsteemi \ref{eq:bary-1} lahend.
-
-\begin{center}
-\begin{minipage}{0.23\textwidth}
-  \[
-    D =
-    \begin{vmatrix}
-      x_1 & x_2 & x_3 \\
-      y_1 & y_2 & y_3 \\
-      z_1 & z_2 & z_3 \\
-    \end{vmatrix}
-  \]
-\end{minipage}
-\begin{minipage}{0.23\textwidth}
-  \[
-    D_{\lambda_1} =
-    \begin{vmatrix}
-      x & x_2 & x_3 \\
-      y & y_2 & y_3 \\
-      z & z_2 & z_3 \\
-    \end{vmatrix}
-  \]
-\end{minipage}
-\begin{minipage}{0.23\textwidth}
-  \[
-    D_{\lambda_2} = 
-    \begin{vmatrix}
-      x_1 & x & x_3 \\
-      y_1 & y & y_3 \\
-      z_1 & z & z_3 \\
-    \end{vmatrix}
-  \]
-\end{minipage}
-\begin{minipage}{0.23\textwidth}
-  \[
-    D_{\lambda_3} = 
-    \begin{vmatrix}
-      x_1 & x_2 & x \\
-      y_1 & y_2 & y \\
-      z_1 & z_2 & z \\
-    \end{vmatrix}
-  \]
-\end{minipage}
-\end{center}
-  
-\begin{equation} \label{eq:bary-2}  
-  \left\{
-  \begin{array}{l}
-    \lambda_1 = \frac{D_{\lambda_1}}{D} \\
-    \lambda_2 = \frac{D_{\lambda_2}}{D} \\
-    \lambda_3 = \frac{D_{\lambda_3}}{D}
-  \end{array}
-  \right.
+\begin{equation} \label{eq:rendering-vec}
+I(X, \omega) = \epsilon(X, \omega) + \int_\Omega\rho(X, \omega', \omega)
+I(X, \omega')d\omega'
 \end{equation}
+\[\Omega = \{\omega ~|~ \omega\cdot \vec n \leq 0,~ \omega^2 = 1\}\]
+\[\omega \cdot \vec n \leq 0\] 
 
-Kuid sellel meetodil üks viga, kolmerealise determinandi arvutamiseks on vaja
-teha 12 suhteliselt kallist korrutamistehet. Kaherealise determinandi
-arvutamiseks oleks vaja ainult kaks korrutamistehet. Võrrandisüsteemi
-\ref{eq:bary-1-exp} esimesed kaks rida kehtivad ka kahemõõtmelise ruumi puhul.
-Võrrandisüsteem \ref{eq:bary-1-2D} on teisendatud seose \ref{eq:bary} järgi ja
-lihtsustatud. Võrrandisüsteem \ref{eq:bary-3} on süsteemi \ref{eq:bary-1-2D}
-lahend.
+\begin{tabular}{l p{0.75\textwidth}}
+\(I(X, \omega)\) & Valguse heledus, mis väljub punktis \(X\) suunast
+	\(-\omega\) \\
+\(\epsilon(X, \omega)\) & Valguse heledus, mis kiirgub punktist \(X\) suunas
+	\(-\omega\)\\
+\(\rho(X, \omega', \omega)\) & Peegeldustegur. Näitab, kui palju suunast
+	\(\omega'\) peegelduvat valgust jõuab peegeldub punktis \(X\) suunas
+	\(-\omega\) \\
+\(\vec n\) & Pinna normaal punktis \(X\) \\
+ & \\
+\end{tabular}
 
-\begin{equation} \label{eq:bary-1-2D}
-  \left\{
-  \begin{array}{l}
-    x-x_3 = \lambda_1(x_1-x_3)+\lambda_2(x_2-y_3) \\
-    y-y_3 = \lambda_1(y_1-x_3)+\lambda_2(y_2-y_3) \\
-  \end{array}
-  \right.
-\end{equation}
 
-\begin{center}
-\begin{minipage}{0.3\textwidth}
-  \[
-    D =
-    \begin{vmatrix}
-      x_1 - x_3 & x_2 - x_3 \\
-      y_1 - y_3 & y_2 - y_3 \\
-    \end{vmatrix}
-  \]
-\end{minipage}
-\begin{minipage}{0.3\textwidth}
-  \[
-    D_{\lambda_1} =
-    \begin{vmatrix}
-      x - x_3 & x_2 - x_3 \\
-      y - y_3 & y_2 - y_3 \\
-    \end{vmatrix}
-  \]
-\end{minipage}
-\begin{minipage}{0.3\textwidth}
-  \[
-    D_{\lambda_2} = 
-    \begin{vmatrix}
-      x_1 - x_3 & x - x_3 \\
-      y_1 - y_3 & y - y_3 \\
-    \end{vmatrix}
-  \]
-\end{minipage}
-\end{center}
-  
-\begin{equation} \label{eq:bary-3}  
-  \left\{
-  \begin{array}{l}
-    \lambda_1 = \frac{D_{\lambda_1}}{D} \\
-    \lambda_2 = \frac{D_{\lambda_2}}{D} \\
-    \lambda_3 = 1-\lambda_1-\lambda_2
-  \end{array}
-  \right.
-\end{equation}
-
-Selle asemel, et kolmnurk pöörata vajalikku asendisse, mis on kulukas, sest
-vajab kolme 4x4 maatriksi korrutamist 1x4 maatriksiga, pakub Wald kolmnurga
-projitseerimist ühele kolmest koordinaattasandist. Suurema täpsuse saavutamiseks
-tuleks tema sõnul valida tasand, kus projektsiooni pindala on suurim. \cite[lk.~91]{wald::PhD}
 
 \chapter*{Kokkuvõte}
 \addcontentsline{toc}{chapter}{Kokkuvõte}

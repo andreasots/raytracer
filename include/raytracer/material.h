@@ -20,6 +20,11 @@ namespace Raytracer
         {
         }
 
+        Material(RT_FLOAT diff, RT_FLOAT spec, RT_FLOAT specP, Color<> c, bool e):
+            diffuse(diff), specular(spec), spec_pow(specP), color(c), emit(e), spec_weight((specP+2)*M_1_PI*0.5)
+        {
+        }
+
         Color<> diffuseCalc(const Color<> &lambda) const
         {
             Color<> ret = lambda;

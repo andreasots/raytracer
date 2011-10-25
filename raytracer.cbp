@@ -23,7 +23,6 @@
 				<Compiler>
 					<Add option="-fomit-frame-pointer" />
 					<Add option="-O3" />
-					<Add option="-march=native" />
 					<Add option="-funroll-loops" />
 					<Add option="-DNDEBUG" />
 				</Compiler>
@@ -46,11 +45,10 @@
 			<Add option="-Wswitch-default" />
 			<Add option="-Weffc++" />
 			<Add option="-Wmain" />
-			<Add option="-std=c++0x" />
 			<Add option="-Wfatal-errors" />
 			<Add option="-Wextra" />
 			<Add option="-Wall" />
-			<Add option="-fopenmp" />
+			<Add option="-fopenmp -std=gnu++0x -march=native" />
 			<Add option="-DRT_FLOAT=float" />
 			<Add option="-DRT_INT=int32_t" />
 			<Add option="-DRT_UINT=uint32_t" />

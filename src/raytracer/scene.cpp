@@ -65,6 +65,7 @@ void Scene::open(std::string file)
         //Y = 0.2126 R + 0.7152 G + 0.0722 B
         m->Get(AI_MATKEY_COLOR_SPECULAR, c);
         mat.specular = 0.2126*c.r + 0.7152*c.g + 0.0722*c.b;
+        mat.diffuse = 1-mat.specular;
 
         std::cout << "Material '" << name.data << "': ";
         if(std::string(name.data).substr(0, 5) == "LIGHT")
@@ -103,9 +104,10 @@ void Scene::add(Object *o)
 RT_FLOAT Scene::intersect(const SIMD::Ray &r, size_t &id, RT_FLOAT &u, RT_FLOAT &v, RT_FLOAT max)
 {
     RT_FLOAT ret = max;
-
-/*    if(m_octree)
-        m_octree->intersect(r, ret, id, u, v, m_objects, m_hits, m_intersections);*/
+/*
+    if(m_octree)
+        m_octree->intersect(r, ret, id, u, v, m_objects, m_hits, m_intersections);
+//*/
     for(size_t i = 0; i < m_objects.size(); i++)
     {
         RT_FLOAT U, V;
@@ -120,6 +122,7 @@ RT_FLOAT Scene::intersect(const SIMD::Ray &r, size_t &id, RT_FLOAT &u, RT_FLOAT 
         }
         m_intersections++;
     }
+//*/
 
     return ret;
 }
@@ -132,29 +135,24 @@ Color<> Scene::radiance(const SIMD::Ray &r, size_t depth)
     size_t id;
     RT_FLOAT u, v;
     RT_FLOAT t = this->intersect(r, id, u, v);
+
     if(t < HUGE_VAL)
     {
         SIMD::Point p = r.origin+t*r.direction;
-        std::clog << p[0] << "; "<< p[1] << "; "<< p[2] << ";" << std::endl;
         Object *o = m_objects[id];
         Material mat = o->material(u, v);
         SIMD::Vec n = o->normal(u, v);
-
-        return Color<>((n[0]+1)/2, (n[1]+1)/2, (n[2]+1)/2);
-
         if(mat.emit)
             c.add(mat.color);
-
-        if(n.dot(r.direction) < 0)
-        {
-            RT_FLOAT u = drand48();
-            if(mat.diffuse > u)
-                c.add(mat.diffuseCalc(radiance(SIMD::Ray(p, mat.diffuseSample(n)), depth+1)));
-            else if(mat.diffuse+mat.specular > u)
-                c.add(mat.specularCalc(radiance(SIMD::Ray(p, mat.specularSample(n, r.direction)), depth+1)));
-        }
+        if(n.dot(r.direction) > 0)
+            n = -n;
+        RT_FLOAT u = drand48();
+        if(mat.diffuse > u)
+            c.add(mat.diffuseCalc(radiance(SIMD::Ray(p, mat.diffuseSample(n)), depth+1)));
+        else if(mat.diffuse+mat.specular > u)
+            c.add(mat.specularCalc(radiance(SIMD::Ray(p, mat.specularSample(n, r.direction)), depth+1)));
+        return c;
     }
-
     return c;
 }
 
