@@ -31,7 +31,6 @@ class Tri : public Object
         int ci;
     protected:
         SIMD::Vec m_normals[3];
-        bool m_hasNormals;
         SIMD::AABox *m_bbox;
     private:
 };

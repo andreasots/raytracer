@@ -45,14 +45,17 @@ class Point
         {
             if(i & ~3U)
                 throw std::out_of_range("Point::operator[]");
-            float val[4];
-            _mm_storer_ps(val, mData);
-            return val[i];
+            return reinterpret_cast<const float*>(&mData)[3-i];
         }
 
         __m128 data() const throw()
         {
             return mData;
+        }
+
+        void normalize()
+        {
+            mData = _mm_div_ps(mData, _mm_set1_ps((*this)[3]));
         }
 };
 inline std::ostream &operator<<(std::ostream &out, const Point &v)

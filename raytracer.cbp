@@ -12,8 +12,12 @@
 				<Option type="1" />
 				<Option compiler="gcc" />
 				<Compiler>
+					<Add option="-pg" />
 					<Add option="-g" />
 				</Compiler>
+				<Linker>
+					<Add option="-pg" />
+				</Linker>
 			</Target>
 			<Target title="Release">
 				<Option output="bin/Release/raytracer" prefix_auto="1" extension_auto="1" />
@@ -75,6 +79,7 @@
 		<Unit filename="include/SIMD/Ray.h" />
 		<Unit filename="include/SIMD/Vec.h" />
 		<Unit filename="include/raytracer/color.h" />
+		<Unit filename="include/raytracer/cylinder.h" />
 		<Unit filename="include/raytracer/material.h" />
 		<Unit filename="include/raytracer/object.h" />
 		<Unit filename="include/raytracer/octree.h" />
@@ -83,6 +88,7 @@
 		<Unit filename="include/raytracer/tri.h" />
 		<Unit filename="include/version.h" />
 		<Unit filename="src/main.cpp" />
+		<Unit filename="src/raytracer/cylinder.cpp" />
 		<Unit filename="src/raytracer/octree.cpp" />
 		<Unit filename="src/raytracer/scene.cpp" />
 		<Unit filename="src/raytracer/sphere.cpp" />

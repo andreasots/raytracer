@@ -12,23 +12,20 @@ namespace Raytracer
         RT_FLOAT diffuse, specular, spec_pow;
         Color<> color;
         bool emit;
-    private:
-        RT_FLOAT spec_weight;
 
     public:
-        Material(): diffuse(0.5), specular(0.5), spec_pow(20), color(), emit(false), spec_weight((spec_pow+2)*M_1_PI*0.5)
+        Material(): diffuse(0.5), specular(0.5), spec_pow(20), color(), emit(false)
         {
         }
 
         Material(RT_FLOAT diff, RT_FLOAT spec, RT_FLOAT specP, Color<> c, bool e):
-            diffuse(diff), specular(spec), spec_pow(specP), color(c), emit(e), spec_weight((specP+2)*M_1_PI*0.5)
+            diffuse(diff), specular(spec), spec_pow(specP), color(c), emit(e)
         {
         }
 
         Color<> diffuseCalc(const Color<> &lambda) const
         {
             Color<> ret = lambda;
-            ret.mult(M_1_PI);
             ret.mult(color);
             return ret;
         }
@@ -36,7 +33,6 @@ namespace Raytracer
         Color<> specularCalc(const Color<> &lambda) const
         {
             Color<> ret = lambda;
-            ret.mult(spec_weight);
             return ret;
         }
 

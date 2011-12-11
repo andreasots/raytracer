@@ -8,10 +8,6 @@
 
 #include "raytracer/color.h"
 #include "raytracer/scene.h"
-#include "raytracer/sphere.h"
-
-#include <assimp/aiDefines.h>
-#include <assimp/aiVersion.h>
 
 #include <cmath>
 
@@ -33,16 +29,12 @@ int main(int argc, char *argv[])
     std::cout << std::endl;
 
     std::cout << "Libraries: " << std::endl;
-    std::cout << "\tAssimp: " << aiGetVersionMajor()<<'.'<<aiGetVersionMinor();
-    std::cout << '.' << aiGetVersionRevision() << std::endl;
     std::cout << "\tPixelToaster: " << PIXELTOASTER_VERSION << std::endl;
     std::cout << "\tOpenEXR" << std::endl;
     std::cout << std::endl;
 
-    w = 1024;
-    h = 768;
-
-    std::cout << SIMD::Vec(1, 0, 0).cross(SIMD::Vec(0, 1, 0)) << std::endl;
+    w = 1280;
+    h = 1024;
 
     PixelToaster::Display screen("Raytracer", w, h);
     std::vector<PixelToaster::Pixel> fb(w*h); // Front buffer
@@ -57,37 +49,27 @@ int main(int argc, char *argv[])
     SIMD::Point scr_y(x, -y, z);
     SIMD::Point pos(0,0,0);
 
-	try
-	{
-        std::ifstream cam("camera.xform");
-        cam.exceptions(std::ios::eofbit | std::ios::failbit | std::ios::badbit);
 
-        RT_FLOAT data[16];
-        for(size_t i = 0; i < 16; i++)
-            cam >> data[i];
-        SIMD::Matrix mat(data);
-        pos = mat * pos;
-        scr_pos = mat * scr_pos;
-        scr_x = mat * scr_x;
-        scr_y = mat * scr_y;
-	}
-	catch(...)
-	{
-	}
+    Raytracer::Scene scene;
+    SIMD::Matrix mat = scene.open(argv[1]);;
+    pos = mat * pos;
+    pos.normalize();
+    scr_pos = mat * scr_pos;
+    scr_pos.normalize();
+    scr_x = mat * scr_x;
+    scr_x.normalize();
+    scr_y = mat * scr_y;
+    scr_y.normalize();
 
 	SIMD::Vec delta_x = (scr_x-scr_pos)/static_cast<RT_FLOAT>(w);
 	SIMD::Vec delta_y = (scr_y-scr_pos)/static_cast<RT_FLOAT>(h);
-
-    Raytracer::Scene scene;
-    scene.open(argv[1]);
 
     PixelToaster::Timer timer, updated;
     bool render = true;
     size_t sample = 1;
     while(render)
     {
-        std::cout << "\r\033[K[" << timer.time() <<  "] Sample " << sample << std::endl;
-        for(size_t y = 0; y < h && render; y++)
+        for(size_t y = 0; y < h; y++)
         {
             #pragma omp parallel for schedule(dynamic, 1)
             for(size_t x = 0; x < w; x++)
@@ -106,16 +88,16 @@ int main(int argc, char *argv[])
                 bb[y*w+x] = pixel;
                 pixel.gamma();
                 fb[y*w+x] = pixel.PT();
-                #pragma omp critical
-                if(updated.time() > 1)
-                {
-                    screen.update(fb);
-                    updated.reset();
-                }
-                if(!screen.open())
-                    render = false;
+            }
+            std::cout << "\r\033[K[" << timer.time() <<  "] Sample " << sample << ": " << 100.0*y/h << " %" << std::flush;
+            if(updated.time() > 1)
+            {
+                screen.update(fb);
+                updated.reset();
             }
         }
+        if(!screen.open())
+            break;
         sample++;
     }
 
@@ -128,6 +110,7 @@ int main(int argc, char *argv[])
     file.writePixels(h);
     delete[] pixels;
 
+    std::cout << std::endl;
     scene.stats();
     std::cout << "Number of samples per pixel: " << sample-1 << std::endl;
     std::cout << "Time: " << timer.time() << std::endl;

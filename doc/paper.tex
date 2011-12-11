@@ -7,6 +7,8 @@
 \usepackage{sectsty}
 \usepackage[compact]{titlesec}
 \usepackage{wrapfig}
+\usepackage{esvect}
+\renewcommand{\vec}[1]{\vv{#1}}
 \chapterfont{\fontsize{16pt}{19pt}\sffamily}
 \linespread{1.3}
 \renewcommand{\thechapter}{\arabic{chapter}.}
@@ -69,53 +71,6 @@ Esimene lehekülg
 Teine lehekülg
 
 \chapter{Kiirtejälitus}
-\section{Visualiseerimisvõrrand}
-Aastal 1986 pakkus James Kajiya välja võrrandi erinevate
-visualiseerimisalgoritmide ül\-dis\-ta\-mi\-seks
-(võrrand~\ref{eq:rendering-kajiya86}). \cite{kajiya86}
-
-\begin{equation} \label{eq:rendering-kajiya86}
-I(X, X') = g(X, X')\left[\epsilon(X, X')+\int_S\rho(X, X', X'')
-I(X', X'')dX''\right]
-\end{equation}
-
-\begin{tabular}{l p{0.75\textwidth}}
-\(I(X, X')\) & Valguse heledus, mis jõuab punktist \(X'\) punkti \(X\)\\
-\(g(X, X')\) & Geomeetriline tegur. Näitab, kui palju punktist \(X'\)
-	väljuvat valgust jõuab punkti \(X\) \\
-\(\epsilon(X, X')\) & Valguse heledus, mis kiirgub punktist \(X'\)
-	punkti \(X\) \\
-\(\rho(X, X', X'')\) & Peegeldustegur. Näitab, kui palju punktist
-	\(X''\) väljuvat valgust jõuab läbi punkti \(X'\) punkti \(X\) \\
-\(S\) & Esemete hulk, millest koosneb visualiseeritav stseen \\
- & \\
-\end{tabular}
-
-
-Probleem selle valemiga on see, et seob lineaarselt pinna heleduse
-esemete arvuga. Üks võimalus on võrrand \ref{eq:rendering-kajiya86}
-kirjutada vektorkujul (võrrand \ref{eq:rendering-vec}).
-
-\begin{equation} \label{eq:rendering-vec}
-I(X, \omega) = \epsilon(X, \omega) + \int_\Omega\rho(X, \omega', \omega)
-I(X, \omega')d\omega'
-\end{equation}
-\[\Omega = \{\omega ~|~ \omega\cdot \vec n \leq 0,~ \omega^2 = 1\}\]
-\[\omega \cdot \vec n \leq 0\] 
-
-\begin{tabular}{l p{0.75\textwidth}}
-\(I(X, \omega)\) & Valguse heledus, mis väljub punktis \(X\) suunast
-	\(-\omega\) \\
-\(\epsilon(X, \omega)\) & Valguse heledus, mis kiirgub punktist \(X\) suunas
-	\(-\omega\)\\
-\(\rho(X, \omega', \omega)\) & Peegeldustegur. Näitab, kui palju suunast
-	\(\omega'\) peegelduvat valgust jõuab peegeldub punktis \(X\) suunas
-	\(-\omega\) \\
-\(\vec n\) & Pinna normaal punktis \(X\) \\
- & \\
-\end{tabular}
-
-
 
 \chapter*{Kokkuvõte}
 \addcontentsline{toc}{chapter}{Kokkuvõte}

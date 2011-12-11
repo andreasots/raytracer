@@ -22,7 +22,10 @@ class Object
 
         }
         virtual const Material &material(RT_FLOAT u, RT_FLOAT v) = 0;
-        virtual const Material &material() = 0;
+        virtual const Material &material()
+        {
+            return m_mat;
+        }
         virtual SIMD::Vec normal(RT_FLOAT u, RT_FLOAT v) = 0;
         virtual RT_FLOAT intersect(const SIMD::Ray &r, RT_FLOAT &u, RT_FLOAT &v) = 0;
         virtual SIMD::AABox bounds() = 0;

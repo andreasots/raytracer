@@ -79,9 +79,7 @@ class Vec
 		{
 			if(i & ~3U)
 				throw std::out_of_range("Vec::operator[]");
-			float val[4];
-            _mm_storer_ps(val, mData);
-            return val[i];
+			return reinterpret_cast<const float*>(&mData)[3-i];
 		}
 
 		inline float dot(const Vec &v) const throw()
@@ -114,7 +112,7 @@ class Vec
 
 		inline void normalize() throw()
 		{
-			mData = _mm_mul_ps(mData, _mm_rsqrt_ps(_mm_dp_ps(mData, mData, 0xFF)));
+			mData = _mm_div_ps(mData, _mm_sqrt_ps(_mm_dp_ps(mData, mData, 0xFF)));
 		}
 
 		inline __m128 data() const throw()

@@ -13,11 +13,15 @@ inline bool equal(const RT_FLOAT &a, const RT_FLOAT &b)
 namespace Raytracer {
 
 Tri::Tri(const SIMD::Point& p1, const SIMD::Point& p2,
-         const SIMD::Point& p3, Material mat): Object(mat), m_hasNormals(false)
+         const SIMD::Point& p3, Material mat): Object(mat)
 {
     SIMD::Vec e0 = p2-p1, e1 = p3-p1, n = e0.cross(e1);
     RT_FLOAT nw = -1;
     int w;
+
+    m_normals[0] = n;
+    m_normals[0].normalize();
+
     for(size_t i = 0; i < 3U; i++)
         if(std::abs(n[i]) > nw)
         {
@@ -63,20 +67,14 @@ const Material &Tri::material(RT_FLOAT u, RT_FLOAT v)
 SIMD::Vec Tri::normal(RT_FLOAT u, RT_FLOAT v)
 {
     SIMD::Vec ret;
-    if(!m_hasNormals)
-    {
-        float v[3];
-        v[(ci&3)] = 1;
-        v[(ci&3) == 0? 1: 0] = nu;
-        v[(ci&3) == 2? 1: 2] = nv;
-        ret = SIMD::Vec(v[0], v[1], v[2]);
-    }
-    else
+    if(ci & 16)
     {
         RT_FLOAT w = 1 - u - v;
         ret = m_normals[0]*w+m_normals[1]*u+m_normals[2]*v;
+        ret.normalize();
     }
-    ret.normalize();
+    else
+        ret = m_normals[0];
     return ret;
 }
 
@@ -133,7 +131,7 @@ SIMD::AABox Tri::bounds()
 
 void Tri::normals(const SIMD::Vec &n1, const SIMD::Vec &n2, const SIMD::Vec &n3)
 {
-    m_hasNormals = true;
+    ci |= 16;
     m_normals[0] = n1;
     m_normals[1] = n2;
     m_normals[2] = n3;

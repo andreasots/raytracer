@@ -18,7 +18,7 @@ namespace SIMD
 
         Ray(Point o, Vec d): direction(d), invd(), origin(o), sign()
         {
-            invd = _mm_rcp_ps(d.data());
+            invd = _mm_div_ps(_mm_set1_ps(1), d.data());
             sign[0] = (invd[0] < 0);
             sign[1] = (invd[1] < 0);
             sign[2] = (invd[2] < 0);

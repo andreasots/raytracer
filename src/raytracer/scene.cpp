@@ -2,35 +2,45 @@
 
 #include "raytracer/sphere.h"
 #include "raytracer/tri.h"
+#include "raytracer/cylinder.h"
 
 #include <SIMD/Vec.h>
 #include <SIMD/Point.h>
 #include <SIMD/AABox.h>
-
-#include <assimp/aiConfig.h>
-#include <assimp/aiMesh.h>
-#include <assimp/aiPostProcess.h>
-#include <assimp/aiScene.h>
-#include <assimp/assimp.hpp>
+#include <SIMD/Matrix.h>
 
 #include <cassert>
 #include <cmath>
 #include <iostream>
 #include <fstream>
-#include <tuple>
 #include <stdexcept>
+#include <map>
 
 #define MAXDEPTH 128
 
+template<class T> static std::string intToString(T i)
+{
+    if(i < 0)
+        return "-"+intToString(-i);
+    if(i < 10)
+    {
+        char buf[2];
+        buf[0] = '0'+i;
+        buf[1] = 0;
+        return std::string(buf);
+    }
+    else
+        return intToString(i/10)+intToString(i%10);
+}
+
 namespace Raytracer {
 
-Scene::Scene(): m_objects(), m_intersections(0), m_hits(0), m_octree(NULL)
+Scene::Scene(): m_objects(), m_intersections(0), m_hits(0)
 {
 }
 
 Scene::~Scene()
 {
-    delete m_octree;
     while(!m_objects.empty())
     {
         delete m_objects.back();
@@ -38,62 +48,153 @@ Scene::~Scene()
     }
 }
 
-void Scene::open(std::string file)
+SIMD::Matrix Scene::open(std::string file)
 {
-    Assimp::Importer importer;
-    int pp = aiProcess_Triangulate | aiProcess_FindInvalidData;
-    pp |= aiProcess_FindDegenerates | aiProcess_SortByPType;
-    pp |= aiProcess_GenSmoothNormals | aiProcess_PreTransformVertices;
-    pp |= aiProcess_OptimizeGraph | aiProcess_OptimizeMeshes;
-    importer.SetPropertyInteger(AI_CONFIG_PP_SBP_REMOVE,
-                                aiPrimitiveType_POINT | aiPrimitiveType_LINE);
-    importer.SetPropertyInteger(AI_CONFIG_PP_RVC_FLAGS,
-                               aiComponent_BONEWEIGHTS|aiComponent_ANIMATIONS);
-    importer.SetPropertyFloat(AI_CONFIG_PP_GSN_MAX_SMOOTHING_ANGLE, 30);
-    const aiScene *scene = importer.ReadFile(file, pp);
-
-    for(size_t i = 0; i < scene->mNumMeshes; i++)
+    std::ifstream in(file.c_str());
+    in.exceptions(std::ios::failbit | std::ios::badbit | std::ios::eofbit);
+    std::map<std::string, Material> materials;
+    SIMD::Matrix camera = SIMD::Matrix::identity();
+    unsigned long statement = 0;
+    try
     {
-        Material mat;
-        aiMaterial *m = scene->mMaterials[scene->mMeshes[i]->mMaterialIndex];
-        aiString name;
-        m->Get(AI_MATKEY_NAME, name);
-        aiColor3D c;
-        m->Get(AI_MATKEY_COLOR_DIFFUSE, c);
-        mat.color = Color<>(c.r, c.g, c.b);
-        m->Get(AI_MATKEY_SHININESS, mat.spec_pow);
-        //Y = 0.2126 R + 0.7152 G + 0.0722 B
-        m->Get(AI_MATKEY_COLOR_SPECULAR, c);
-        mat.specular = 0.2126*c.r + 0.7152*c.g + 0.0722*c.b;
-        mat.diffuse = 1-mat.specular;
-
-        std::cout << "Material '" << name.data << "': ";
-        if(std::string(name.data).substr(0, 5) == "LIGHT")
+        while(true)
         {
-            mat.emit = true;
-            std::cout << "emissive" << std::endl;
-        }
-        else
-            std::cout << "regular" << std::endl;
+            std::string token;
+            in >> token;
+            statement++;
+            if(token == "material")
+            {
+                token = "";
+                char c;
+                in.ignore(1024, '"');
+                in.get(c);
+                while(c != '"')
+                {
+                    token += c;
+                    in.get(c);
+                }
+                RT_FLOAT diff, spec, spec_pow, r, g, b;
+                bool emit;
+                in >> diff >> spec >> spec_pow >> emit >> r >> g >> b;
+                materials[token] = Material(diff, spec, spec_pow, Color<>(r, g, b), emit);
+            }
+            else if(token == "camera")
+            {
+                in >> token;
+                if(token == "matrix")
+                {
+                    RT_FLOAT mat[16];
+                    for(int i = 0; i < 16; i++)
+                        in >> mat[i];
+                    camera = SIMD::Matrix(mat);
+                }
+                else if(token == "lookat")
+                {
+                    // http://www.opengl.org/sdk/docs/man/xhtml/gluLookAt.xml
+                    RT_FLOAT x, y, z;
+                    in >> x >> y >> z;
+                    SIMD::Point eye(x, y, z);
+                    in >> x >> y >> z;
+                    SIMD::Point center(x, y, z);
+                    in >> x >> y >> z;
+                    SIMD::Vec up(x, y, z);
 
-        for(size_t j = 0; j < scene->mMeshes[i]->mNumFaces; j++)
-        {
-            assert(scene->mMeshes[i]->mFaces[j].mNumIndices == 3);
-            aiVector3D v(scene->mMeshes[i]->mVertices[scene->mMeshes[i]->mFaces[j].mIndices[0]]);
-            SIMD::Point A(v.x, v.y, v.z);
-            v = scene->mMeshes[i]->mVertices[scene->mMeshes[i]->mFaces[j].mIndices[1]];
-            SIMD::Point B(v.x, v.y, v.z);
-            v = scene->mMeshes[i]->mVertices[scene->mMeshes[i]->mFaces[j].mIndices[2]];
-            SIMD::Point C(v.x, v.y, v.z);
-            Tri *tri = new Tri(A, B, C, mat);
-            v = scene->mMeshes[i]->mNormals[scene->mMeshes[i]->mFaces[j].mIndices[0]];
-            aiVector3D u(scene->mMeshes[i]->mNormals[scene->mMeshes[i]->mFaces[j].mIndices[1]]);
-            aiVector3D w(scene->mMeshes[i]->mNormals[scene->mMeshes[i]->mFaces[j].mIndices[2]]);
-            tri->normals(SIMD::Vec(v.x, v.y, v.z), SIMD::Vec(u.x, u.y, u.z), SIMD::Vec(w.x, w.y, w.z));
-            add(tri);
+                    SIMD::Vec f = center-eye;
+                    f.normalize();
+                    up.normalize();
+                    SIMD::Vec s = f.cross(up);
+                    SIMD::Vec u = s.cross(f);
+                    f = -f;
+                    camera = SIMD::Matrix(s.data(), u.data(), f.data(), eye.data());
+                }
+                else
+                    throw std::runtime_error("Unrecognised token '"+token+"' after 'camera' in statement "+intToString(statement));
+            }
+            else if(token == "triangle")
+            {
+                token = "";
+                char c;
+                in.ignore(1024, '"');
+                in.get(c);
+                while(c != '"')
+                {
+                    token += c;
+                    in.get(c);
+                }
+
+                RT_FLOAT x, y, z;
+                in >> x >> y >> z;
+                SIMD::Point A(x, y, z);
+                in >> x >> y >> z;
+                SIMD::Point B(x, y, z);
+                in >> x >> y >> z;
+                SIMD::Point C(x, y, z);
+                Tri *t = new Tri(A, B, C, materials[token]);
+                in >> token;
+                if(token == "normals")
+                {
+                    in >> x >> y >> z;
+                    SIMD::Vec n0(x, y, z);
+                    in >> x >> y >> z;
+                    SIMD::Vec n1(x, y, z);
+                    in >> x >> y >> z;
+                    SIMD::Vec n2(x, y, z);
+                    t->normals(n0, n1, n2);
+                }
+                else if(token != "flat")
+                {
+                    throw std::runtime_error("Unrecognised token '"+token+"' after 'triangle' in statement "+intToString(statement));
+                }
+                add(t);
+            }
+            else if(token == "sphere")
+            {
+                token = "";
+                char c;
+                in.ignore(1024, '"');
+                in.get(c);
+                while(c != '"')
+                {
+                    token += c;
+                    in.get(c);
+                }
+
+                RT_FLOAT x, y, z;
+                in >> x >> y >> z;
+                SIMD::Point O(x, y, z);
+                in >> x;
+                add(new Sphere(O, x, materials[token]));
+            }
+            else if(token == "cylinder")
+            {
+                token = "";
+                char c;
+                in.ignore(1024, '"');
+                in.get(c);
+                while(c != '"')
+                {
+                    token += c;
+                    in.get(c);
+                }
+
+                RT_FLOAT x, y, z;
+                in >> x >> y >> z;
+                SIMD::Point A(x, y, z);
+                in >> x >> y >> z;
+                SIMD::Point B(x, y, z);
+                in >> x;
+                add(new Cylinder(A, B, x, materials[token]));
+            }
+            else
+                throw std::runtime_error("Unrecognised token '"+token+"' in statement "+intToString(statement));
         }
     }
-//    this->regenerate();
+    catch(std::exception &e)
+    {
+        std::cerr << file << ": reading stopped: " << e.what() << std::endl;
+    }
+
+    return camera;
 }
 
 void Scene::add(Object *o)
@@ -104,14 +205,11 @@ void Scene::add(Object *o)
 RT_FLOAT Scene::intersect(const SIMD::Ray &r, size_t &id, RT_FLOAT &u, RT_FLOAT &v, RT_FLOAT max)
 {
     RT_FLOAT ret = max;
-/*
-    if(m_octree)
-        m_octree->intersect(r, ret, id, u, v, m_objects, m_hits, m_intersections);
-//*/
+
     for(size_t i = 0; i < m_objects.size(); i++)
     {
         RT_FLOAT U, V;
-        RT_FLOAT T = m_objects[i]->intersect(r, u, v);
+        RT_FLOAT T = m_objects[i]->intersect(r, U, V);
         if(T < ret)
         {
             ret = T;
@@ -122,7 +220,6 @@ RT_FLOAT Scene::intersect(const SIMD::Ray &r, size_t &id, RT_FLOAT &u, RT_FLOAT 
         }
         m_intersections++;
     }
-//*/
 
     return ret;
 }
@@ -142,17 +239,22 @@ Color<> Scene::radiance(const SIMD::Ray &r, size_t depth)
         Object *o = m_objects[id];
         Material mat = o->material(u, v);
         SIMD::Vec n = o->normal(u, v);
+
         if(mat.emit)
             c.add(mat.color);
-        if(n.dot(r.direction) > 0)
-            n = -n;
-        RT_FLOAT u = drand48();
-        if(mat.diffuse > u)
+
+        if(r.direction.dot(n) > 0)
+            return c;
+
+        RT_FLOAT U = drand48();
+        if(mat.diffuse > U)
             c.add(mat.diffuseCalc(radiance(SIMD::Ray(p, mat.diffuseSample(n)), depth+1)));
-        else if(mat.diffuse+mat.specular > u)
+        else if(mat.diffuse+mat.specular > U)
             c.add(mat.specularCalc(radiance(SIMD::Ray(p, mat.specularSample(n, r.direction)), depth+1)));
-        return c;
     }
+    else
+        c = Color<>(0.25, 0.25, 0.4);
+
     return c;
 }
 
@@ -164,28 +266,4 @@ void Scene::stats()
     std::cout << "Number of successful intersection tests: " << m_hits << std::endl;
 }
 
-void Scene::regenerate()
-{
-    if(m_octree)
-        delete m_octree;
-    if(!(m_objects.size()))
-        return;
-
-    SIMD::AABox box = m_objects[0]->bounds();
-
-    for(size_t i = 1; i < m_objects.size(); i++)
-        box.extend(m_objects[i]->bounds());
-
-    std::cout << std::endl;
-    std::cout << "Creating Octree: min: " << box.min() << std::endl;
-    std::cout << "                 max: " << box.max() << std::endl;
-    std::cout << std::endl;
-
-    m_octree = new Octree(box.min(), box.max(), NULL);
-
-    for(size_t i = 0; i < m_objects.size(); i++)
-        m_octree->add(m_objects[i], i);
-
-    m_octree->prune(m_objects);
-}
 } // namespace Raytracer

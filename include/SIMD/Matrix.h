@@ -65,19 +65,39 @@ namespace SIMD
 
         Vec operator*(const Vec &v) const throw()
         {
-            return Vec(v.dot(mData[0]), v.dot(mData[1]), v.dot(mData[2]), v.dot(mData[3]));
+            Vec r[4] = {mData[0], mData[1], mData[2], mData[3]};
+            Matrix m(_mm_set_ps(r[0][0], r[1][0], r[2][0], r[3][0]),
+                     _mm_set_ps(r[0][1], r[1][1], r[2][1], r[3][1]),
+                     _mm_set_ps(r[0][2], r[1][2], r[2][2], r[3][2]),
+                     _mm_set_ps(r[0][3], r[1][3], r[2][3], r[3][3]));
+            return Vec(v.dot(m.mData[0]), v.dot(m.mData[1]), v.dot(m.mData[2]), v.dot(m.mData[3]));
         }
 
         Point operator*(const Point &p) const throw()
         {
             Vec v(p.data());
-            return Point(v.dot(mData[0]), v.dot(mData[1]), v.dot(mData[2]), v.dot(mData[3]));
+            return Point(((*this)*v).data());
         }
 
         void transpose() throw()
         {
             _MM_TRANSPOSE4_PS(mData[0], mData[1], mData[2], mData[3]);
         }
+
+        static Matrix identity()
+        {
+            return Matrix(_mm_set_ps(1, 0, 0, 0), _mm_set_ps(0, 1, 0, 0), _mm_set_ps(0, 0, 1, 0), _mm_set_ps(0, 0, 0, 1));
+        }
+        friend inline std::ostream &operator<<(std::ostream &out, const Matrix &v);
     };
+
+    inline std::ostream &operator<<(std::ostream &out, const Matrix &v)
+    {
+        out << "Matrix(" << Vec(v.mData[0]) << std::endl;
+        out << "       " << Vec(v.mData[1]) << std::endl;
+        out << "       " << Vec(v.mData[2]) << std::endl;
+        out << "       " << Vec(v.mData[3]) << ")"<< std::endl;
+        return out;
+    }
 }
 #endif
