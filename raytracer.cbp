@@ -82,14 +82,12 @@
 		<Unit filename="include/raytracer/cylinder.h" />
 		<Unit filename="include/raytracer/material.h" />
 		<Unit filename="include/raytracer/object.h" />
-		<Unit filename="include/raytracer/octree.h" />
 		<Unit filename="include/raytracer/scene.h" />
 		<Unit filename="include/raytracer/sphere.h" />
 		<Unit filename="include/raytracer/tri.h" />
 		<Unit filename="include/version.h" />
 		<Unit filename="src/main.cpp" />
 		<Unit filename="src/raytracer/cylinder.cpp" />
-		<Unit filename="src/raytracer/octree.cpp" />
 		<Unit filename="src/raytracer/scene.cpp" />
 		<Unit filename="src/raytracer/sphere.cpp" />
 		<Unit filename="src/raytracer/tri.cpp" />
