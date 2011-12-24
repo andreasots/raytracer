@@ -22,12 +22,13 @@ class Scene
         SIMD::Matrix open(std::string file);
         void add(Object *o);
         RT_FLOAT intersect(const SIMD::Ray &r, size_t &id, RT_FLOAT &u, RT_FLOAT &v, RT_FLOAT max = HUGE_VAL);
-        Color<> radiance(const SIMD::Ray &r, size_t depth);
+        Color radiance(const SIMD::Ray &r, size_t depth);
         void stats();
     protected:
     private:
         std::vector<Object *> m_objects;
         unsigned long long m_intersections, m_hits;
+        Color m_sky;
 };
 
 } // namespace Raytracer

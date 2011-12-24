@@ -4,6 +4,9 @@
 #include "raytracer/tri.h"
 #include "raytracer/cylinder.h"
 
+#include "raytracer/material/lambertphong.h"
+#include "raytracer/material/null.h"
+
 #include <SIMD/Vec.h>
 #include <SIMD/Point.h>
 #include <SIMD/AABox.h>
@@ -35,7 +38,7 @@ template<class T> static std::string intToString(T i)
 
 namespace Raytracer {
 
-Scene::Scene(): m_objects(), m_intersections(0), m_hits(0)
+Scene::Scene(): m_objects(), m_intersections(0), m_hits(0), m_sky(0, 0, 0)
 {
 }
 
@@ -52,7 +55,7 @@ SIMD::Matrix Scene::open(std::string file)
 {
     std::ifstream in(file.c_str());
     in.exceptions(std::ios::failbit | std::ios::badbit | std::ios::eofbit);
-    std::map<std::string, Material> materials;
+    std::map<std::string, Material*> materials;
     SIMD::Matrix camera = SIMD::Matrix::identity();
     unsigned long statement = 0;
     try
@@ -76,7 +79,7 @@ SIMD::Matrix Scene::open(std::string file)
                 RT_FLOAT diff, spec, spec_pow, r, g, b;
                 bool emit;
                 in >> diff >> spec >> spec_pow >> emit >> r >> g >> b;
-                materials[token] = Material(diff, spec, spec_pow, Color<>(r, g, b), emit);
+                materials[token] = new material::LambertPhong(diff, spec, spec_pow, emit, Color(r, g, b));
             }
             else if(token == "camera")
             {
@@ -129,6 +132,8 @@ SIMD::Matrix Scene::open(std::string file)
                 SIMD::Point B(x, y, z);
                 in >> x >> y >> z;
                 SIMD::Point C(x, y, z);
+                if(!materials.count(token))
+                    materials[token] = new material::Null(Color());
                 Tri *t = new Tri(A, B, C, materials[token]);
                 in >> token;
                 if(token == "normals")
@@ -163,6 +168,8 @@ SIMD::Matrix Scene::open(std::string file)
                 in >> x >> y >> z;
                 SIMD::Point O(x, y, z);
                 in >> x;
+                if(!materials.count(token))
+                    materials[token] = new material::Null(Color());
                 add(new Sphere(O, x, materials[token]));
             }
             else if(token == "cylinder")
@@ -183,7 +190,15 @@ SIMD::Matrix Scene::open(std::string file)
                 in >> x >> y >> z;
                 SIMD::Point B(x, y, z);
                 in >> x;
+                if(!materials.count(token))
+                    materials[token] = new material::Null(Color());
                 add(new Cylinder(A, B, x, materials[token]));
+            }
+            else if(token == "sky")
+            {
+                RT_FLOAT r, g, b;
+                in >> r >> g >> b;
+                m_sky = Color(r, g, b);
             }
             else
                 throw std::runtime_error("Unrecognised token '"+token+"' in statement "+intToString(statement));
@@ -224,11 +239,11 @@ RT_FLOAT Scene::intersect(const SIMD::Ray &r, size_t &id, RT_FLOAT &u, RT_FLOAT 
     return ret;
 }
 
-Color<> Scene::radiance(const SIMD::Ray &r, size_t depth)
+Color Scene::radiance(const SIMD::Ray &r, size_t depth)
 {
-    Color<> c;
+    Color c;
     if(depth > MAXDEPTH)
-        return Color<>();
+        return Color();
     size_t id;
     RT_FLOAT u, v;
     RT_FLOAT t = this->intersect(r, id, u, v);
@@ -237,23 +252,13 @@ Color<> Scene::radiance(const SIMD::Ray &r, size_t depth)
     {
         SIMD::Point p = r.origin+t*r.direction;
         Object *o = m_objects[id];
-        Material mat = o->material(u, v);
+        const Material *mat = o->material();
         SIMD::Vec n = o->normal(u, v);
 
-        if(mat.emit)
-            c.add(mat.color);
-
-        if(r.direction.dot(n) > 0)
-            return c;
-
-        RT_FLOAT U = drand48();
-        if(mat.diffuse > U)
-            c.add(mat.diffuseCalc(radiance(SIMD::Ray(p, mat.diffuseSample(n)), depth+1)));
-        else if(mat.diffuse+mat.specular > U)
-            c.add(mat.specularCalc(radiance(SIMD::Ray(p, mat.specularSample(n, r.direction)), depth+1)));
+        c.add(mat->color(p, n, r.direction, *this, depth));
     }
     else
-        c = Color<>(0.25, 0.25, 0.4);
+        c = m_sky;
 
     return c;
 }

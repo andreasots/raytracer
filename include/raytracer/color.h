@@ -1,88 +1,65 @@
 #ifndef RAYTRACER_COLOR_H
 #define RAYTRACER_COLOR_H
-#include <cmath>
 #include <algorithm>
 #include <PixelToaster.h>
+#include <xmmintrin.h>
 
 namespace Raytracer
 {
-template<class T = RT_FLOAT>
 class Color
 {
+    __m128 m_data;
 public:
     /** Constructor
      * \param r Red component
      * \param g Green component
      * \param b Blue component
      */
-    Color(T _r, T _g, T _b): m_r(_r), m_g(_g), m_b(_b)
+    Color(float r, float g, float b): m_data(_mm_set_ps(r, g, b, 0))
     {
     }
 
-    Color(T val): m_r(val), m_g(val), m_b(val)
+    Color(float val): m_data(_mm_set_ps(val, val, val, 0))
     {
     }
 
-    Color(PixelToaster::Pixel p): m_r(p.r), m_g(p.g), m_b(p.b)
+    Color(PixelToaster::Pixel p): m_data(_mm_set_ps(p.r, p.g, p.b, p.a))
     {
     }
 
     /** Default constructor */
-    Color(): m_r(0), m_g(0), m_b(0)
+    Color(): m_data(_mm_setzero_ps())
     {
     }
 
     /** Get red componet
      * \return The red component
      */
-    T r()
+    float r() const
     {
-        return m_r;
-    }
-
-    /** Set red component
-     * \param val The red component
-     */
-    void r(T val)
-    {
-        m_r = val;
+        return _mm_cvtss_f32(_mm_shuffle_ps(m_data, m_data, _MM_SHUFFLE(3, 3, 3, 3)));
     }
 
     /** Access green component
      * \return The green component
      */
-    T g()
+    float g() const
     {
-        return m_g;
-    }
-
-    /** Set green component
-     * \param val The green component
-     */
-    void g(T val)
-    {
-        m_g = val;
+        return _mm_cvtss_f32(_mm_shuffle_ps(m_data, m_data, _MM_SHUFFLE(2, 2, 2, 2)));
     }
 
     /** Access blue component
      * \return The blue component
      */
-    T b()
+    float b() const
     {
-        return m_b;
-    }
-
-    /** Set blue component
-     * \param val The blue component
-     */
-    void b(T val)
-    {
-        m_b = val;
+        return _mm_cvtss_f32(_mm_shuffle_ps(m_data, m_data, _MM_SHUFFLE(1, 1, 1, 1)));
     }
 
     /** Do sRGB gamma correction */
     void gamma()
     {
+        float m_r = r(), m_g = g(), m_b = b();
         if(m_r <= 0.0031308)
             m_r *= 12.92;
         else
@@ -97,67 +74,48 @@ public:
             m_b *= 12.92;
         else
             m_b = 1.055*std::pow(m_b, 1/2.4) - 0.055;
+        m_data = _mm_set_ps(m_r, m_g, m_b, 0);
     }
 
     /** Do gamma correction
      * \param Gamma The gamma value
      */
-    void gamma(T Gamma)
+    void gamma(float Gamma)
     {
+        float m_r = r(), m_g = g(), m_b = b();
         m_r = std::pow(m_r, Gamma);
         m_g = std::pow(m_g, Gamma);
         m_b = std::pow(m_b, Gamma);
+        m_data = _mm_set_ps(m_r, m_g, m_b, 0);
     }
 
-    /** Clamp the values */
-    void clamp()
+    Color &add(Color c)
     {
-        m_r = std::max<T>(0, std::min<T>(m_r, 1));
-        m_g = std::max<T>(0, std::min<T>(m_g, 1));
-        m_b = std::max<T>(0, std::min<T>(m_b, 1));
-    }
-
-    Color<T> &add(Color c)
-    {
-        m_r += c.r();
-        m_g += c.g();
-        m_b += c.b();
+        m_data = _mm_add_ps(m_data, c.m_data);
         return *this;
     }
 
-    Color<T> &mult(T x)
+    Color &mult(float x)
     {
-        m_r *= x;
-        m_g *= x;
-        m_b *= x;
+        m_data = _mm_mul_ps(m_data, _mm_set1_ps(x));
         return *this;
     }
 
-    Color<T> &div(T x)
+    Color &div(float x)
     {
-        return this->mult(1/x);
+        m_data = _mm_div_ps(m_data, _mm_set1_ps(x));
     }
 
-    Color<T> mult(Color<T> c)
+    Color &mult(Color c)
     {
-        m_r *= c.r();
-        m_g *= c.g();
-        m_b *= c.b();
+        m_data = _mm_mul_ps(m_data, c.m_data);
         return *this;
     }
 
     PixelToaster::Pixel PT() const
     {
-        return PixelToaster::Pixel(static_cast<T>(m_r),
-                                   static_cast<T>(m_g),
-                                   static_cast<T>(m_b));
+        return PixelToaster::Pixel(r(), g(), b());
     }
-
-protected:
-private:
-    T m_r; //!< The red component
-    T m_g; //!< The green component
-    T m_b; //!< The blue component
 };
 
 } // namespace raytracer

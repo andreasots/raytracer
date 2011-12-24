@@ -13,14 +13,9 @@ class Tri : public Object
         Tri(const SIMD::Point& p1,
             const SIMD::Point& p2,
             const SIMD::Point& p3,
-            Material mat);
+            Material *mat);
         /** Default destructor */
         virtual ~Tri();
-        virtual const Material &material(RT_FLOAT u, RT_FLOAT v);
-        virtual const Material &material()
-        {
-            return m_mat;
-        }
         virtual SIMD::Vec normal(RT_FLOAT u, RT_FLOAT v);
         virtual RT_FLOAT intersect(const SIMD::Ray &r, RT_FLOAT &u, RT_FLOAT &v);
         virtual SIMD::AABox bounds();

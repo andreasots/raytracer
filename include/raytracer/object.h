@@ -13,7 +13,7 @@ namespace Raytracer {
 class Object
 {
     public:
-        Object(Material mat): m_mat(mat)
+        Object(Material *mat): m_mat(mat)
         {
         }
         /** Default destructor */
@@ -21,8 +21,7 @@ class Object
         {
 
         }
-        virtual const Material &material(RT_FLOAT u, RT_FLOAT v) = 0;
-        virtual const Material &material()
+        const Material *material()
         {
             return m_mat;
         }
@@ -30,7 +29,7 @@ class Object
         virtual RT_FLOAT intersect(const SIMD::Ray &r, RT_FLOAT &u, RT_FLOAT &v) = 0;
         virtual SIMD::AABox bounds() = 0;
     protected:
-        Material m_mat;
+        Material *m_mat;
     private:
 };
 

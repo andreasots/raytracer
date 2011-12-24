@@ -2,18 +2,13 @@
 
 namespace Raytracer {
 
-Cylinder::Cylinder(SIMD::Point A, SIMD::Point B, RT_FLOAT r, Material mat): m_A(A), m_a(B-A), Object(mat)
+Cylinder::Cylinder(SIMD::Point A, SIMD::Point B, RT_FLOAT r, Material *mat): m_A(A), m_a(B-A), Object(mat)
 {
     m_d = std::copysign(r*r*m_a.dot(m_a), r);
 }
 
 Cylinder::~Cylinder()
 {
-}
-
-const Material &Cylinder::material(RT_FLOAT u, RT_FLOAT v)
-{
-    return m_mat;
 }
 
 SIMD::Vec Cylinder::normal(RT_FLOAT u, RT_FLOAT v)

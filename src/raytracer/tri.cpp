@@ -13,7 +13,7 @@ inline bool equal(const RT_FLOAT &a, const RT_FLOAT &b)
 namespace Raytracer {
 
 Tri::Tri(const SIMD::Point& p1, const SIMD::Point& p2,
-         const SIMD::Point& p3, Material mat): Object(mat)
+         const SIMD::Point& p3, Material *mat): Object(mat)
 {
     SIMD::Vec e0 = p2-p1, e1 = p3-p1, n = e0.cross(e1);
     RT_FLOAT nw = -1;
@@ -57,11 +57,6 @@ Tri::~Tri()
 {
     //dtor
     delete m_bbox;
-}
-
-const Material &Tri::material(RT_FLOAT u, RT_FLOAT v)
-{
-    return m_mat;
 }
 
 SIMD::Vec Tri::normal(RT_FLOAT u, RT_FLOAT v)
