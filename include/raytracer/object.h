@@ -7,6 +7,7 @@
 #include <SIMD/Vec.h>
 #include <SIMD/Ray.h>
 #include <SIMD/AABox.h>
+#include <SIMD/Matrix.h>
 
 namespace Raytracer {
 
@@ -25,7 +26,7 @@ class Object
         {
             return m_mat;
         }
-        virtual SIMD::Vec normal(RT_FLOAT u, RT_FLOAT v) = 0;
+        virtual SIMD::Matrix tangentSpace(RT_FLOAT u, RT_FLOAT v) = 0;
         virtual RT_FLOAT intersect(const SIMD::Ray &r, RT_FLOAT &u, RT_FLOAT &v) = 0;
         virtual SIMD::AABox bounds() = 0;
     protected:

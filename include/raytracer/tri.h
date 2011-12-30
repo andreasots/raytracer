@@ -16,7 +16,7 @@ class Tri : public Object
             Material *mat);
         /** Default destructor */
         virtual ~Tri();
-        virtual SIMD::Vec normal(RT_FLOAT u, RT_FLOAT v);
+        virtual SIMD::Matrix tangentSpace(RT_FLOAT u, RT_FLOAT v);
         virtual RT_FLOAT intersect(const SIMD::Ray &r, RT_FLOAT &u, RT_FLOAT &v);
         virtual SIMD::AABox bounds();
         void normals(const SIMD::Vec &n1,

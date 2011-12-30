@@ -6,6 +6,7 @@
 
 namespace Raytracer
 {
+// a class for sRGB color
 class Color
 {
     __m128 m_data;
@@ -94,6 +95,11 @@ public:
         m_data = _mm_add_ps(m_data, c.m_data);
         return *this;
     }
+    Color &sub(Color c)
+    {
+        m_data = _mm_sub_ps(m_data, c.m_data);
+        return *this;
+    }
 
     Color &mult(float x)
     {
@@ -115,6 +121,12 @@ public:
     PixelToaster::Pixel PT() const
     {
         return PixelToaster::Pixel(r(), g(), b());
+    }
+
+    float luminance() const
+    {
+        return 0.2126 * r() + 0.7152 * g() + 0.0722 * b();
+        // says the Wikipedia
     }
 };
 

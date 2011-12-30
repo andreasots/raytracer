@@ -4,7 +4,10 @@
 #include "raytracer/tri.h"
 #include "raytracer/cylinder.h"
 
-#include "raytracer/material/lambertphong.h"
+#include "raytracer/material/ashikhminshirley.h"
+#include "raytracer/material/phong.h"
+#include "raytracer/material/dielectric.h"
+#include "raytracer/material/mirror.h"
 #include "raytracer/material/null.h"
 
 #include <SIMD/Vec.h>
@@ -19,7 +22,7 @@
 #include <stdexcept>
 #include <map>
 
-#define MAXDEPTH 128
+#define MAXDEPTH 256
 
 template<class T> static std::string intToString(T i)
 {
@@ -76,10 +79,48 @@ SIMD::Matrix Scene::open(std::string file)
                     token += c;
                     in.get(c);
                 }
-                RT_FLOAT diff, spec, spec_pow, r, g, b;
-                bool emit;
-                in >> diff >> spec >> spec_pow >> emit >> r >> g >> b;
-                materials[token] = new material::LambertPhong(diff, spec, spec_pow, emit, Color(r, g, b));
+                Material *mat;
+                std::string name = token;
+                in >> token;
+                if(token == "Phong")
+                {
+                    RT_FLOAT diff, spec, spec_pow, emit, r, g, b;
+                    in >> diff >> r >> g >> b;
+                    Color c_diff(r, g, b);
+                    in >> spec >> spec_pow >> r >> g >> b;
+                    Color c_spec(r, g, b);
+                    in >> emit >> r >> g >> b;
+                    Color c_emit(r, g, b);
+                    mat = new material::Phong(diff, c_diff, spec, spec_pow, c_spec, emit, c_emit);
+                }
+                else if(token == "Null")
+                {
+                    RT_FLOAT r, g, b;
+                    in >> r >> g >> b;
+                    mat = new material::Null(Color(r, g, b));
+                }
+                else if(token == "Dielectric")
+                {
+                    RT_FLOAT n;
+                    in >> n;
+                    mat = new material::Dielectric(n);
+                }
+                else if(token == "AshikhminShirley")
+                {
+                    RT_FLOAT nv, nu, r, g, b;
+                    in >> r >> g >> b;
+                    Color Rd(r, g, b);
+                    in >> nu >> nv >> r >> g >> b;
+                    Color Rs(r, g, b);
+                    mat = new material::AshikhminShirley(Rd, nu, nv, Rs);
+                }
+                else if(token == "Mirror")
+                    mat = new material::Mirror();
+                else
+                    std::runtime_error("Unrecognised token '"+token+"' after 'material \""+name+"\"' in statement "+intToString(statement));
+                if(materials.count(name))
+                    delete materials[name];
+                materials[name] = mat;
             }
             else if(token == "camera")
             {
@@ -239,11 +280,12 @@ RT_FLOAT Scene::intersect(const SIMD::Ray &r, size_t &id, RT_FLOAT &u, RT_FLOAT 
     return ret;
 }
 
-Color Scene::radiance(const SIMD::Ray &r, size_t depth)
+Color Scene::radiance(const SIMD::Ray &r, size_t depth, dsfmt_t &dsfmt)
 {
     Color c;
+    // SIGSEGV protection
     if(depth > MAXDEPTH)
-        return Color();
+        return c;
     size_t id;
     RT_FLOAT u, v;
     RT_FLOAT t = this->intersect(r, id, u, v);
@@ -253,9 +295,9 @@ Color Scene::radiance(const SIMD::Ray &r, size_t depth)
         SIMD::Point p = r.origin+t*r.direction;
         Object *o = m_objects[id];
         const Material *mat = o->material();
-        SIMD::Vec n = o->normal(u, v);
+        SIMD::Vec n = o->tangentSpace(u, v)[2];
 
-        c.add(mat->color(p, n, r.direction, *this, depth));
+        c.add(mat->color(p, n, r.direction, *this, depth, dsfmt));
     }
     else
         c = m_sky;

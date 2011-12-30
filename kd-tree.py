@@ -196,12 +196,13 @@ def main(argc, argv):
 				if box != None:
 					bounds = [copy_vector(box[0]), copy_vector(box[1])]
 			else:
-				bounds[0].x = min(bounds[0].x, box[0].x)
-				bounds[0].y = min(bounds[0].y, box[0].y)
-				bounds[0].z = min(bounds[0].z, box[0].z)
-				bounds[1].x = max(bounds[1].x, box[1].x)
-				bounds[1].y = max(bounds[1].y, box[1].y)
-				bounds[1].z = max(bounds[1].z, box[1].z)
+				if box != None:
+					bounds[0].x = min(bounds[0].x, box[0].x)
+					bounds[0].y = min(bounds[0].y, box[0].y)
+					bounds[0].z = min(bounds[0].z, box[0].z)
+					bounds[1].x = max(bounds[1].x, box[1].x)
+					bounds[1].y = max(bounds[1].y, box[1].y)
+					bounds[1].z = max(bounds[1].z, box[1].z)
 	aabox(bounds)
 	screen.center = (bounds[0]+bounds[1])/2
 	splits = [[], [], []]

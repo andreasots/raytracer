@@ -11,19 +11,22 @@ Cylinder::~Cylinder()
 {
 }
 
-SIMD::Vec Cylinder::normal(RT_FLOAT u, RT_FLOAT v)
+SIMD::Matrix Cylinder::tangentSpace(RT_FLOAT _u, RT_FLOAT _v)
 {
-    SIMD::Vec i, j, k = m_a;
-    k.normalize();
-    if(std::abs(k[0]) > 0.1)
-        i = SIMD::Vec(0, 1, 0).cross(k);
+    SIMD::Vec i, j, u = m_a;
+    u.normalize();
+    if(std::abs(u[0]) > 0.1)
+        i = SIMD::Vec(0, 1, 0).cross(u);
     else
-        i = SIMD::Vec(1, 0, 0).cross(k);
+        i = SIMD::Vec(1, 0, 0).cross(u);
     i.normalize();
-    j = k.cross(i);
-    SIMD::Vec n = i*std::sin(v*2*M_PI)+j*std::cos(v*2*M_PI);
+    j = u.cross(i);
+    SIMD::Vec n = i*std::sin(_v*2*M_PI)+j*std::cos(_v*2*M_PI);
     n *= std::copysign(1, m_d);
-    return n;
+
+    SIMD::Vec v = n.cross(u);
+
+    return SIMD::Matrix(u.data(), v.data(), n.data(), SIMD::Point().data());
 }
 
 RT_FLOAT Cylinder::intersect(const SIMD::Ray &r, RT_FLOAT &u, RT_FLOAT &v)

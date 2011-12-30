@@ -9,10 +9,11 @@ namespace material {
 class Dielectric: public Raytracer::Material
 {
     public:
-        Dielectric();
+        Dielectric(RT_FLOAT n);
         virtual ~Dielectric();
-        Color color(const SIMD::Point &p, const SIMD::Vec &n, const SIMD::Vec &in, Scene &scene, size_t depth) const;
+        Color color(const SIMD::Point &p, const SIMD::Vec &n, const SIMD::Vec &in, Scene &scene, size_t depth, dsfmt_t &dsfmt) const;
     protected:
+        RT_FLOAT m_n;
     private:
 };
 

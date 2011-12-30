@@ -9,6 +9,8 @@
 #include <SIMD/Ray.h>
 #include <SIMD/Matrix.h>
 
+#include <dSFMT.h>
+
 #include <vector>
 #include <utility>
 #include <string>
@@ -22,7 +24,7 @@ class Scene
         SIMD::Matrix open(std::string file);
         void add(Object *o);
         RT_FLOAT intersect(const SIMD::Ray &r, size_t &id, RT_FLOAT &u, RT_FLOAT &v, RT_FLOAT max = HUGE_VAL);
-        Color radiance(const SIMD::Ray &r, size_t depth);
+        Color radiance(const SIMD::Ray &r, size_t depth, dsfmt_t &dsfmt);
         void stats();
     protected:
     private:

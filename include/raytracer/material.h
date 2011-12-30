@@ -4,6 +4,8 @@
 #include <SIMD/Vec.h>
 #include <SIMD/Ray.h>
 
+#include <dSFMT.h>
+
 namespace Raytracer
 {
     class Scene;
@@ -13,7 +15,7 @@ namespace Raytracer
         virtual ~Material()
         {
         }
-        virtual Color color(const SIMD::Point &p, const SIMD::Vec &n, const SIMD::Vec &in, Scene &scene, size_t depth) const = 0;
+        virtual Color color(const SIMD::Point &p, const SIMD::Vec &n, const SIMD::Vec &in, Scene &scene, size_t depth, dsfmt_t &dsfmt) const = 0;
     };
 }
 

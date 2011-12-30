@@ -59,18 +59,27 @@ Tri::~Tri()
     delete m_bbox;
 }
 
-SIMD::Vec Tri::normal(RT_FLOAT u, RT_FLOAT v)
+SIMD::Matrix Tri::tangentSpace(RT_FLOAT u, RT_FLOAT v)
 {
-    SIMD::Vec ret;
+    SIMD::Vec n;
     if(ci & 16)
     {
         RT_FLOAT w = 1 - u - v;
-        ret = m_normals[0]*w+m_normals[1]*u+m_normals[2]*v;
-        ret.normalize();
+        n = m_normals[0]*w+m_normals[1]*u+m_normals[2]*v;
+        n.normalize();
     }
     else
-        ret = m_normals[0];
-    return ret;
+        n = m_normals[0];
+
+    SIMD::Vec U, V;
+    if(std::abs(n[0]) > 0.1)
+        U = SIMD::Vec(0, 1, 0).cross(n);
+    else
+        U = SIMD::Vec(1, 0, 0).cross(n);
+    U.normalize();
+    V = n.cross(U);
+
+    return SIMD::Matrix(U.data(), V.data(), n.data(), SIMD::Point().data());
 }
 
 RT_FLOAT Tri::intersect(const SIMD::Ray &r, RT_FLOAT &_u, RT_FLOAT &_v)

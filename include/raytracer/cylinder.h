@@ -11,7 +11,7 @@ class Cylinder : public Object
         Cylinder(SIMD::Point A, SIMD::Point B, RT_FLOAT r, Material *mat);
         /** Default destructor */
         virtual ~Cylinder();
-        SIMD::Vec normal(RT_FLOAT u, RT_FLOAT v);
+        virtual SIMD::Matrix tangentSpace(RT_FLOAT u, RT_FLOAT v);
         RT_FLOAT intersect(const SIMD::Ray &r, RT_FLOAT &u, RT_FLOAT &v);
         SIMD::AABox bounds();
     protected:

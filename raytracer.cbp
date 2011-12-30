@@ -81,9 +81,11 @@
 		<Unit filename="include/raytracer/color.h" />
 		<Unit filename="include/raytracer/cylinder.h" />
 		<Unit filename="include/raytracer/material.h" />
+		<Unit filename="include/raytracer/material/ashikhminshirley.h" />
 		<Unit filename="include/raytracer/material/dielectric.h" />
-		<Unit filename="include/raytracer/material/lambertphong.h" />
+		<Unit filename="include/raytracer/material/mirror.h" />
 		<Unit filename="include/raytracer/material/null.h" />
+		<Unit filename="include/raytracer/material/phong.h" />
 		<Unit filename="include/raytracer/object.h" />
 		<Unit filename="include/raytracer/scene.h" />
 		<Unit filename="include/raytracer/sphere.h" />
@@ -91,9 +93,11 @@
 		<Unit filename="include/version.h" />
 		<Unit filename="src/main.cpp" />
 		<Unit filename="src/raytracer/cylinder.cpp" />
+		<Unit filename="src/raytracer/material/ashikhminshirley.cpp" />
 		<Unit filename="src/raytracer/material/dielectric.cpp" />
-		<Unit filename="src/raytracer/material/lambertphong.cpp" />
+		<Unit filename="src/raytracer/material/mirror.cpp" />
 		<Unit filename="src/raytracer/material/null.cpp" />
+		<Unit filename="src/raytracer/material/phong.cpp" />
 		<Unit filename="src/raytracer/scene.cpp" />
 		<Unit filename="src/raytracer/sphere.cpp" />
 		<Unit filename="src/raytracer/tri.cpp" />

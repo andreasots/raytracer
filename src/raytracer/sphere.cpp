@@ -19,12 +19,34 @@ Sphere::~Sphere()
     //dtor
 }
 
-SIMD::Vec Sphere::normal(RT_FLOAT u, RT_FLOAT v)
+SIMD::Matrix Sphere::tangentSpace(RT_FLOAT _u, RT_FLOAT _v)
 {
-    RT_FLOAT phi = u*M_PI;
-    RT_FLOAT theta = v*(2*M_PI);
-    SIMD::Vec n(std::cos(theta)*std::sin(phi), std::sin(theta)*std::sin(phi), std::cos(phi));
-    return n;
+    RT_FLOAT phi = _u*M_PI;
+    RT_FLOAT theta = _v*(2*M_PI);
+    SIMD::Vec n(std::cos(theta)*std::sin(phi), std::sin(theta)*std::sin(phi), std::cos(phi)), u, v;
+
+    switch(static_cast<int>(n[2]))
+    {
+        // Hairy ball theorem:
+        // Vector field can't be continuous on the surface of a sphere
+        // Infinitely many tangents on poles
+        case 1:
+            u = SIMD::Vec(1, 0, 0);
+            v = SIMD::Vec(0, 1, 0);
+            break;
+        case -1:
+            u = SIMD::Vec(-1, 0, 0);
+            v = SIMD::Vec(0, -1, 0);
+            break;
+        default:
+            SIMD::Point Pn(0, 0, 1);
+            u = Pn-SIMD::Point(n.data());
+            v = n.cross(u);
+            v.normalize();
+            u = v.cross(n);
+    }
+
+    return SIMD::Matrix(u.data(), v.data(), n.data(), SIMD::Point().data());
 }
 
 RT_FLOAT Sphere::intersect(const SIMD::Ray &r, RT_FLOAT &u, RT_FLOAT &v)
