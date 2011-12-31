@@ -9,6 +9,8 @@
 \usepackage{wrapfig}
 \usepackage{esvect}
 \renewcommand{\vec}[1]{\vv{#1}}
+\usepackage{listings}
+\lstset{basicstyle=\footnotesize, language=C++, numbers=left, numberbychapter=false}
 \chapterfont{\fontsize{16pt}{19pt}\sffamily}
 \linespread{1.3}
 \renewcommand{\thechapter}{\arabic{chapter}.}
@@ -17,6 +19,8 @@
 \renewcommand{\thesubsubsection}{\thesubsection\arabic{subsubsection}.}
 \renewcommand{\theequation}{\thechapter\arabic{equation}}
 \renewcommand{\thefigure}{\thechapter\arabic{figure}}
+\renewcommand{\lstlistlistingname}{Programmid}
+\renewcommand{\lstlistingname}{Programm}
 
 % et nad kaklema ei läheks
 \usepackage[colorlinks=true]{hyperref}
@@ -59,6 +63,7 @@ Tallinn 2011
 \tableofcontents
 \listoffigures
 \listoftables
+\lstlistoflistings
 
 \chapter*{Sissejuhatus}
 \addcontentsline{toc}{chapter}{Sissejuhatus}
@@ -71,6 +76,72 @@ Esimene lehekülg
 Teine lehekülg
 
 \chapter{Kiirtejälitus}
+\section{Kiirtejälituse mõiste}
+Järgnev lõik pärineb Eesti Standardikeskuse standardist EVS-ISO/IEC~2382-13:1998:
+\begin{quote}
+Kiirte jälitus --- Vaatleja silmast stseeni objektideni kulgevate
+kujuteldavate valguskiirte jälitusel põhinev meetod stseeni nende osade
+määramiseks, mis tuleb kuvada saadaval pildil.
+
+MÄRKUS: Jälitus võib hõlmata valguse peegeldumist ja murdumist.\cite{ISO:2382-13}
+\end{quote}
+
+Kiirtejälitus pakub praeguseni teadaolevatest ilmestusmeetoditest kõige
+realistlikumat tulemust, sest kasutab ilmestusel valguse füüsikalist
+mudelit.
+
+\section{Kiirtejälituse algoritm}
+Esimese kiirtejälituse algoritmi (mitte \textit{ray tracing} aga
+\textit{ray casting}) lõi Arthur Appel 1968. aastal. Programm
+\ref{prog:raycasting} on selle algoritmi teostus. \texttt{eye} on
+kaamera koordinaadid ruumis, \texttt{imagePlane(x, y)} tagastab punkti
+pilditasandil koordinaatidega \texttt{x} ja \texttt{y} ja
+\texttt{trace(r)} leiab lähima keha selle kiire teel ja tagastab selle
+värvi.
+
+\begin{lstlisting}[caption=\textit{Ray casting}, label=prog:raycasting]
+int w, h;
+Pixel image[h][w];
+
+for(int y = 0; y < h; y++)
+{
+	for(int x = 0; x < w; x++)
+	{
+		Ray r;
+		r.position = eye;
+		r.direction = imagePlane(x, y) - eye;
+		image[y][x] = trace(r);
+	}
+}
+\end{lstlisting}
+
+Kasutades kahendpuud kehade seast otsimiseks on algoritmi keerukuseks
+\(O(\log n)\) kehade arvu suhtes.
+
+1979. aastal lisas Turner Whitted algoritmile varjud ja valguse
+peegeldumise ning murdumise.
+
+1986. aasta SIGGRAPHil tutvustas Jim Kajiya oma artiklit
+ilmestusvõrrandist (võrrand \ref{eq:kajiya}), mis üldistas mõndasid
+ilmestusmeetodeid. \cite{kajiya86}
+
+\begin{equation} \label{eq:kajiya}
+I(x, x') = g(x, x')\left[\epsilon(x, x') +\int_S \rho(x, x', x'')I(x', x'') dx'' \right]
+\end{equation}
+
+Kajiya ilmestusvõrrandi üks puuduseid on sõltuvus kehade arvust, sest
+integreeritakse üle kõikide kehade kõikide punktide ja liiasus mõningate
+\(x''\) korral, näiteks kui leidub mitu \(x''\), mis asuvad sama sirgel
+ning lähim neist varjab ära ülejäänud. Tänapäevasemal ilmestusvõrrandil
+(võrrand \ref{eq:render}) pole neid puuduseid.
+
+\begin{equation} \label{eq:render}
+L(x, \omega) = L_e(x, \omega) + \int_\Omega f_r(x, \omega', \omega) L_i(x, \omega') d\omega'
+\end{equation}
+
+\section{Monte Carlo meetod}
+\section{Lõikumised}
+\section{Valguse peegeldumine}
 
 \chapter*{Kokkuvõte}
 \addcontentsline{toc}{chapter}{Kokkuvõte}

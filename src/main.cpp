@@ -15,7 +15,6 @@
 
 #include <cmath>
 
-
 #include "version.h"
 #include <PixelToaster.h>
 
@@ -30,6 +29,33 @@ size_t w, h;
 
 #define TILESIZE 32
 
+// Cubic B-Spline Filter
+// Generation of Stratified Samples for B-Spline Pixel Filtering
+// Michael Stark, Peter Shirley, Michael Ashikhmin
+inline RT_FLOAT cubicBSplineFilter(RT_FLOAT r)
+{
+    if(r < 1.0/24)
+        return std::pow(24*r, 0.25)-2;
+    else if(r < 0.5)
+    {
+        r = 24*r-1;
+        RT_FLOAT u = r/11;
+        for(int i = 0; i < 5; i++)
+            u = (r + u*u*(6+u*(8-9*u)))/(4+12*u*(1+u*(1-u)));
+        return u - 1;
+    }
+    else if(r < 23.0/24)
+    {
+        r = 23-24*r;
+        RT_FLOAT u = r/11;
+        for(int i = 0; i < 5; i++)
+            u = (r + u*u*(6+u*(8-9*u)))/(4+12*u*(1+u*(1-u)));
+        return 1-u;
+    }
+    else
+        return 2-std::pow(24-24*r, 0.25);
+}
+
 int main(int argc, char *argv[])
 {
     std::cout << "Raytracer " << AutoVersion::FULLVERSION_STRING << " build ";
@@ -42,8 +68,8 @@ int main(int argc, char *argv[])
     std::cout << "\tOpenEXR" << std::endl;
     std::cout << std::endl;
 
-    w = 1024;
-    h = 1024;
+    w = 1024*3/4;
+    h = 1024*3/4;
 
     if((w / TILESIZE)*TILESIZE != w)
         w = (w/TILESIZE+1)*TILESIZE;
@@ -85,6 +111,7 @@ int main(int argc, char *argv[])
     std::srand(time(NULL));
     for(int i = 0; i < omp_get_max_threads(); i++)
         dsfmt_chk_init_gen_rand(&dSFMT_states[i], std::rand(), DSFMT_MEXP);
+
     while(render)
     {
         for(size_t y = 0; y < h; y += TILESIZE)
@@ -98,13 +125,8 @@ int main(int argc, char *argv[])
                         Raytracer::Color pixel(bb[(y+tile_y)*w+x+tile_x]);
                         pixel.mult(sample-1);
 
-                        // Linear B-Spline Filter
-                        // Generation of Stratified Samples for B-Spline Pixel Filtering
-                        // Michael Stark, Peter Shirley, Michael Ashikhmin
-                        RT_FLOAT sample_x = 2*dsfmt_genrand_close_open(&dSFMT_states[omp_get_thread_num()]);
-                        RT_FLOAT sample_y = 2*dsfmt_genrand_close_open(&dSFMT_states[omp_get_thread_num()]);
-                        sample_x = (sample_x < 1 ? sample_x = std::sqrt(sample_x)-1: sample_x = 1-std::sqrt(2-sample_x));
-                        sample_y = (sample_y < 1 ? sample_y = std::sqrt(sample_y)-1: sample_y = 1-std::sqrt(2-sample_y));
+                        RT_FLOAT sample_x = cubicBSplineFilter(dsfmt_genrand_close_open(&dSFMT_states[omp_get_thread_num()]));
+                        RT_FLOAT sample_y = cubicBSplineFilter(dsfmt_genrand_close_open(&dSFMT_states[omp_get_thread_num()]));
 
                         SIMD::Point scr = scr_pos + delta_y*static_cast<RT_FLOAT>(y+tile_y+sample_y) + delta_x*static_cast<RT_FLOAT>(x+tile_x+sample_x);
                         SIMD::Vec dir = scr - pos;

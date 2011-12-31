@@ -57,8 +57,11 @@
 			<Add option="-DRT_INT=int32_t" />
 			<Add option="-DRT_UINT=uint32_t" />
 			<Add option='-DRT_MSB=&quot;(UINT32_MAX-INT32_MAX)&quot;' />
+			<Add option="-DDSFMT_MEXP=19937" />
+			<Add option="-DHAVE_SSE2" />
 			<Add directory="include" />
 			<Add directory="PixelToaster" />
+			<Add directory="dSFMT" />
 		</Compiler>
 		<Linker>
 			<Add library="assimp" />
@@ -73,6 +76,12 @@
 		<Unit filename="PixelToaster/PixelToasterConversion.h" />
 		<Unit filename="PixelToaster/PixelToasterUnix.h" />
 		<Unit filename="PixelToaster/PixelToasterWindows.h" />
+		<Unit filename="dSFMT/dSFMT-params.h" />
+		<Unit filename="dSFMT/dSFMT-params19937.h" />
+		<Unit filename="dSFMT/dSFMT.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="dSFMT/dSFMT.h" />
 		<Unit filename="include/SIMD/AABox.h" />
 		<Unit filename="include/SIMD/Matrix.h" />
 		<Unit filename="include/SIMD/Point.h" />
