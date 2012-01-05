@@ -1,15 +1,15 @@
 #ifndef RAYTRACER_COLOR_H
 #define RAYTRACER_COLOR_H
-#include <algorithm>
 #include <PixelToaster.h>
 #include <xmmintrin.h>
+#include <cmath>
 
 namespace Raytracer
 {
 // a class for sRGB color
 class Color
 {
-    __m128 m_data;
+    __m128 m_data __attribute__((aligned(16)));
 public:
     /** Constructor
      * \param r Red component
@@ -24,7 +24,7 @@ public:
     {
     }
 
-    Color(PixelToaster::Pixel p): m_data(_mm_set_ps(p.r, p.g, p.b, p.a))
+    explicit Color(PixelToaster::Pixel p): m_data(_mm_set_ps(p.r, p.g, p.b, p.a))
     {
     }
 
@@ -110,6 +110,7 @@ public:
     Color &div(float x)
     {
         m_data = _mm_div_ps(m_data, _mm_set1_ps(x));
+        return *this;
     }
 
     Color &mult(Color c)

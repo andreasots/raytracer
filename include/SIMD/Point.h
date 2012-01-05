@@ -6,7 +6,7 @@ namespace SIMD
 {
 class Point
 {
-    __m128 mData;
+    __m128 mData __attribute__((aligned(16)));
     public:
         Point() throw(): mData(_mm_set_ps(0,0,0,1))
         {

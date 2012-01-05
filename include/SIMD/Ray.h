@@ -4,25 +4,15 @@
 #include "SIMD/Vec.h"
 #include "SIMD/Point.h"
 
-/* An Efficient and Robust Ray-Box Intersection Algorithm */
-/* Amy Williams, Steve Barrus, R. Keith Morley, Peter Shirley */
-
-
 namespace SIMD
 {
     struct Ray
     {
-        Vec direction, invd;
+        Vec direction;
         Point origin;
-        int sign[4];
 
-        Ray(Point o, Vec d): direction(d), invd(), origin(o), sign()
+        Ray(Point o, Vec d): direction(d), origin(o)
         {
-            invd = _mm_div_ps(_mm_set1_ps(1), d.data());
-            sign[0] = (invd[0] < 0);
-            sign[1] = (invd[1] < 0);
-            sign[2] = (invd[2] < 0);
-            sign[3] = (invd[3] < 0);
         }
     };
 }

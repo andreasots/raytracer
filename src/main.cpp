@@ -12,6 +12,7 @@
 
 #include "raytracer/color.h"
 #include "raytracer/scene.h"
+#include "raytracer/allocator.h"
 
 #include <cmath>
 
@@ -79,7 +80,7 @@ int main(int argc, char *argv[])
 
     PixelToaster::Display screen("Raytracer", w, h);
     std::vector<PixelToaster::Pixel> fb(w*h); // Front buffer
-    std::vector<Raytracer::Color> bb(w*h); // Back buffer
+    std::vector<Raytracer::Color, Raytracer::allocator<Raytracer::Color, 16>> bb(w*h); // Back buffer
 
     RT_FLOAT x = -DISTANCE * 18 / FOCAL_LENGTH;
     RT_FLOAT y = -x*h/w;

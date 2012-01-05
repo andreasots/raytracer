@@ -3,7 +3,12 @@
 
 #include <cstdlib>
 #include <xmmintrin.h>
-#include <smmintrin.h>
+#ifdef __SSE4_1__
+# include <smmintrin.h>
+#endif
+#ifdef __SSE3__
+# include <pmmintrin.h>
+#endif
 #include <stdexcept>
 #include <cmath>
 #include <ostream>
@@ -12,7 +17,7 @@ namespace SIMD
 {
 class Vec
 {
-	__m128 mData;
+	__m128 mData __attribute__((aligned(16)));
 	public:
 		Vec() throw(): mData(_mm_setzero_ps())
 		{
@@ -84,7 +89,13 @@ class Vec
 
 		inline float dot(const Vec &v) const throw()
 		{
+#ifdef __SSE4_1__
 			return _mm_cvtss_f32(_mm_dp_ps(mData, v.mData, 0xF1));
+#elif defined(__SSE3__)
+            return _mm_cvtss_f32(_mm_hadd_ps(_mm_hadd_ps(_mm_mul_ps(mData, v.mData), _mm_setzero_ps()), _mm_setzero_ps());
+#else
+            return (*this)[0]*v[0]+(*this)[1]*v[1]+(*this)[2]*v[2]+(*this)[3]*v[3];
+#endif
 		}
 
  		inline Vec cross(const Vec &v) const throw()
@@ -112,7 +123,11 @@ class Vec
 
 		inline void normalize() throw()
 		{
+#ifdef __SSE4_1__
 			mData = _mm_div_ps(mData, _mm_sqrt_ps(_mm_dp_ps(mData, mData, 0xFF)));
+#else
+            mData = _mm_div_ps(mData, _mm_sqrt_ps(_mm_set1_ps(dot(*this))));
+#endif
 		}
 
 		inline __m128 data() const throw()
