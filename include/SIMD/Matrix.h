@@ -8,7 +8,7 @@ namespace SIMD
 {
     class Matrix
     {
-        __m128 mData[4];
+        __m128 mData[4] __attribute__((aligned(16)));
     public:
         Matrix() throw(): mData({_mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps()})
         {

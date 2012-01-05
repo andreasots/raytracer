@@ -9,7 +9,7 @@ namespace SIMD
 {
     class AABox
     {
-        Point mBounds[2];
+        Point mBounds[2] __attribute__((aligned(16)));
         public:
         AABox(Point _min, Point _max)
         {

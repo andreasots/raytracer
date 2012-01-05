@@ -4,6 +4,20 @@
 
 namespace Raytracer
 {
+    template <class T, std::size_t align> inline T* allocate(size_t n)
+    {
+        T *ret;
+        if(posix_memalign(reinterpret_cast<void**>(&ret), align, n*sizeof(T)))
+            std::__throw_bad_alloc();
+        return ret;
+    }
+
+    template <class T, std::size_t align> inline void deallocate(T* p, size_t n)
+    {
+        free(p);
+    }
+
+    // STL wrapper for previous functions
     template <class T, std::size_t align> class allocator: public std::allocator<T>
     {
     	public:
@@ -47,31 +61,28 @@ namespace Raytracer
 
         pointer allocate(size_type n, const void *hint = 0)
         {
-            pointer ret;
-            if(posix_memalign(reinterpret_cast<void**>(&ret), align, n*sizeof(value_type)))
-                std::__throw_bad_alloc();
-            return ret;
+            return Raytracer::allocate<T, align>(n);
         }
-    
+
         void deallocate(pointer p, size_type n)
         {
-            free(p);
+            Raytracer::deallocate<T, align>(p, n);
         }
-        
-        size_type max_size() const throw() 
+
+        size_type max_size() const throw()
         {
             return size_type(-1)/sizeof(T);
         }
-        
-        void construct(pointer p, const_reference val) 
+
+        void construct(pointer p, const_reference val)
         {
             ::new((void *)p) value_type(val);
         }
-        
+
         template<typename... Args> void construct(pointer p, Args&&... args)
-	{
-	    ::new((void *)p) value_type(std::forward<Args>(args)...);
-	}
+        {
+            ::new((void *)p) value_type(std::forward<Args>(args)...);
+        }
 
         void destroy(pointer p)
         {

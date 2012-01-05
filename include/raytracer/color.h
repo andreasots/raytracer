@@ -24,7 +24,7 @@ public:
     {
     }
 
-    explicit Color(PixelToaster::Pixel p): m_data(_mm_set_ps(p.r, p.g, p.b, p.a))
+    Color(PixelToaster::Pixel p): m_data(_mm_set_ps(p.r, p.g, p.b, p.a))
     {
     }
 

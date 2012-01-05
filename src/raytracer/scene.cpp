@@ -1,5 +1,7 @@
 #include "raytracer/scene.h"
 
+#include "raytracer/allocator.h"
+
 #include "raytracer/sphere.h"
 #include "raytracer/tri.h"
 #include "raytracer/cylinder.h"
@@ -49,7 +51,7 @@ Scene::~Scene()
 {
     while(!m_objects.empty())
     {
-        delete m_objects.back();
+        deallocate<Object, 16>(m_objects.back(), 1);
         m_objects.pop_back();
     }
 }
@@ -91,19 +93,19 @@ SIMD::Matrix Scene::open(std::string file)
                     Color c_spec(r, g, b);
                     in >> emit >> r >> g >> b;
                     Color c_emit(r, g, b);
-                    mat = new material::Phong(diff, c_diff, spec, spec_pow, c_spec, emit, c_emit);
+                    mat = new (allocate<material::Phong, 16>(1)) material::Phong(diff, c_diff, spec, spec_pow, c_spec, emit, c_emit);
                 }
                 else if(token == "Null")
                 {
                     RT_FLOAT r, g, b;
                     in >> r >> g >> b;
-                    mat = new material::Null(Color(r, g, b));
+                    mat = new (allocate<material::Null, 16>(1)) material::Null(Color(r, g, b));
                 }
                 else if(token == "Dielectric")
                 {
                     RT_FLOAT n;
                     in >> n;
-                    mat = new material::Dielectric(n);
+                    mat = new (allocate<material::Dielectric, 16>(1)) material::Dielectric(n);
                 }
                 else if(token == "AshikhminShirley")
                 {
@@ -112,7 +114,7 @@ SIMD::Matrix Scene::open(std::string file)
                     Color Rd(r, g, b);
                     in >> nu >> nv >> r >> g >> b;
                     Color Rs(r, g, b);
-                    mat = new material::AshikhminShirley(Rd, nu, nv, Rs);
+                    mat = new (allocate<material::AshikhminShirley, 16>(1)) material::AshikhminShirley(Rd, nu, nv, Rs);
                 }
                 else if(token == "Mirror")
                     mat = new material::Mirror();
@@ -174,8 +176,8 @@ SIMD::Matrix Scene::open(std::string file)
                 in >> x >> y >> z;
                 SIMD::Point C(x, y, z);
                 if(!materials.count(token))
-                    materials[token] = new material::Null(Color());
-                Tri *t = new Tri(A, B, C, materials[token]);
+                    materials[token] = new (allocate<material::Null, 16>(1)) material::Null(Color());
+                Tri *t = new (allocate<Tri, 16>(1)) Tri(A, B, C, materials[token]);
                 in >> token;
                 if(token == "normals")
                 {
@@ -210,8 +212,8 @@ SIMD::Matrix Scene::open(std::string file)
                 SIMD::Point O(x, y, z);
                 in >> x;
                 if(!materials.count(token))
-                    materials[token] = new material::Null(Color());
-                add(new Sphere(O, x, materials[token]));
+                    materials[token] = new (allocate<material::Null, 16>(1)) material::Null(Color());
+                add(new (allocate<Sphere, 16>(1)) Sphere(O, x, materials[token]));
             }
             else if(token == "cylinder")
             {
@@ -232,8 +234,8 @@ SIMD::Matrix Scene::open(std::string file)
                 SIMD::Point B(x, y, z);
                 in >> x;
                 if(!materials.count(token))
-                    materials[token] = new material::Null(Color());
-                add(new Cylinder(A, B, x, materials[token]));
+                    materials[token] = new (allocate<material::Null, 16>(1)) material::Null(Color());
+                add(new (allocate<Cylinder, 16>(1)) Cylinder(A, B, x, materials[token]));
             }
             else if(token == "sky")
             {

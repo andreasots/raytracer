@@ -1,5 +1,7 @@
 #include "raytracer/tri.h"
 
+#include "raytracer/allocator.h"
+
 #include <cassert>
 #include <limits>
 
@@ -48,7 +50,7 @@ Tri::Tri(const SIMD::Point& p1, const SIMD::Point& p2,
     ci = w;
     if(equal(nu, 0) && equal(nv, 0))
         ci |= 8;
-    m_bbox = new SIMD::AABox(p1, p1);
+    m_bbox = new (allocate<SIMD::AABox, 16>(1)) SIMD::AABox(p1, p1);
     m_bbox->extend(SIMD::AABox(p2, p2));
     m_bbox->extend(SIMD::AABox(p3, p3));
 }
@@ -56,7 +58,7 @@ Tri::Tri(const SIMD::Point& p1, const SIMD::Point& p2,
 Tri::~Tri()
 {
     //dtor
-    delete m_bbox;
+    deallocate<SIMD::AABox, 16>(m_bbox, 1);
 }
 
 SIMD::Matrix Tri::tangentSpace(RT_FLOAT u, RT_FLOAT v)
