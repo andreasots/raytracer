@@ -65,7 +65,10 @@ RT_FLOAT Sphere::intersect(const SIMD::Ray &r, RT_FLOAT &u, RT_FLOAT &v)
         return HUGE_VAL;
 
     V = r.origin+t*r.direction - mO;
-    RT_FLOAT theta = std::acos(V[2]/mR);
+    RT_FLOAT cos_theta = V[2]/mR;
+    RT_FLOAT theta = std::acos(cos_theta);
+    if(isnan(theta))
+        theta = M_PI_2 - std::copysign(M_PI_2, cos_theta);
     RT_FLOAT phi = std::atan2(V[1], V[0]);
     if(phi < 0)
         phi += 2*M_PI;

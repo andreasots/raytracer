@@ -32,8 +32,12 @@ Color Dielectric::color(const SIMD::Point &p, const SIMD::Vec &n, const SIMD::Ve
 
     RT_FLOAT cos_theta_2 = 1-n1n2*n1n2*(1-cos_theta_1*cos_theta_1);
     if(cos_theta_2 < 0)
+    {
         ret.add(scene.radiance(SIMD::Ray(p, in+2*cos_theta_1*N), depth+1, dsfmt));
+        return ret;
+    }
     cos_theta_2 = std::sqrt(cos_theta_2);
+
     RT_FLOAT Rs = (n1*cos_theta_1-n2*cos_theta_2)/(n1*cos_theta_1+n2*cos_theta_2);
     Rs *= Rs;
     RT_FLOAT Rp = (n1*cos_theta_2-n2*cos_theta_1)/(n1*cos_theta_2+n2*cos_theta_1);

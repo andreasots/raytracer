@@ -69,8 +69,8 @@ int main(int argc, char *argv[])
     std::cout << "\tOpenEXR" << std::endl;
     std::cout << std::endl;
 
-    w = 1024*3/4;
-    h = 1024*3/4;
+    w = 512;
+    h = 512;
 
     if((w / TILESIZE)*TILESIZE != w)
         w = (w/TILESIZE+1)*TILESIZE;
@@ -115,6 +115,9 @@ int main(int argc, char *argv[])
 
     while(render)
     {
+        std::cout << "\r\033[K[" << timer.time() <<  "] Sample " << sample << ": 0.0 %" << std::flush;
+        screen.update(fb);
+        updated.reset();
         for(size_t y = 0; y < h; y += TILESIZE)
         {
             #pragma omp parallel for schedule(dynamic, 1)
@@ -133,7 +136,11 @@ int main(int argc, char *argv[])
                         SIMD::Vec dir = scr - pos;
                         dir.normalize();
 
-                        pixel.add(scene.radiance(SIMD::Ray(pos, dir), 0, dSFMT_states[omp_get_thread_num()]));
+                        Raytracer::Color s = scene.radiance(SIMD::Ray(pos, dir), 0, dSFMT_states[omp_get_thread_num()]);
+                        // if Phong triangle and Mirror cylinder touch a NaN is produced
+                        pixel.add(Raytracer::Color(isnan(s.r())? 0: s.r(),
+                                                   isnan(s.g())? 0: s.g(),
+                                                   isnan(s.b())? 0: s.b()));
                         pixel.div(sample);
 
                         bb[(y+tile_y)*w+x+tile_x] = pixel;
@@ -168,6 +175,7 @@ int main(int argc, char *argv[])
     scene.stats();
     std::cout << "Number of samples per pixel: " << sample << std::endl;
     std::cout << "Time: " << timer.time() << std::endl;
+    std::cout << "SPS: " << sample/timer.time() << std::endl;
 
     while(screen.open())
     {

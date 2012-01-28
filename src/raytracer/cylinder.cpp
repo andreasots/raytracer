@@ -36,7 +36,7 @@ RT_FLOAT Cylinder::intersect(const SIMD::Ray &r, RT_FLOAT &u, RT_FLOAT &v)
 
     RT_FLOAT a = U.dot(U);
     RT_FLOAT b = V.dot(U);
-    RT_FLOAT c = V.dot(V)-std::copysign(m_d, 1);
+    RT_FLOAT c = V.dot(V)-std::abs(m_d);
     RT_FLOAT det = b*b-a*c;
     if(det < 0)
         return HUGE_VAL;
@@ -56,13 +56,16 @@ RT_FLOAT Cylinder::intersect(const SIMD::Ray &r, RT_FLOAT &u, RT_FLOAT &v)
         return HUGE_VAL;
 
     SIMD::Point P = r.origin+t*r.direction;
-    u = (P-m_A).dot(m_a)/m_a.dot(m_a);
-    if(u < 0 || u > 1)
+    u = (P-m_A).dot(m_a);
+    RT_FLOAT a2 = m_a.dot(m_a);
+
+    if((u < 0 || u > a2) && (t2 < HUGE_VAL))
     {
         t = t2;
         P = r.origin+t*r.direction;
-        u = (P-m_A).dot(m_a)/m_a.dot(m_a);
+        u = (P-m_A).dot(m_a);
     }
+    u /= a2;
 
     if(u < 0 || u > 1)
         return HUGE_VAL;
@@ -79,6 +82,7 @@ RT_FLOAT Cylinder::intersect(const SIMD::Ray &r, RT_FLOAT &u, RT_FLOAT &v)
     v = std::atan2(i.dot(R), j.dot(R))/(2*M_PI);
     if(v < 0)
         v += 1;
+
     return t;
 }
 

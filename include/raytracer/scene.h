@@ -4,6 +4,7 @@
 #include "raytracer/color.h"
 #include "raytracer/material.h"
 #include "raytracer/object.h"
+#include "raytracer/texture.h"
 
 #include <SIMD/AABox.h>
 #include <SIMD/Ray.h>
@@ -30,7 +31,9 @@ class Scene
     private:
         std::vector<Object *> m_objects;
         unsigned long long m_intersections, m_hits;
-        Color m_sky;
+        enum {SKY_TEX, SKY_COL} m_sky_type;
+        Color m_sky_col;
+        Texture m_sky_tex;
 };
 
 } // namespace Raytracer

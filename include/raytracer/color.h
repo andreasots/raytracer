@@ -1,6 +1,7 @@
 #ifndef RAYTRACER_COLOR_H
 #define RAYTRACER_COLOR_H
 #include <PixelToaster.h>
+#include <ImfRgba.h>
 #include <xmmintrin.h>
 #include <cmath>
 
@@ -16,15 +17,23 @@ public:
      * \param g Green component
      * \param b Blue component
      */
-    Color(float r, float g, float b): m_data(_mm_set_ps(r, g, b, 0))
+    Color(float r, float g, float b): m_data(_mm_set_ps(r, g, b, 1))
     {
     }
 
-    Color(float val): m_data(_mm_set_ps(val, val, val, 0))
+    Color(float val): m_data(_mm_set_ps(val, val, val, 1))
     {
     }
 
     Color(PixelToaster::Pixel p): m_data(_mm_set_ps(p.r, p.g, p.b, p.a))
+    {
+    }
+
+    Color(Imf::Rgba p): m_data(_mm_set_ps(p.r, p.g, p.b, p.a))
+    {
+    }
+
+    Color(__m128 data): m_data(data)
     {
     }
 
@@ -119,6 +128,27 @@ public:
         return *this;
     }
 
+    Color operator+(const Color &c) const
+    {
+        Color ret = *this;
+        ret.add(c);
+        return ret;
+    }
+
+    Color operator-(const Color &c) const
+    {
+        Color ret = *this;
+        ret.sub(c);
+        return ret;
+    }
+
+    Color operator*(const float x) const
+    {
+        Color ret = *this;
+        ret.mult(x);
+        return ret;
+    }
+
     PixelToaster::Pixel PT() const
     {
         return PixelToaster::Pixel(r(), g(), b());
@@ -130,6 +160,11 @@ public:
         // says the Wikipedia
     }
 };
+
+inline Color operator*(float x, const Color &c)
+{
+    return c*x;
+}
 
 } // namespace raytracer
 

@@ -6,7 +6,6 @@
 #include "raytracer/tri.h"
 #include "raytracer/cylinder.h"
 
-#include "raytracer/material/ashikhminshirley.h"
 #include "raytracer/material/phong.h"
 #include "raytracer/material/dielectric.h"
 #include "raytracer/material/mirror.h"
@@ -43,7 +42,7 @@ template<class T> static std::string intToString(T i)
 
 namespace Raytracer {
 
-Scene::Scene(): m_objects(), m_intersections(0), m_hits(0), m_sky(0, 0, 0)
+Scene::Scene(): m_objects(), m_intersections(0), m_hits(0)
 {
 }
 
@@ -106,15 +105,6 @@ SIMD::Matrix Scene::open(std::string file)
                     RT_FLOAT n;
                     in >> n;
                     mat = new (allocate<material::Dielectric, 16>(1)) material::Dielectric(n);
-                }
-                else if(token == "AshikhminShirley")
-                {
-                    RT_FLOAT nv, nu, r, g, b;
-                    in >> r >> g >> b;
-                    Color Rd(r, g, b);
-                    in >> nu >> nv >> r >> g >> b;
-                    Color Rs(r, g, b);
-                    mat = new (allocate<material::AshikhminShirley, 16>(1)) material::AshikhminShirley(Rd, nu, nv, Rs);
                 }
                 else if(token == "Mirror")
                     mat = new material::Mirror();
@@ -239,9 +229,30 @@ SIMD::Matrix Scene::open(std::string file)
             }
             else if(token == "sky")
             {
-                RT_FLOAT r, g, b;
-                in >> r >> g >> b;
-                m_sky = Color(r, g, b);
+                in >> token;
+                if(token == "color")
+                {
+                    RT_FLOAT r, g, b;
+                    in >> r >> g >> b;
+                    m_sky_col = Color(r, g, b);
+                    m_sky_type = SKY_COL;
+                }
+                else if(token == "tex")
+                {
+                    token = "";
+                    char c;
+                    in.ignore(1024, '"');
+                    in.get(c);
+                    while(c != '"')
+                    {
+                        token += c;
+                        in.get(c);
+                    }
+                    m_sky_tex = Texture(token);
+                    m_sky_type = SKY_TEX;
+                }
+                else
+                    throw std::runtime_error("Unrecognised token '"+token+"' after 'sky' in statement "+intToString(statement));
             }
             else
                 throw std::runtime_error("Unrecognised token '"+token+"' in statement "+intToString(statement));
@@ -297,12 +308,23 @@ Color Scene::radiance(const SIMD::Ray &r, size_t depth, dsfmt_t &dsfmt)
         SIMD::Point p = r.origin+t*r.direction;
         Object *o = m_objects[id];
         const Material *mat = o->material();
-        SIMD::Vec n = o->tangentSpace(u, v)[2];
+        SIMD::Matrix m = o->tangentSpace(u, v);
 
-        c.add(mat->color(p, n, r.direction, *this, depth, dsfmt));
+        c.add(mat->color(p, m[2], r.direction, *this, depth, dsfmt));
     }
     else
-        c = m_sky;
+    {
+        if(m_sky_type == SKY_COL)
+            c = m_sky_col;
+        else if(m_sky_type == SKY_TEX)
+        {
+            RT_FLOAT theta = std::acos(r.direction[2]);
+            RT_FLOAT phi = std::atan2(r.direction[1], r.direction[0]);
+            if(phi < 0)
+                phi += 2*M_PI;
+            c = m_sky_tex.get(phi/(2*M_PI), theta/M_PI);
+        }
+    }
 
     return c;
 }

@@ -22,11 +22,19 @@ class Tri : public Object
         void normals(const SIMD::Vec &n1,
                      const SIMD::Vec &n2,
                      const SIMD::Vec &n3);
+#ifdef __SSE4_1__
+// Yet faster Ray-Triangle Intersection (Using SSE4)
+// Jiri Havel and Adam Herout
+        SIMD::Vec n, n1, n2;
+#else
+// Ray-Triangle Intersection Algorithm for Modern CPU Architectures
+// Maxim Shevtsov, Alexei Soupikov and Alexander Kapustin
         RT_FLOAT nu, nv, np, pu, pv, e0u, e0v, e1u, e1v;
         int ci;
+#endif
     protected:
         SIMD::Vec m_normals[3];
-        SIMD::AABox *m_bbox;
+        SIMD::AABox m_bbox;
     private:
 };
 

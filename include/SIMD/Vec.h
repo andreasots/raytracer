@@ -71,12 +71,16 @@ class Vec
 
 		inline Vec operator/(float f) const throw()
 		{
-			return _mm_div_ps(mData, _mm_load1_ps(&f));
+		    __m128 F = _mm_set1_ps(f);
+		    __m128 rcp = _mm_rcp_ps(F);
+			return _mm_mul_ps(mData, _mm_mul_ps(rcp, _mm_sub_ps(_mm_set1_ps(2), _mm_mul_ps(F, rcp))));
 		}
 
 		inline Vec &operator/=(float f) throw()
 		{
-			mData = _mm_div_ps(mData, _mm_load1_ps(&f));
+		    __m128 F = _mm_set1_ps(f);
+		    __m128 rcp = _mm_rcp_ps(F);
+			mData = _mm_mul_ps(mData, _mm_mul_ps(rcp, _mm_sub_ps(_mm_set1_ps(2), _mm_mul_ps(F, rcp))));
 			return *this;
 		}
 
@@ -92,7 +96,7 @@ class Vec
 #ifdef __SSE4_1__
 			return _mm_cvtss_f32(_mm_dp_ps(mData, v.mData, 0xF1));
 #elif defined(__SSE3__)
-            return _mm_cvtss_f32(_mm_hadd_ps(_mm_hadd_ps(_mm_mul_ps(mData, v.mData), _mm_setzero_ps()), _mm_setzero_ps());
+            return _mm_cvtss_f32(_mm_hadd_ps(_mm_hadd_ps(_mm_mul_ps(mData, v.mData), _mm_setzero_ps()), _mm_setzero_ps()));
 #else
             return (*this)[0]*v[0]+(*this)[1]*v[1]+(*this)[2]*v[2]+(*this)[3]*v[3];
 #endif
@@ -123,11 +127,15 @@ class Vec
 
 		inline void normalize() throw()
 		{
+		    __m128 len2 =
 #ifdef __SSE4_1__
-			mData = _mm_div_ps(mData, _mm_sqrt_ps(_mm_dp_ps(mData, mData, 0xFF)));
+			_mm_dp_ps(mData, mData, 0xFF);
 #else
-            mData = _mm_div_ps(mData, _mm_sqrt_ps(_mm_set1_ps(dot(*this))));
+            _mm_set1_ps(dot(*this));
 #endif
+            __m128 inv_len = _mm_rsqrt_ps(len2);
+            inv_len = _mm_mul_ps(_mm_set1_ps(0.5), _mm_mul_ps(inv_len, _mm_sub_ps(_mm_set1_ps(3), _mm_mul_ps(_mm_mul_ps(len2, inv_len), inv_len))));
+            mData = _mm_mul_ps(mData, inv_len);
 		}
 
 		inline __m128 data() const throw()

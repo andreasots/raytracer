@@ -1,6 +1,7 @@
 #ifndef RAYTRACER_ALLOCATOR_H
 #define RAYTRACER_ALLOCATOR_H
 #include <memory>
+#include <cstdlib>
 
 namespace Raytracer
 {

@@ -9,14 +9,37 @@
 
 inline bool equal(const RT_FLOAT &a, const RT_FLOAT &b)
 {
-    return std::abs(a-b) <= 10*std::numeric_limits<RT_FLOAT>::epsilon()*std::max<RT_FLOAT>(1, std::max(std::abs(a), std::abs(b)));
+    return std::abs(a-b) <= 20*std::numeric_limits<RT_FLOAT>::epsilon()*std::max<RT_FLOAT>(1, std::max(std::abs(a), std::abs(b)));
 }
 
 namespace Raytracer {
 
 Tri::Tri(const SIMD::Point& p1, const SIMD::Point& p2,
-         const SIMD::Point& p3, Material *mat): Object(mat)
+         const SIMD::Point& p3, Material *mat): Object(mat), m_bbox(p1, p1)
 {
+#ifdef __SSE4_1__
+    SIMD::Vec AB = p2-p1, AC = p3-p1;
+
+    this->n = AB.cross(AC);
+    RT_FLOAT denom = this->n.dot(this->n);
+
+    this->n1 = AC.cross(this->n)/denom;
+    this->n2 = this->n.cross(AB)/denom;
+
+    const RT_FLOAT d  = this->n.dot (SIMD::Vec(p1.data()));
+    const RT_FLOAT d1 = -this->n1.dot(SIMD::Vec(p1.data()));
+    const RT_FLOAT d2 = -this->n2.dot(SIMD::Vec(p1.data()));
+
+    this->n  += SIMD::Vec(0, 0, 0, d);
+    this->n1 += SIMD::Vec(0, 0, 0, d1);
+    this->n2 += SIMD::Vec(0, 0, 0, d2);
+
+    this->n = SIMD::Vec(_mm_shuffle_ps(n.data(), n.data(), 0x1B));
+    this->n1 = SIMD::Vec(_mm_shuffle_ps(n1.data(), n1.data(), 0x1B));
+    this->n2 = SIMD::Vec(_mm_shuffle_ps(n2.data(), n2.data(), 0x1B));
+
+    this->m_normals[0] = SIMD::Vec(0, 0, 0);
+#else
     SIMD::Vec e0 = p2-p1, e1 = p3-p1, n = e0.cross(e1);
     RT_FLOAT nw = -1;
     int w;
@@ -50,42 +73,84 @@ Tri::Tri(const SIMD::Point& p1, const SIMD::Point& p2,
     ci = w;
     if(equal(nu, 0) && equal(nv, 0))
         ci |= 8;
-    m_bbox = new (allocate<SIMD::AABox, 16>(1)) SIMD::AABox(p1, p1);
-    m_bbox->extend(SIMD::AABox(p2, p2));
-    m_bbox->extend(SIMD::AABox(p3, p3));
+#endif
+    m_bbox.extend(SIMD::AABox(p2, p2));
+    m_bbox.extend(SIMD::AABox(p3, p3));
 }
 
 Tri::~Tri()
 {
     //dtor
-    deallocate<SIMD::AABox, 16>(m_bbox, 1);
 }
 
 SIMD::Matrix Tri::tangentSpace(RT_FLOAT u, RT_FLOAT v)
 {
-    SIMD::Vec n;
+    SIMD::Vec N;
+#ifdef __SSE4_1__
+    if(m_normals[0].dot(m_normals[0]) != 0)
+#else
     if(ci & 16)
+#endif
     {
         RT_FLOAT w = 1 - u - v;
-        n = m_normals[0]*w+m_normals[1]*u+m_normals[2]*v;
-        n.normalize();
+        N = m_normals[0]*w+m_normals[1]*u+m_normals[2]*v;
+        N.normalize();
     }
     else
-        n = m_normals[0];
+#ifdef __SSE4_1__
+    {
+        N = SIMD::Vec(this->n[3], this->n[2], this->n[1]);
+        N.normalize();
+    }
+#else
+        N = m_normals[0];
+#endif
 
     SIMD::Vec U, V;
-    if(std::abs(n[0]) > 0.1)
-        U = SIMD::Vec(0, 1, 0).cross(n);
+    if(equal(N[0], 0))
+        U = SIMD::Vec(1, 0, 0).cross(N);
     else
-        U = SIMD::Vec(1, 0, 0).cross(n);
+        U = SIMD::Vec(0, 1, 0).cross(N);
     U.normalize();
-    V = n.cross(U);
+    V = N.cross(U);
 
-    return SIMD::Matrix(U.data(), V.data(), n.data(), SIMD::Point().data());
+    return SIMD::Matrix(U.data(), V.data(), N.data(), SIMD::Point().data());
 }
 
 RT_FLOAT Tri::intersect(const SIMD::Ray &r, RT_FLOAT &_u, RT_FLOAT &_v)
 {
+#ifdef __SSE4_1__
+    const __m128 o = _mm_shuffle_ps(r.origin.data(), r.origin.data(), 0x1B);
+    const __m128 d = _mm_shuffle_ps(r.direction.data(), r.direction.data(), 0x1B);
+
+    const __m128 det = _mm_dp_ps(n.data(), d, 0x7f);
+    const __m128 dett = _mm_dp_ps(_mm_mul_ps(_mm_set_ps(1, -1, -1, -1), n.data()), o, 0xff);
+    const __m128 oldt = _mm_set_ss(HUGE_VAL);
+
+    if((_mm_movemask_ps(_mm_xor_ps(dett, _mm_sub_ss(_mm_mul_ss(oldt, det), dett)))&1) == 0)
+    {
+        const __m128 detp = _mm_add_ps(_mm_mul_ps(o, det), _mm_mul_ps(dett, d));
+        const __m128 detu = _mm_dp_ps(detp, n1.data(), 0xf1);
+
+        if((_mm_movemask_ps(_mm_xor_ps(detu, _mm_sub_ss(det, detu)))&1) == 0)
+        {
+            const __m128 detv = _mm_dp_ps(detp, n2.data(), 0xf1);
+
+            if((_mm_movemask_ps(_mm_xor_ps(detv, _mm_sub_ss(det, _mm_add_ss(detu, detv))))&1) == 0)
+            {
+                __m128 inv_det = _mm_rcp_ss(det);
+                inv_det = _mm_mul_ss(inv_det, _mm_sub_ss(_mm_set_ss(2), _mm_mul_ss(det, inv_det)));
+                _u = _mm_cvtss_f32(_mm_mul_ss(detu, inv_det));
+                _v = _mm_cvtss_f32(_mm_mul_ss(detv, inv_det));
+                RT_FLOAT t = _mm_cvtss_f32(_mm_mul_ss(dett, inv_det));
+                if(equal(t, 0))
+                    t = HUGE_VAL;
+                return t;
+            }
+        }
+    }
+    return HUGE_VAL;
+#else
     const int w = ci & 3;
     const int u = (w == 0? 1: 0);
     const int v = (w == 2? 1: 2);
@@ -109,7 +174,6 @@ RT_FLOAT Tri::intersect(const SIMD::Ray &r, RT_FLOAT &_u, RT_FLOAT &_v)
     const RT_FLOAT detu = e1v*Du-e1u*Dv;
     const RT_FLOAT detv = e0u*Dv-e0v*Du;
 
-    // Russian bit magic
     const RT_FLOAT tmpdet = det - detu - detv;
     RT_UINT tmpdet0 = reinterpret_cast<const RT_UINT&>(tmpdet) ^ reinterpret_cast<const RT_UINT&>(detu);
     RT_UINT tmpdet1 = reinterpret_cast<const RT_UINT&>(detv) ^ reinterpret_cast<const RT_UINT&>(detu);
@@ -128,16 +192,16 @@ RT_FLOAT Tri::intersect(const SIMD::Ray &r, RT_FLOAT &_u, RT_FLOAT &_v)
     if(_v < 0 || _u+_v > 1)
         return HUGE_VAL;
     return t;
+#endif
 }
 SIMD::AABox Tri::bounds()
 {
-    return *m_bbox;
+    return m_bbox;
 }
 
 
 void Tri::normals(const SIMD::Vec &n1, const SIMD::Vec &n2, const SIMD::Vec &n3)
 {
-    ci |= 16;
     m_normals[0] = n1;
     m_normals[1] = n2;
     m_normals[2] = n3;

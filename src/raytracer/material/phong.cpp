@@ -81,6 +81,7 @@ Color Phong::color(const SIMD::Point &p, const SIMD::Vec &n, const SIMD::Vec &in
         lambda.mult(c_specular);
         ret.add(lambda);
     }
+
     return ret;
 }
 
