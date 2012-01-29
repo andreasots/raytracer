@@ -22,13 +22,13 @@ class Object
         {
 
         }
-        const Material *material()
+        const Material *material() const
         {
             return m_mat;
         }
-        virtual SIMD::Matrix tangentSpace(RT_FLOAT u, RT_FLOAT v) = 0;
-        virtual RT_FLOAT intersect(const SIMD::Ray &r, RT_FLOAT &u, RT_FLOAT &v) = 0;
-        virtual SIMD::AABox bounds() = 0;
+        virtual SIMD::Matrix tangentSpace(RT_FLOAT u, RT_FLOAT v) const = 0;
+        virtual RT_FLOAT intersect(const SIMD::Ray &r, RT_FLOAT &u, RT_FLOAT &v) const = 0;
+        virtual SIMD::AABox bounds() const = 0;
     protected:
         Material *m_mat;
     private:

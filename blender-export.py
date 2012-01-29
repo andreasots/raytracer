@@ -1,10 +1,18 @@
 import bpy
-obj = "Back wall"
+obj = "Plane.001"
 f = open(obj+".txt", "w")
 
-for face in bpy.data.objects[obj].data.faces:
-    f.write("triangle \""+obj+"\" ")
-    for vert in face.vertices:        
+mesh = bpy.data.objects[obj].to_mesh(bpy.context.scene, True, 'RENDER')
+
+for face in mesh.faces:
+    if len(face.vertices) == 3:
+        f.write("triangle")
+    elif len(face.vertices) == 4:
+        f.write("quad")
+    else:
+        raise ""
+    f.write(" \""+obj+"\" ")
+    for vert in face.vertices:
         f.write(str(bpy.data.objects[obj].data.vertices[vert].co.x)+" ")
         f.write(str(bpy.data.objects[obj].data.vertices[vert].co.y)+" ")
         f.write(str(bpy.data.objects[obj].data.vertices[vert].co.z)+" ")

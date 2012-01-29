@@ -13,9 +13,9 @@ class Sphere : public Raytracer::Object
         Sphere(SIMD::Point o, RT_FLOAT r, Material *mat);
         /** Default destructor */
         virtual ~Sphere();
-        virtual SIMD::Matrix tangentSpace(RT_FLOAT u, RT_FLOAT v);
-        virtual RT_FLOAT intersect(const SIMD::Ray &r, RT_FLOAT &u, RT_FLOAT &v);
-        virtual SIMD::AABox bounds();
+        virtual SIMD::Matrix tangentSpace(RT_FLOAT u, RT_FLOAT v) const;
+        virtual RT_FLOAT intersect(const SIMD::Ray &r, RT_FLOAT &u, RT_FLOAT &v) const;
+        virtual SIMD::AABox bounds() const;
     protected:
         SIMD::Point mO;
         RT_FLOAT mR;

@@ -12,7 +12,7 @@ class Null: public Raytracer::Material
     public:
         Null(Color _color);
         virtual ~Null();
-        Color color(const SIMD::Point &p, const SIMD::Vec &n, const SIMD::Vec &in, Scene &scene, size_t depth, dsfmt_t &dsfmt) const;
+        Color color(const SIMD::Point &p, const SIMD::Matrix &m, const SIMD::Vec &in, Scene &scene, size_t depth, dsfmt_t &dsfmt) const;
     protected:
         Color m_color;
     private:

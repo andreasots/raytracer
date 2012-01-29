@@ -5,6 +5,7 @@
 #include "raytracer/sphere.h"
 #include "raytracer/tri.h"
 #include "raytracer/cylinder.h"
+#include "raytracer/quad.h"
 
 #include "raytracer/material/phong.h"
 #include "raytracer/material/dielectric.h"
@@ -254,6 +255,50 @@ SIMD::Matrix Scene::open(std::string file)
                 else
                     throw std::runtime_error("Unrecognised token '"+token+"' after 'sky' in statement "+intToString(statement));
             }
+            else if(token == "quad")
+            {
+                token = "";
+                char c;
+                in.ignore(1024, '"');
+                in.get(c);
+                while(c != '"')
+                {
+                    token += c;
+                    in.get(c);
+                }
+
+                RT_FLOAT x, y, z;
+                in >> x >> y >> z;
+                SIMD::Point A(x, y, z);
+                in >> x >> y >> z;
+                SIMD::Point B(x, y, z);
+                in >> x >> y >> z;
+                SIMD::Point C(x, y, z);
+                in >> x >> y >> z;
+                SIMD::Point D(x, y, z);
+                if(!materials.count(token))
+                    materials[token] = new (allocate<material::Null, 16>(1)) material::Null(Color());
+                Quad *t = new (allocate<Quad, 16>(1)) Quad(A, B, C, D, materials[token]);
+                in >> token;
+                if(token == "normals")
+                {
+                    in >> x >> y >> z;
+                    SIMD::Vec n0(x, y, z);
+                    in >> x >> y >> z;
+                    SIMD::Vec n1(x, y, z);
+                    in >> x >> y >> z;
+                    SIMD::Vec n2(x, y, z);
+                    in >> x >> y >> z;
+                    SIMD::Vec n3(x, y, z);
+                    t->normals(n0, n1, n2, n3);
+                }
+                else if(token != "flat")
+                {
+                    throw std::runtime_error("Unrecognised token '"+token+"' after 'quad' in statement "+intToString(statement));
+                }
+                add(t);
+            }
+
             else
                 throw std::runtime_error("Unrecognised token '"+token+"' in statement "+intToString(statement));
         }
@@ -306,11 +351,11 @@ Color Scene::radiance(const SIMD::Ray &r, size_t depth, dsfmt_t &dsfmt)
     if(t < HUGE_VAL)
     {
         SIMD::Point p = r.origin+t*r.direction;
-        Object *o = m_objects[id];
+        const Object *o = m_objects[id];
         const Material *mat = o->material();
-        SIMD::Matrix m = o->tangentSpace(u, v);
+        const SIMD::Matrix m = o->tangentSpace(u, v);
 
-        c.add(mat->color(p, m[2], r.direction, *this, depth, dsfmt));
+        c.add(mat->color(p, m, r.direction, *this, depth, dsfmt));
     }
     else
     {

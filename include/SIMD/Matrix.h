@@ -35,7 +35,7 @@ namespace SIMD
             return *this;
         }
 
-        SIMD::Vec operator[](size_t i) throw(std::out_of_range)
+        SIMD::Vec operator[](size_t i) const throw(std::out_of_range)
         {
             if(i >= 4)
                 throw std::out_of_range("SIMD::Matrix::operator[]");

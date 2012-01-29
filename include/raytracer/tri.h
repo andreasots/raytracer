@@ -16,12 +16,13 @@ class Tri : public Object
             Material *mat);
         /** Default destructor */
         virtual ~Tri();
-        virtual SIMD::Matrix tangentSpace(RT_FLOAT u, RT_FLOAT v);
-        virtual RT_FLOAT intersect(const SIMD::Ray &r, RT_FLOAT &u, RT_FLOAT &v);
-        virtual SIMD::AABox bounds();
+        SIMD::Matrix tangentSpace(RT_FLOAT u, RT_FLOAT v) const;
+        RT_FLOAT intersect(const SIMD::Ray &r, RT_FLOAT &u, RT_FLOAT &v) const;
+        SIMD::AABox bounds() const;
         void normals(const SIMD::Vec &n1,
                      const SIMD::Vec &n2,
                      const SIMD::Vec &n3);
+    protected:
 #ifdef __SSE4_1__
 // Yet faster Ray-Triangle Intersection (Using SSE4)
 // Jiri Havel and Adam Herout
@@ -32,7 +33,6 @@ class Tri : public Object
         RT_FLOAT nu, nv, np, pu, pv, e0u, e0v, e1u, e1v;
         int ci;
 #endif
-    protected:
         SIMD::Vec m_normals[3];
         SIMD::AABox m_bbox;
     private:

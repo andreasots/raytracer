@@ -15,7 +15,7 @@ Null::~Null()
     //dtor
 }
 
-Color Null::color(const SIMD::Point &p, const SIMD::Vec &n, const SIMD::Vec &in, Scene &scene, size_t depth, dsfmt_t &dsfmt) const
+Color Null::color(const SIMD::Point &p, const SIMD::Matrix &m, const SIMD::Vec &in, Scene &scene, size_t depth, dsfmt_t &dsfmt) const
 {
     return m_color;
 }

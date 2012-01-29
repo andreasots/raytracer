@@ -14,16 +14,16 @@ Dielectric::~Dielectric()
     //dtor
 }
 
-Color Dielectric::color(const SIMD::Point &p, const SIMD::Vec &n, const SIMD::Vec &in, Scene &scene, size_t depth, dsfmt_t &dsfmt) const
+Color Dielectric::color(const SIMD::Point &p, const SIMD::Matrix &m, const SIMD::Vec &in, Scene &scene, size_t depth, dsfmt_t &dsfmt) const
 {
     Color ret;
-    SIMD::Vec d, N = n;
+    SIMD::Vec d, N = m[2];
     RT_FLOAT n1 = 1, n2 = m_n, n1n2 = n1/n2;
 
     RT_FLOAT cos_theta_1 = -N.dot(in);
     if(cos_theta_1 < 0)
     {
-        N = -n;
+        N = -N;
         cos_theta_1 = -cos_theta_1;
         n1 = m_n;
         n2 = 1;

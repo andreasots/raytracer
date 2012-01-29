@@ -83,7 +83,7 @@ Tri::~Tri()
     //dtor
 }
 
-SIMD::Matrix Tri::tangentSpace(RT_FLOAT u, RT_FLOAT v)
+SIMD::Matrix Tri::tangentSpace(RT_FLOAT u, RT_FLOAT v) const
 {
     SIMD::Vec N;
 #ifdef __SSE4_1__
@@ -117,7 +117,7 @@ SIMD::Matrix Tri::tangentSpace(RT_FLOAT u, RT_FLOAT v)
     return SIMD::Matrix(U.data(), V.data(), N.data(), SIMD::Point().data());
 }
 
-RT_FLOAT Tri::intersect(const SIMD::Ray &r, RT_FLOAT &_u, RT_FLOAT &_v)
+RT_FLOAT Tri::intersect(const SIMD::Ray &r, RT_FLOAT &_u, RT_FLOAT &_v) const
 {
 #ifdef __SSE4_1__
     const __m128 o = _mm_shuffle_ps(r.origin.data(), r.origin.data(), 0x1B);
@@ -194,7 +194,7 @@ RT_FLOAT Tri::intersect(const SIMD::Ray &r, RT_FLOAT &_u, RT_FLOAT &_v)
     return t;
 #endif
 }
-SIMD::AABox Tri::bounds()
+SIMD::AABox Tri::bounds() const
 {
     return m_bbox;
 }
@@ -205,6 +205,9 @@ void Tri::normals(const SIMD::Vec &n1, const SIMD::Vec &n2, const SIMD::Vec &n3)
     m_normals[0] = n1;
     m_normals[1] = n2;
     m_normals[2] = n3;
+#ifndef __SSE4_1__
+    ci |= 16;
+#endif
 }
 
 } // namespace Raytracer

@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
     std::cout << std::endl;
 
     w = 512;
-    h = 512;
+    h = 348;
 
     if((w / TILESIZE)*TILESIZE != w)
         w = (w/TILESIZE+1)*TILESIZE;
@@ -136,11 +136,7 @@ int main(int argc, char *argv[])
                         SIMD::Vec dir = scr - pos;
                         dir.normalize();
 
-                        Raytracer::Color s = scene.radiance(SIMD::Ray(pos, dir), 0, dSFMT_states[omp_get_thread_num()]);
-                        // if Phong triangle and Mirror cylinder touch a NaN is produced
-                        pixel.add(Raytracer::Color(isnan(s.r())? 0: s.r(),
-                                                   isnan(s.g())? 0: s.g(),
-                                                   isnan(s.b())? 0: s.b()));
+                        pixel.add(scene.radiance(SIMD::Ray(pos, dir), 0, dSFMT_states[omp_get_thread_num()]));
                         pixel.div(sample);
 
                         bb[(y+tile_y)*w+x+tile_x] = pixel;

@@ -16,8 +16,9 @@ Phong::~Phong()
     //dtor
 }
 
-Color Phong::color(const SIMD::Point &p, const SIMD::Vec &n, const SIMD::Vec &in, Scene &scene, size_t depth, dsfmt_t &dsfmt) const
+Color Phong::color(const SIMD::Point &p, const SIMD::Matrix &m, const SIMD::Vec &in, Scene &scene, size_t depth, dsfmt_t &dsfmt) const
 {
+    const SIMD::Vec u = m[0], v = m[1], n = m[2];
     Color ret;
     ret.add(c_emit);
 
@@ -38,14 +39,6 @@ Color Phong::color(const SIMD::Point &p, const SIMD::Vec &n, const SIMD::Vec &in
         // Cosine weighted random hemisphere sampling
         // from smallpt by Kevin Beason
         RT_FLOAT r1=2*M_PI*dsfmt_genrand_close_open(&dsfmt), r2=dsfmt_genrand_close_open(&dsfmt), r2s=std::sqrt(r2);
-
-        SIMD::Vec u, v;
-        if(std::abs(n[0]) > 0.1)
-            u = SIMD::Vec(0, 1, 0).cross(n);
-        else
-            u = SIMD::Vec(1, 0, 0).cross(n);
-        u.normalize();
-        v = n.cross(u);
 
         SIMD::Vec d = u*std::cos(r1)*r2s + v*std::sin(r1)*r2s + n*std::sqrt(1-r2);
         d.normalize();

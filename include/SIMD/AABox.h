@@ -35,18 +35,8 @@ namespace SIMD
 
         void extend(const AABox &box) throw()
         {
-            float _min[] = {mBounds[0][0], mBounds[0][1], mBounds[0][2]};
-            float _max[] = {mBounds[1][0], mBounds[1][1], mBounds[1][2]};
-
-            _max[0] = std::max(box.max()[0], _max[0]);
-            _min[0] = std::min(box.min()[0], _min[0]);
-            _max[1] = std::max(box.max()[1], _max[1]);
-            _min[1] = std::min(box.min()[1], _min[1]);
-            _max[2] = std::max(box.max()[2], _max[2]);
-            _min[2] = std::min(box.min()[2], _min[2]);
-
-            mBounds[0] = Point(_min[0], _min[1], _min[2]);
-            mBounds[1] = Point(_max[0], _max[1], _max[2]);
+            mBounds[0] = _mm_min_ps(mBounds[0].data(), box.mBounds[0].data());
+            mBounds[1] = _mm_max_ps(mBounds[1].data(), box.mBounds[1].data());
         }
 
         Point min() const throw()

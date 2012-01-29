@@ -19,7 +19,7 @@ Sphere::~Sphere()
     //dtor
 }
 
-SIMD::Matrix Sphere::tangentSpace(RT_FLOAT _u, RT_FLOAT _v)
+SIMD::Matrix Sphere::tangentSpace(RT_FLOAT _u, RT_FLOAT _v) const
 {
     RT_FLOAT phi = _u*M_PI;
     RT_FLOAT theta = _v*(2*M_PI);
@@ -49,7 +49,7 @@ SIMD::Matrix Sphere::tangentSpace(RT_FLOAT _u, RT_FLOAT _v)
     return SIMD::Matrix(u.data(), v.data(), n.data(), SIMD::Point().data());
 }
 
-RT_FLOAT Sphere::intersect(const SIMD::Ray &r, RT_FLOAT &u, RT_FLOAT &v)
+RT_FLOAT Sphere::intersect(const SIMD::Ray &r, RT_FLOAT &u, RT_FLOAT &v) const
 {
     static const RT_FLOAT eps = 1e-4*mR;
     SIMD::Vec V = r.origin - mO;
@@ -78,7 +78,7 @@ RT_FLOAT Sphere::intersect(const SIMD::Ray &r, RT_FLOAT &u, RT_FLOAT &v)
     return t;
 }
 
-SIMD::AABox Sphere::bounds()
+SIMD::AABox Sphere::bounds() const
 {
     SIMD::Vec v(mR, mR, mR);
     return SIMD::AABox(mO-v, mO+v);

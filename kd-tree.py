@@ -178,6 +178,15 @@ def main(argc, argv):
 				vector(max(A.x, B.x, C.x), max(A.y, B.y, C.y), max(A.z, B.z, C.z))]
 				boxes += [box]
 				curve(pos = [A, B, C, A], color=color.green)
+			elif line[0] == "quad":
+				A = vector(float(line[2]), float(line[3]), float(line[4]))
+				B = vector(float(line[5]), float(line[6]), float(line[7]))
+				C = vector(float(line[8]), float(line[9]), float(line[10]))
+				D = vector(float(line[11]), float(line[12]), float(line[13]))
+				box = [vector(min(A.x, B.x, C.x, D.x), min(A.y, B.y, C.y, D.y), min(A.z, B.z, C.z, D.z)),
+				vector(max(A.x, B.x, C.x, D.x), max(A.y, B.y, C.y, D.y), max(A.z, B.z, C.z, D.z))]
+				boxes += [box]
+				curve(pos = [A, B, C, D, A], color=color.green)
 			elif line[0] == "camera":
 				if line[1] == "lookat":
 					eye = vector(float(line[2]), float(line[3]), float(line[4]))

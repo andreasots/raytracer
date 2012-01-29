@@ -11,7 +11,7 @@ Cylinder::~Cylinder()
 {
 }
 
-SIMD::Matrix Cylinder::tangentSpace(RT_FLOAT _u, RT_FLOAT _v)
+SIMD::Matrix Cylinder::tangentSpace(RT_FLOAT _u, RT_FLOAT _v) const
 {
     SIMD::Vec i, j, u = m_a;
     u.normalize();
@@ -29,7 +29,7 @@ SIMD::Matrix Cylinder::tangentSpace(RT_FLOAT _u, RT_FLOAT _v)
     return SIMD::Matrix(u.data(), v.data(), n.data(), SIMD::Point().data());
 }
 
-RT_FLOAT Cylinder::intersect(const SIMD::Ray &r, RT_FLOAT &u, RT_FLOAT &v)
+RT_FLOAT Cylinder::intersect(const SIMD::Ray &r, RT_FLOAT &u, RT_FLOAT &v) const
 {
     static const RT_FLOAT eps = 1e-4*std::abs(m_d);
     SIMD::Vec V = (r.origin-m_A).cross(m_a), U = r.direction.cross(m_a);
@@ -86,7 +86,7 @@ RT_FLOAT Cylinder::intersect(const SIMD::Ray &r, RT_FLOAT &u, RT_FLOAT &v)
     return t;
 }
 
-SIMD::AABox Cylinder::bounds()
+SIMD::AABox Cylinder::bounds() const
 {
     RT_FLOAT m_r = std::sqrt(m_d/m_a.dot(m_a));
     const SIMD::Point A = m_A, B = m_A + m_a;
