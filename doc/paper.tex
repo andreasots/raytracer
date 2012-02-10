@@ -81,67 +81,234 @@ Järgnev lõik pärineb Eesti Standardikeskuse standardist EVS-ISO/IEC~2382-13:1
 \begin{quote}
 Kiirte jälitus --- Vaatleja silmast stseeni objektideni kulgevate
 kujuteldavate valguskiirte jälitusel põhinev meetod stseeni nende osade
-määramiseks, mis tuleb kuvada saadaval pildil.
-
-MÄRKUS: Jälitus võib hõlmata valguse peegeldumist ja murdumist.\cite{ISO:2382-13}
+määramiseks, mis tuleb kuvada saadaval pildil.\cite{ISO:2382-13}
 \end{quote}
 
 Kiirtejälitus pakub praeguseni teadaolevatest ilmestusmeetoditest kõige
 realistlikumat tulemust, sest kasutab ilmestusel valguse füüsikalist
 mudelit.
 
-\section{Kiirtejälituse algoritm}
-Esimese kiirtejälituse algoritmi (mitte \textit{ray tracing} aga
-\textit{ray casting}) lõi Arthur Appel 1968. aastal. Programm
-\ref{prog:raycasting} on selle algoritmi teostus. \texttt{eye} on
-kaamera koordinaadid ruumis, \texttt{imagePlane(x, y)} tagastab punkti
-pilditasandil koordinaatidega \texttt{x} ja \texttt{y} ja
-\texttt{trace(r)} leiab lähima keha selle kiire teel ja tagastab selle
-värvi.
 
-\begin{lstlisting}[caption=\textit{Ray casting}, label=prog:raycasting]
-int w, h;
-Pixel image[h][w];
+\section{Valguse füüsikaline mudel}
+Kiirtejälitus kasutab radiomeetriat valguse mudelina, sest piksli heledus
+ekraanil on otseselt seotud mõõdetud kirkusega.
 
-for(int y = 0; y < h; y++)
-{
-	for(int x = 0; x < w; x++)
-	{
-		Ray r;
-		r.position = eye;
-		r.direction = imagePlane(x, y) - eye;
-		image[y][x] = trace(r);
-	}
-}
-\end{lstlisting}
+Läbi stseeni peegeldunud valguse kirkuse määramiseks on vaja arvutada
+läbi pilditasandi paistvate pindade kirkust. Selleks on muuhulgas vaja
+ka teada, kuidas muutub peegelduva valguse suund valgusallikast vaatlejani
+jõudes. Funktsioon \(f_r(\omega', \omega)\) näitab, kui palju suunast
+\(-\omega'\) tulnud valgusest peegeldub suunda \(\omega\). Radiomeetrilistes
+suurustes tähendab see väljuva kirkuse suhe sissetulevasse kiiritustihedusse
+(võrrand \ref{eq:BRDF}).
 
-Kasutades kahendpuud kehade seast otsimiseks on algoritmi keerukuseks
-\(O(\log n)\) kehade arvu suhtes.
-
-1979. aastal lisas Turner Whitted algoritmile varjud ja valguse
-peegeldumise ning murdumise.
-
-1986. aasta SIGGRAPHil tutvustas Jim Kajiya oma artiklit
-ilmestusvõrrandist (võrrand \ref{eq:kajiya}), mis üldistas mõndasid
-ilmestusmeetodeid. \cite{kajiya86}
-
-\begin{equation} \label{eq:kajiya}
-I(x, x') = g(x, x')\left[\epsilon(x, x') +\int_S \rho(x, x', x'')I(x', x'') dx'' \right]
+\begin{equation} \label{eq:BRDF}
+f_r(\omega', \omega) = \frac{dL_r(\omega)}{dE_r(\omega')}
 \end{equation}
 
-Kajiya ilmestusvõrrandi üks puuduseid on sõltuvus kehade arvust, sest
-integreeritakse üle kõikide kehade kõikide punktide ja liiasus mõningate
-\(x''\) korral, näiteks kui leidub mitu \(x''\), mis asuvad sama sirgel
-ning lähim neist varjab ära ülejäänud. Tänapäevasemal ilmestusvõrrandil
-(võrrand \ref{eq:render}) pole neid puuduseid.
+Funktsioon \(f_r(\omega', \omega)\) näitab materjali omadust peegeldada
+valgust. Kõikidel füüsikaliselt korrektsetel materjalidel on kolm
+lisaomadust:
 
-\begin{equation} \label{eq:render}
-L(x, \omega) = L_e(x, \omega) + \int_\Omega f_r(x, \omega', \omega) L_i(x, \omega') d\omega'
+\begin{enumerate}
+\item Positiivsus: \(f_r(\omega', \omega) \geq 0 \)
+\item Ümberpööratavus: \(f_r(\omega', \omega) = f_r(\omega, \omega')\)
+\item Energia jäävus: \(\int_\Omega f_r(\omega', \omega) d\omega \leq 1\) iga \(\omega'\) korral
+\end{enumerate}
+
+Funktsiooni \(f_r(\omega', \omega)\) abil on võimalik leida punktist \(x\)
+väljuv kirkus \(L_o\) (võrrand \ref{eq:reflectance}). \(x\) on mõõdetav
+punkt, \(\omega\) on vektor mõõdetavast punktist vaatleja poole,
+\(L_i\) on suunast \(\omega'\) tulev kirkus.
+
+\begin{equation} \label{eq:reflectance}
+L_o(x, \omega) = \int_\Omega f_r(x, \omega', \omega) L_i(x, \omega') d\omega'
 \end{equation}
+
+Funktsiooni \(f_r(\omega', \omega)\) sõltuvus mõõdetavast punktist on
+seletatav sellega, et see funktsioon määrab ühe kindla pinna
+peegelduvuse, mitte kõikide stseenis olevate pindade peegelduvust.
+
+Võrrand \ref{eq:reflectance} ei ole piisav, kui pind ka kiirgab valgust.
+Kiiratava valguse kirkuse (\(L_e\)) võib lihtsalt juurde liita peegeldunud valguse
+kirkusele (võrrand \ref{eq:rendering}).
+
+\begin{equation} \label{eq:rendering}
+L_o(x, \omega) = L_e(x, \omega) + \int_\Omega f_r(x, \omega', \omega) L_i(x, \omega') d\omega'
+\end{equation}
+
+Ainus seni käsitlemata tegur võrrandis \ref{eq:rendering} on \(L_i\),
+mille saab avaldada \(L_o\) kaudu (võrrand \ref{eq:incident}). 
+
+\begin{equation} \label{eq:incident}
+L_i(x, \omega) = L_o(x + t\omega, -\omega)
+\end{equation}
+
+Kui asendada võrrand \ref{eq:incident} võrrandisse \ref{eq:rendering},
+on tulemuseks mitmekordne integraal, mida on isegi arvutil ebamugav
+analüütiliselt lahendada.
 
 \section{Monte Carlo meetod}
-\section{Lõikumised}
-\section{Valguse peegeldumine}
+Monte Carlo meetod on stohhastiline meetod integraali väärtuse arvutamiseks.
+Igast integreerimislõigust võetakse juhuslik suurus ja leitakse integraali
+ligikaudne väärtus. Kõikide leitud väärtuste aritmeetiline keskmine
+läheneb integraali väärtusele kui ligikaudsete tulemuste arv läheneb
+lõpmatusele. Monte Carlo meetodiga on võimalik suhteliselt lihtsalt
+ligikaudselt määrata ka keerulisi integraale nagu näiteks võrrand \ref{eq:rendering}.
+
+Üks puudus eelmises lõigus kirjeldatud meetodil siiski on: kui juhusliku
+protsessiga jõutakse kohale, kus funktsiooni väärtus on väga suur, siis
+Monte Carlo meetod ülehindab integraali väärtust ja pildile tuleb teistega
+võrreldes väga hele piksel (nn ``jaaniussike"). Selle ennetamiseks tuleks
+integreerimislõigust valimisel eelistada väärtusi, mille korral
+integreeritava väärtus on suurem. Sellisel juhul tuleb integreeritavat
+läbi jagada juhusliku väärtuse tõenäosusfunktsiooniga (võrrand \ref{eq:mc-is1}).
+
+\begin{equation} \label{eq:mc-is1}
+L_o(x, \omega) = L_e(x, \omega) + \int_\Omega \frac{f_r(x, \omega', \omega)}{P(\omega')} L_i(x, \omega') d\omega'
+\end{equation}
+
+Kui valida võrrandis \ref{eq:mc-is1} \(\omega'\) nii, et selle
+tõenäosusfunktsioon on võrdne peegeldusfunktiooniga, siis on nende
+jagatis üks ja võrrand lihtsustub (võrrand \ref{eq:mc-is2}).
+
+\begin{equation} \label{eq:mc-is2}
+L_o(x, \omega) = L_e(x, \omega) + \int_\Omega L_i(x, \omega') d\omega'
+\end{equation}
+
+\section{Lähima pinna leidmine}
+Olgu kolmemõõtmelises ruumis kaks punkti \(A\) ja \(B\). Kõik punktid
+lõigul \(AB\) on võimalik leida, liites punktile \(A\) vektori \(\vec{AB}\)-ga
+samasihilise, kuid lühema vektori (võrrand \ref{eq:ray-1}).
+
+\begin{equation} \label{eq:ray-1}
+P = A + t\vec{AB}, \quad 0 \leq t \leq 1
+\end{equation}
+
+Kiire definitsioon ütleb, et kiir on lõik, mis on pikendatud lõpmatult
+üle ühe otspunkti. Pikendades üle punkti \(B\) peab olema \(t\)
+mittenegatiivne, mida on lihtsam kontrollida, kui seda, kas \(t\) on
+väiksem ühest.
+
+Uurimistöös on kasutusel selline tähistus kui pole märgitud teisiti:
+\(P\) on kiire alguspunkt, \(\vec s\) on ühikvektor kiire suunas ja
+\(P'\) on punkt kiirel, mille kaugus kiire alguspunktist on \(t\)
+(võrrand \ref{eq:ray}).
+
+\begin{equation} \label{eq:ray}
+P' = P + t\vec s, \quad t \geq 0
+\end{equation}
+
+Võrrandis \ref{eq:incident} on \(L_o\) esimene argument sarnane kiire
+võrrandiga, nimelt on seal \(t\) vähim positiivne\footnote{Kui \(t=0\),
+saadaks jälle punkt \(x\)} arv, mille korral \(x + t\omega\) on lähim
+punkt mõnel pinnal. Selle punkti saab leida, kui leida kõikide pindade
+lõikepunktid selle kiirega ja võtta neist vähim positiivne.
+
+\subsection{Kiire lõikumine tasandiga}
+Kõik vektorid tasandil on risti tasandi normaalvektoriga (võrrand
+\ref{eq:plane1}). \(A\) on punkt tasandil ja \(P'\) on otsitav punkt.
+
+\begin{equation} \label{eq:plane1}
+(A - P') \cdot \vec n = 0
+\end{equation}
+
+Kiire ja tasandi lõikepunkti leidmiseks on vaja lahendada võrrandisüsteem
+\ref{eq:plane2}. Parameetri \(t\) kohta kehtivad samad piirangud, mis
+võrrandis \ref{eq:ray}.
+
+\begin{equation} \label{eq:plane2}
+\left\{
+\begin{array}{l}
+(A - P') \cdot \vec n = 0 \\
+P' = P + t\vec s
+\end{array}
+\right.
+\end{equation}
+
+\[(A - P + t\vec s) \cdot \vec n = 0\]
+
+\[(A - P) \cdot \vec n + t\vec s \cdot \vec n = 0\]
+
+\[t\vec s \cdot \vec n = (P-A) \cdot \vec n\]
+
+\begin{equation} \label{eq:plane3}
+t = \frac{(P-A) \cdot \vec n}{\vec s \cdot \vec n}
+\end{equation}
+
+Kui võrrandis \ref{eq:plane3} on lugeja null, algab kiir tasandilt, kui
+nimetaja on null, siis kiir on paralleelne tasandiga, kui aga mõlemad on
+nullid, asub kiir tasandil.
+
+\subsection{Kiire lõikumine kolmnurgaga}
+Olgu kolmnurk \(ABC\). Olgu punkt \(A\) koordinaatsüsteemi alguspunkt ja
+vektorid \(\vec{AB}\) ja \(\vec{AC}\) vektorruumi baasiks. Nüüd on
+võimalik kirjutada iga punkt selle kolmnurga tasandil nende vektorite
+summana (võrrand \ref{eq:tri-1}).
+
+\begin{equation} \label{eq:tri-1}
+P' = A + u\vec{AB} + v\vec{AC}
+\end{equation}
+
+Kui \(u\) või \(v\) on väiksem kui null või suurem kui üks, asub punkt
+kolmnurgast väljas. Kui punkt asub sirge \(BC\) kohal, on punkt
+kolmnurgast väljas. Sirge \(BC\) võrrand on \(x + y = 1\), seega peab
+punkti koordinaatide summa olema väiksem või võrdne ühega.
+
+\subsubsection{Möller-Trumbore lähenemine}
+Kiire lõikumise kolmnurgaga saab leida võrrandisüsteemist \ref{eq:tri-mt-1}.
+
+\begin{equation} \label{eq:tri-mt-1}
+\left\{
+\begin{array}{l}
+P' = P + t\vec s \\
+P' = A + u\vec{AB} + v\vec{AC} \\
+0 \leq u \leq 1 \\
+0 \leq v \leq 1 \\
+u + v \leq 1 \\
+t > 0 
+\end{array}
+\right.
+\end{equation}
+
+\[P + t\vec s = A + u\vec{AB} + v\vec{AC}\]
+
+\[u\vec{AB} + v\vec{AC} -t\vec s = (P - A)\]
+
+\begin{equation} \label{eq:tri-mt-2}
+u\vec{AB} + v\vec{AC} + t(-\vec s) = (P - A)
+\end{equation}
+
+Võrrand \ref{eq:tri-mt-2} on kolme tundmatuga lineaarvõrrandisüsteem,
+mida on võimalik lahendada kolmerealise determinandiga.
+
+\subsubsection{Waldi lähenemine}
+Leida punkt \(P'\) kiire ja tasandi lõikumise võrrandist (võrrand
+\ref{eq:plane3}), projitseerida kolmnurk ja leitud punkt mõnele koordinaatteljega
+risti olevale tasandile ja lahendada võrrand \ref{eq:tri-1}.
+
+\subsection{Kiire lõikumine keraga}
+\begin{equation} \label{eq:sphere1}
+\left\{
+\begin{array}{l}
+(A - P')^2 = r^2 \\
+P' = P + t\vec s
+\end{array}
+\right.
+\end{equation}
+
+\subsection{Kiire lõikumine silindriga}
+Silinder otspunktidega \(A\) ja \(B\) ning raadiusega \(r\). Punkti \(P'\) kaugus sirgest \(AB\)
+peab olema \(r\). Punkt \(P'\) ei tohi olla punktist \(A\) kaugemal kui \(B\) vektori \(\vec{AB}\)
+sihis ja \(P'\) ei tohi olla punktist \(B\) kaugemal kui \(A\) vektori \(\vec{AB}\) sihis (võrrand \ref{eq:cyl-1}).
+
+\begin{equation} \label{eq:cyl-1}
+\left\{
+\begin{array}{l}
+\frac{\left(\vec{AB}\times\vec{AP'}\right)^2}{\vec{AB}^2} = r^2 \\
+0\leq\vec{AB}\cdot\vec{AP'}\leq|\vec{AB}| 
+\end{array}
+\right.
+\end{equation}
 
 \chapter*{Kokkuvõte}
 \addcontentsline{toc}{chapter}{Kokkuvõte}
@@ -150,4 +317,12 @@ L(x, \omega) = L_e(x, \omega) + \int_\Omega f_r(x, \omega', \omega) L_i(x, \omeg
 \renewcommand\bibname{Kasutatud materjalid}
 \bibliographystyle{apacite}
 \bibliography{paper}
+
+\appendix
+\chapter{Radiomeetria mõisted}
+\begin{description}
+\item[Kiirgusvoog] (ing. k. \textit{radiant flux}) on energiahulk, mille kiirgus kannab ajaühikus läbi pinna.
+\item[Kiiritustihedus] (ing. k. \textit{irradiance}) iseloomustab ruumi- ja mittepunktvalgusallikate kiiratud valgust.
+\item[Kirkus] (ing. k. \textit{radiance}) nimetatakse pinnale langevat kiirgusvoogu.
+\end{description}
 \end{document}
