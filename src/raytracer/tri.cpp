@@ -15,7 +15,7 @@ inline bool equal(const RT_FLOAT &a, const RT_FLOAT &b)
 namespace Raytracer {
 
 Tri::Tri(const SIMD::Point& p1, const SIMD::Point& p2,
-         const SIMD::Point& p3, Material *mat): Object(mat), m_bbox(p1, p1)
+         const SIMD::Point& p3, Material *mat): Object(mat)
 {
 #ifdef __SSE4_1__
     SIMD::Vec AB = p2-p1, AC = p3-p1;
@@ -74,8 +74,6 @@ Tri::Tri(const SIMD::Point& p1, const SIMD::Point& p2,
     if(equal(nu, 0) && equal(nv, 0))
         ci |= 8;
 #endif
-    m_bbox.extend(SIMD::AABox(p2, p2));
-    m_bbox.extend(SIMD::AABox(p3, p3));
 }
 
 Tri::~Tri()
@@ -194,11 +192,6 @@ RT_FLOAT Tri::intersect(const SIMD::Ray &r, RT_FLOAT &_u, RT_FLOAT &_v) const
     return t;
 #endif
 }
-SIMD::AABox Tri::bounds() const
-{
-    return m_bbox;
-}
-
 
 void Tri::normals(const SIMD::Vec &n1, const SIMD::Vec &n2, const SIMD::Vec &n3)
 {

@@ -6,6 +6,8 @@
 #include "raytracer/object.h"
 #include "raytracer/texture.h"
 
+#include "raytracer/octree/root.h"
+
 #include <SIMD/AABox.h>
 #include <SIMD/Ray.h>
 #include <SIMD/Matrix.h>
@@ -29,6 +31,7 @@ class Scene
         void stats();
     protected:
     private:
+        Octree::Root octree;
         std::vector<Object *> m_objects;
         unsigned long long m_intersections, m_hits;
         enum {SKY_TEX, SKY_COL} m_sky_type;

@@ -18,7 +18,6 @@ class Tri : public Object
         virtual ~Tri();
         SIMD::Matrix tangentSpace(RT_FLOAT u, RT_FLOAT v) const;
         RT_FLOAT intersect(const SIMD::Ray &r, RT_FLOAT &u, RT_FLOAT &v) const;
-        SIMD::AABox bounds() const;
         void normals(const SIMD::Vec &n1,
                      const SIMD::Vec &n2,
                      const SIMD::Vec &n3);
@@ -34,7 +33,6 @@ class Tri : public Object
         int ci;
 #endif
         SIMD::Vec m_normals[3];
-        SIMD::AABox m_bbox;
     private:
 };
 

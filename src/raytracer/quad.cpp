@@ -169,15 +169,6 @@ RT_FLOAT Quad::intersect(const SIMD::Ray &r, RT_FLOAT &_u, RT_FLOAT &_v) const
     }
     return t;
 }
-SIMD::AABox Quad::bounds() const
-{
-    SIMD::AABox m_bbox(v00, v00);
-    m_bbox.extend(SIMD::AABox(v10, v10));
-    m_bbox.extend(SIMD::AABox(v11, v11));
-    m_bbox.extend(SIMD::AABox(v01, v01));
-    return m_bbox;
-}
-
 
 void Quad::normals(const SIMD::Vec &n1, const SIMD::Vec &n2, const SIMD::Vec &n3, const SIMD::Vec &n4)
 {

@@ -28,14 +28,6 @@ Color Phong::color(const SIMD::Point &p, const SIMD::Matrix &m, const SIMD::Vec 
     RT_FLOAT xi = dsfmt_genrand_close_open(&dsfmt);
     if(diffuse > xi)
     {
-        RT_FLOAT weight = std::max(c_diffuse.r(), std::max(c_diffuse.g(), c_diffuse.b()));
-        Raytracer::Color lambda = c_diffuse;
-        if(depth > 16)
-            if(weight < dsfmt_genrand_close_open(&dsfmt))
-                return ret;
-            else // for conservation of energy:
-                lambda.div(weight);
-
         // Cosine weighted random hemisphere sampling
         // from smallpt by Kevin Beason
         RT_FLOAT r1=2*M_PI*dsfmt_genrand_close_open(&dsfmt), r2=dsfmt_genrand_close_open(&dsfmt), r2s=std::sqrt(r2);
@@ -44,6 +36,7 @@ Color Phong::color(const SIMD::Point &p, const SIMD::Matrix &m, const SIMD::Vec 
         d.normalize();
         // End of CWRHS
 
+        Raytracer::Color lambda = c_diffuse;
         lambda.mult(scene.radiance(SIMD::Ray(p, d), depth+1, dsfmt));
         ret.add(lambda);
     }

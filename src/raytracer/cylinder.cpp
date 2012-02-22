@@ -86,19 +86,4 @@ RT_FLOAT Cylinder::intersect(const SIMD::Ray &r, RT_FLOAT &u, RT_FLOAT &v) const
     return t;
 }
 
-SIMD::AABox Cylinder::bounds() const
-{
-    RT_FLOAT m_r = std::sqrt(m_d/m_a.dot(m_a));
-    const SIMD::Point A = m_A, B = m_A + m_a;
-    SIMD::Vec n = m_a;
-    n.normalize();
-    const SIMD::Vec r(m_r*std::sqrt(1-n[0]*n[0]), m_r*std::sqrt(1-n[1]*n[1]),
-                      m_r*std::sqrt(1-n[2]*n[2]));
-
-    return SIMD::AABox(SIMD::Point(std::min(A[0], B[0]), std::min(A[1], B[1]),
-                                   std::min(A[2], B[2])) - r,
-                       SIMD::Point(std::max(A[0], B[0]), std::max(A[1], B[1]),
-                                   std::max(A[2], B[2])) + r);
-}
-
 } // namespace Raytracer

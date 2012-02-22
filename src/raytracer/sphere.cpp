@@ -78,10 +78,4 @@ RT_FLOAT Sphere::intersect(const SIMD::Ray &r, RT_FLOAT &u, RT_FLOAT &v) const
     return t;
 }
 
-SIMD::AABox Sphere::bounds() const
-{
-    SIMD::Vec v(mR, mR, mR);
-    return SIMD::AABox(mO-v, mO+v);
-}
-
 } // namespace Raytracer

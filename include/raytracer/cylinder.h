@@ -13,7 +13,6 @@ class Cylinder : public Object
         virtual ~Cylinder();
         virtual SIMD::Matrix tangentSpace(RT_FLOAT u, RT_FLOAT v) const;
         RT_FLOAT intersect(const SIMD::Ray &r, RT_FLOAT &u, RT_FLOAT &v) const;
-        SIMD::AABox bounds() const;
     protected:
         SIMD::Point m_A;
         SIMD::Vec m_a;

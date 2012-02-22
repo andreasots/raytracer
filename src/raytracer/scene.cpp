@@ -184,6 +184,7 @@ SIMD::Matrix Scene::open(std::string file)
                 {
                     throw std::runtime_error("Unrecognised token '"+token+"' after 'triangle' in statement "+intToString(statement));
                 }
+                octree.addTri(A, B, C, m_objects.size());
                 add(t);
             }
             else if(token == "sphere")
@@ -204,6 +205,7 @@ SIMD::Matrix Scene::open(std::string file)
                 in >> x;
                 if(!materials.count(token))
                     materials[token] = new (allocate<material::Null, 16>(1)) material::Null(Color());
+                octree.addSphere(O, x, m_objects.size());
                 add(new (allocate<Sphere, 16>(1)) Sphere(O, x, materials[token]));
             }
             else if(token == "cylinder")
@@ -226,6 +228,7 @@ SIMD::Matrix Scene::open(std::string file)
                 in >> x;
                 if(!materials.count(token))
                     materials[token] = new (allocate<material::Null, 16>(1)) material::Null(Color());
+                octree.addCylinder(A, B, x, m_objects.size());
                 add(new (allocate<Cylinder, 16>(1)) Cylinder(A, B, x, materials[token]));
             }
             else if(token == "sky")
@@ -296,6 +299,7 @@ SIMD::Matrix Scene::open(std::string file)
                 {
                     throw std::runtime_error("Unrecognised token '"+token+"' after 'quad' in statement "+intToString(statement));
                 }
+                octree.addQuad(A, B, C, D, m_objects.size());
                 add(t);
             }
 
@@ -318,24 +322,7 @@ void Scene::add(Object *o)
 
 RT_FLOAT Scene::intersect(const SIMD::Ray &r, size_t &id, RT_FLOAT &u, RT_FLOAT &v, RT_FLOAT max)
 {
-    RT_FLOAT ret = max;
-
-    for(size_t i = 0; i < m_objects.size(); i++)
-    {
-        RT_FLOAT U, V;
-        RT_FLOAT T = m_objects[i]->intersect(r, U, V);
-        if(T < ret)
-        {
-            ret = T;
-            id = i;
-            u = U;
-            v = V;
-            m_hits++;
-        }
-        m_intersections++;
-    }
-
-    return ret;
+    return octree.intersect(r, id, u, v, max, m_objects, m_intersections, m_hits);
 }
 
 Color Scene::radiance(const SIMD::Ray &r, size_t depth, dsfmt_t &dsfmt)

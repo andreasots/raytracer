@@ -39,6 +39,14 @@ namespace SIMD
             mBounds[1] = _mm_max_ps(mBounds[1].data(), box.mBounds[1].data());
         }
 
+        bool empty() const throw()
+        {
+            SIMD::Vec d = mBounds[1] - mBounds[0];
+            if(d.dot(d) == 0)
+                return true;
+            return false;
+        }
+
         Point min() const throw()
         {
             return mBounds[0];
@@ -61,40 +69,21 @@ namespace SIMD
 
         bool intersect(const Ray &r, RT_FLOAT &t0, RT_FLOAT &t1) const
         {
-/*            __m128 res = _mm_set_ps(mBounds[r.sign[0]][0], mBounds[1-r.sign[0]][0], mBounds[r.sign[1]][1], mBounds[1-r.sign[1]][1]);
-            res = _mm_sub_ps(res, _mm_set_ps(r.origin[0], r.origin[0], r.origin[1], r.origin[1]));
-            res = _mm_mul_ps(res, _mm_set_ps(r.invd[0], r.invd[0], r.invd[1], r.invd[1]));
-            float tmin = _mm_cvtss_f32(_mm_shuffle_ps(res, res, 0));
-            float tmax = _mm_cvtss_f32(_mm_shuffle_ps(res, res, 1));
-            float tymin = _mm_cvtss_f32(_mm_shuffle_ps(res, res, 2));
-            float tymax = _mm_cvtss_f32(_mm_shuffle_ps(res, res, 3));
-            float tmin = (mBounds[r.sign[0]][0] - r.origin[0]) * r.invd[0];
-            float tmax = (mBounds[1-r.sign[0]][0] - r.origin[0]) * r.invd[0];
-            float tymin = (mBounds[r.sign[1]][1] - r.origin[1]) * r.invd[1];
-            float tymax = (mBounds[1-r.sign[1]][1] - r.origin[1]) * r.invd[1];
-            if((tmin > tymax)||(tymin > tmax))
-                return false;
-            if(tymin > tmin)
-                tmin = tymin;
-            if(tymax < tmax)
-                tmax = tymax;
-            res = _mm_set_ps(mBounds[r.sign[2]][2], mBounds[1-r.sign[2]][2], 0, 0);
-            res = _mm_sub_ps(res, _mm_set_ps(r.origin[2], r.origin[2], 0, 0));
-            res = _mm_mul_ps(res, _mm_set_ps(r.invd[2], r.invd[2], 0, 0));
-            float tzmin = _mm_cvtss_f32(_mm_shuffle_ps(res, res, 0));
-            float tzmax = _mm_cvtss_f32(_mm_shuffle_ps(res, res, 1));
-            float tzmin = (mBounds[r.sign[2]][2] - r.origin[2]) * r.invd[2];
-            float tzmax = (mBounds[1-r.sign[2]][2] - r.origin[2]) * r.invd[2];
-            if((tmin > tzmax)||(tzmin > tmax))
-                return false;
-            if(tzmin > tmin)
-                tmin = tzmin;
-            if(tzmax < tmax)
-                tmax = tzmax;
-            t0 = tmin;
-            t1 = tmax;
-            return true;*/
-	    return false;
+            __m128 T1, T2, temp;
+
+            T1 = _mm_mul_ps((mBounds[0]-r.origin).data(), r.inv_d.data());
+            T2 = _mm_mul_ps((mBounds[1]-r.origin).data(), r.inv_d.data());
+            temp = T1;
+            T1 = _mm_min_ps(T1, T2);
+            T2 = _mm_max_ps(temp, T2);
+
+            SIMD::Vec v = T1;
+
+            t0 = std::max(v[0], std::max(v[1], v[2]));
+            v = T2;
+            t1 = std::min(v[0], std::min(v[1], v[2]));
+
+            return t0 < t1 && t1 > 0;
         }
     };
 }

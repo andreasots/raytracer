@@ -5,7 +5,7 @@
 
 namespace Raytracer
 {
-    template <class T, std::size_t align> inline T* allocate(size_t n)
+    template <class T, std::size_t align> inline T* allocate(size_t n = 1)
     {
         T *ret;
         if(posix_memalign(reinterpret_cast<void**>(&ret), align, n*sizeof(T)))
@@ -13,7 +13,7 @@ namespace Raytracer
         return ret;
     }
 
-    template <class T, std::size_t align> inline void deallocate(T* p, size_t n)
+    template <class T, std::size_t align> inline void deallocate(T* p, size_t n = 1)
     {
         free(p);
     }

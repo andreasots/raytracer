@@ -69,8 +69,8 @@ int main(int argc, char *argv[])
     std::cout << "\tOpenEXR" << std::endl;
     std::cout << std::endl;
 
-    w = 512;
-    h = 348;
+    w = 1024;
+    h = 768;
 
     if((w / TILESIZE)*TILESIZE != w)
         w = (w/TILESIZE+1)*TILESIZE;

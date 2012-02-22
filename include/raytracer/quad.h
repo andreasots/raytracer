@@ -19,7 +19,6 @@ class Quad : public Object
         virtual ~Quad();
         SIMD::Matrix tangentSpace(RT_FLOAT u, RT_FLOAT v) const;
         RT_FLOAT intersect(const SIMD::Ray &r, RT_FLOAT &u, RT_FLOAT &v) const;
-        SIMD::AABox bounds() const;
         void normals(const SIMD::Vec &n00,
                      const SIMD::Vec &n10,
                      const SIMD::Vec &n11,
