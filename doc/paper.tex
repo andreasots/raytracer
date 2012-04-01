@@ -14,7 +14,7 @@
 \usepackage{listings}
 \lstset{basicstyle=\footnotesize, language=C++, numbers=left, numberbychapter=false}
 \chapterfont{\fontsize{16pt}{19pt}\sffamily}
-\linespread{1.3}
+\linespread{1.5	}
 \renewcommand{\thechapter}{\arabic{chapter}.}
 \renewcommand{\thesection}{\thechapter\arabic{section}.}
 \renewcommand{\thesubsection}{\thesection\arabic{subsection}.}
@@ -67,13 +67,29 @@ Tallinn 2011
 
 \chapter*{Sissejuhatus}
 \addcontentsline{toc}{chapter}{Sissejuhatus}
-\pagestyle{plain}
 \thispagestyle{empty}
-Esimene lehekülg
+Kui kolmemõõtmeline arvutigraafika levima hakkas oli kaks võimalikku
+algoritmi: rasteriseerimine ja kiirtejälitus. Rasteriseerimist on võimalik
+realiseerida kasutades ainult täisarvude aritmeetikat, kiirtejälitust on
+võimalik realiseerida ainult ujukomaaritmeetikat. Ujukomaaritmeetika oli
+aeglane võrreldes täisarvude omaga, mis ei ole enam nii. 
 
-\clearpage
+Rasteriseerimine on liikunud üle ujukomaarvudele ja protsessori asemel
+toimub joonistamine graafikakaardis, mille abil on võimalik joonistada
+miljoneid kolmnurki kaadrisagedustel üle 30 kaadri sekundis koos erinevate
+effektidega. Kiirtejälitusega on võimalik kasutada ära senist infrastruktuuri
+ja saada realistlikum tulemus.
 
-Teine lehekülg
+Uurimistöö eesmärgiks on luua ülevaade kiirtejälitusest ning olla aluseks
+selle teema edasisel uurimisel.
+
+Uurimistöö allikatena on kasutatud internetist kättesaadavaid selle ala
+teaduslikke artikleid ja doktoritöid.
+
+Uurimistöö koosneb ühest teoreetilise osa peatükist, milles on kuus
+alampeatükki. Praktiline osa puudub. Lisa \ref{chap:download} sisaldab
+uurimistöö raames valminud kiirtejälitaja kompileerimiseks vajalikku
+informatsiooni.
 
 \chapter{Kiirtejälitus}
 \section{Kiirtejälituse mõiste}
@@ -476,7 +492,7 @@ olemasolul arvutada kõik pikslid paralleelselt.
 Mõned käsustikud (nt. Inteli x86 protsessorites MMX, SSE ja AVX) suudavad
 sooritada korraga tervel andmehulgal sama operatsiooni ligikaudselt ajaga,
 mis kulub tavalise käsustikuga ühe elemendi töötlemiseks. Eelmainitud
-käsustikest opereerivad ujukomaarvudega ainult SSE (\textit{Streaming
+käsustikest opereerivad uju\-koma\-arvudega ainult SSE (\textit{Streaming
 SIMD Extensions}) ja AVX (\textit{Advanced Vector Extensions}), mis 
 töötlevad vastavalt nelja ja kaheksa 32-bitise või kahe ja nelja 64-bitise
 ujukomaarvuga korraga. Registri laiusest olenevalt on võimalik töödelda
@@ -489,7 +505,7 @@ See ei paku nii suurt kiirusetõusu kui esimene variant kuid töötab alati.
 \subsubsection{Lõimtöötlus}
 Kuna kõikidel uutel protsessoritel on mitu tuuma on võimalik leida mitme
 piksli väärtus korraga. Ainsaks takistuseks on, et lõimtöötluse realisatsioonid
-on eri operatsioonisüsteemides erinevad, ainult UNIXi derivaatidel on
+on eri operatsiooni\-süstee\-mides erinevad, ainult UNIXi derivaatidel on
 UNIXi spetsifikatsioonist tulenev \texttt{pthread}i toetus, mis puudub
 Windowsil. Lahenduseks on GCC (GNU Compiler Collection) ja Microsofti
 Visual Studio poolt toetatud OpenMP (Open MultiProcessing) spetsifikatsioon.
@@ -586,10 +602,23 @@ C = C_t + S \cdot n \cdot C_i
 \item[\(\mathbf{C_i}\)] kiire kujunditega lõikumiste uurimise hind
 \end{itemize}
 
-
-
 \chapter*{Kokkuvõte}
 \addcontentsline{toc}{chapter}{Kokkuvõte}
+Uurimistöö eesmärgiks oli anda ülevaade ja kiirtejälituse põhiprotsesside
+suhtes sai eesmärk täidetud. 
+
+Kirjeldati:
+\begin{itemize}
+\item valguse füüsikalist mudelit,
+\item Monte Carlo meetodit multidimensionaalsete integraalide arvutamiseks,
+\item kiirte lõikumist erinevate kolmemõõtmeliste kujunditega,
+\item erinevaid peegeldusfunktsioone ja
+\item kolmemõõtmelise ruumi jaotamist kahendpuusse.
+\end{itemize}
+
+Uurimistöös toodi välja ka erinevad kiirtejälituse kiiruse tõstmise
+võimalused, millest on kasutatud näidisprogrammis kõiki peale
+graafikaprotsessoril arvutamist.
 
 % Kasutatud materjalid
 \renewcommand\bibname{Kasutatud materjalid}
@@ -597,14 +626,13 @@ C = C_t + S \cdot n \cdot C_i
 \bibliography{paper}
 
 \appendix
-\chapter{Radiomeetria mõisted}
-\begin{description}
-\item[Kiirgusvoog] (ing. k. \textit{radiant flux}) on energiahulk, mille kiirgus kannab ajaühikus läbi pinna.
-\item[Kiiritustihedus] (ing. k. \textit{irradiance}) iseloomustab ruumi- ja mittepunktvalgusallikate kiiratud valgust.
-\item[Kirkus] (ing. k. \textit{radiance}) nimetatakse pinnale langevat kiirgusvoogu.
-\end{description}
-
-\chapter{Kiirtejälitaja}
+%\chapter{Radiomeetria mõisted}
+%\begin{description}
+%\item[Kiirgusvoog] (ing. k. \textit{radiant flux}) on energiahulk, mille kiirgus kannab ajaühikus läbi pinna.
+%\item[Kiiritustihedus] (ing. k. \textit{irradiance}) iseloomustab ruumi- ja mittepunktvalgusallikate kiiratud valgust.
+%\item[Kirkus] (ing. k. \textit{radiance}) nimetatakse pinnale langevat kiirgusvoogu.
+%\end{description}
+\chapter{Kiirtejälitaja} \label{chap:download}
 Uurimistöö raames valmis programm, mis kasutab uurimistöös kirjeldatud
 algoritme ja ideid. Programmi suhteliselt suure mahu tõttu ei ole võimalik
 seda siin ära tuua. Programmi lähtekood on saadaval \texttt{git}i varamust
@@ -612,11 +640,38 @@ aadressil \url{https://github.com/andreasots/raytracer}. Programmi kompileerimis
 on vaja Single UNIX spetsifikatsioonile vastavat operatsioonisüsteemi,
 vastavalt operatsioonisüsteemile kas DirectX (Windows), X11 (Unix) või
 Cocoa (MacOS) teeke ja päiseid, OpenEXR teeki ning selle päiseid ja
-viimast C++ versiooni toetavat kompilaatorit.
+viimast C++ versiooni toetavat kompilaatorit. Lähtekoodiga on kaasas
+Code::Blocksi projektifail.
 
 \chapter*{Resümee}
+Kiirtejälitus on arvutigraafika algoritm, mis suudab luua realistlikuma
+kujutise kui rohkem kasutatud rasteriseerimine. Uurimistöös on kirjeldatud
+kiirtejälituse alussüsteeme nagu näiteks:
+\begin{itemize}
+\item valguse füüsikalist mudel,
+\item Monte Carlo meetod multidimensionaalsete integraalide arvutamiseks,
+\item kiirte lõikumine erinevate kolmemõõtmeliste kujunditega,
+\item erinevad peegeldusfunktsioonid ja
+\item kolmemõõtmelise ruumi jaotamine kahendpuusse.
+\end{itemize}
+
+Uurimistöö raames kirjutati lihtne kiirtejälitaja, mis kasutab uurimistöös
+kirjeldatud meetodeid.
 
 \chapter*{Abstract}
+Raytracing is a computer graphics algorithm that can create more realistic
+image than more commonly used rasterisation. This research paper covers
+the basics of raytracing such as:
+\begin{itemize}
+\item basic radiometry,
+\item Monte Carlo method for evaluation of multidimentional integrals,
+\item ray-object intersections,
+\item bidirectional reflectance distribution functions (BRDF) and
+\item space partitioning trees.
+\end{itemize}
+
+The research paper also contains a simple reference raytracer which uses
+the methods described in the paper.
 
 \chapter*{Kinnitusleht}
 Kinnitan, et
