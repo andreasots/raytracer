@@ -37,10 +37,10 @@ RT_FLOAT Cylinder::intersect(const SIMD::Ray &r, RT_FLOAT &u, RT_FLOAT &v) const
     RT_FLOAT a = U.dot(U);
     RT_FLOAT b = V.dot(U);
     RT_FLOAT c = V.dot(V)-std::abs(m_d);
-    RT_FLOAT det = b*b-a*c;
+    RT_DFLOAT det = static_cast<RT_DFLOAT>(b)*b-static_cast<RT_DFLOAT>(a)*c;
     if(det < 0)
         return HUGE_VAL;
-    RT_FLOAT q = -(b+std::copysign(std::sqrt(det), b));
+    RT_FLOAT q = -(b+std::copysign(static_cast<RT_FLOAT>(std::sqrt(det)), b));
     RT_FLOAT t = q/a, t2 = c/q;
 
     t = (t > eps ? t: HUGE_VAL);

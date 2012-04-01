@@ -55,10 +55,10 @@ RT_FLOAT Sphere::intersect(const SIMD::Ray &r, RT_FLOAT &u, RT_FLOAT &v) const
     SIMD::Vec V = r.origin - mO;
     RT_FLOAT b = r.direction.dot(V);
     RT_FLOAT c = V.dot(V) - mR*mR;
-    RT_FLOAT det = b*b-c;
+    RT_DFLOAT det = static_cast<RT_DFLOAT>(b)*b-static_cast<RT_DFLOAT>(c);
     if(det < 0)
         return HUGE_VAL;
-    RT_FLOAT t1 = -(b+std::copysign(std::sqrt(det), b));
+    RT_FLOAT t1 = -(b+std::copysign(static_cast<RT_FLOAT>(std::sqrt(det)), b));
     RT_FLOAT t2 = c/t1;
     RT_FLOAT t = std::min((t1 > eps ? t1: HUGE_VAL), (t2 > eps? t2: HUGE_VAL));
     if(t == HUGE_VAL)

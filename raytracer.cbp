@@ -41,6 +41,7 @@
 			<Add option="-Wall" />
 			<Add option="-fopenmp -std=gnu++0x -march=native" />
 			<Add option="-DRT_FLOAT=float" />
+			<Add option="-DRT_DFLOAT=double" />
 			<Add option="-DRT_INT=int32_t" />
 			<Add option="-DRT_UINT=uint32_t" />
 			<Add option='-DRT_MSB=&quot;(UINT32_MAX-INT32_MAX)&quot;' />
@@ -83,6 +84,8 @@
 		<Unit filename="include/raytracer/material/null.h" />
 		<Unit filename="include/raytracer/material/phong.h" />
 		<Unit filename="include/raytracer/object.h" />
+		<Unit filename="include/raytracer/octree/node.h" />
+		<Unit filename="include/raytracer/octree/root.h" />
 		<Unit filename="include/raytracer/quad.h" />
 		<Unit filename="include/raytracer/scene.h" />
 		<Unit filename="include/raytracer/sphere.h" />
@@ -95,6 +98,8 @@
 		<Unit filename="src/raytracer/material/mirror.cpp" />
 		<Unit filename="src/raytracer/material/null.cpp" />
 		<Unit filename="src/raytracer/material/phong.cpp" />
+		<Unit filename="src/raytracer/octree/node.cpp" />
+		<Unit filename="src/raytracer/octree/root.cpp" />
 		<Unit filename="src/raytracer/quad.cpp" />
 		<Unit filename="src/raytracer/scene.cpp" />
 		<Unit filename="src/raytracer/sphere.cpp" />

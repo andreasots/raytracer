@@ -312,6 +312,8 @@ SIMD::Matrix Scene::open(std::string file)
         std::cerr << file << ": reading stopped: " << e.what() << std::endl;
     }
 
+    octree.rebuild();
+
     return camera;
 }
 

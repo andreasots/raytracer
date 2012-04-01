@@ -3,15 +3,14 @@
 #include "Ray.h"
 #include <xmmintrin.h>
 #include <cstring>
-/* An Efficient and Robust Ray-Box Intersection Algorithm */
-/* Amy Williams, Steve Barrus, R. Keith Morley, Peter Shirley */
+
 namespace SIMD
 {
     class AABox
     {
         Point mBounds[2] __attribute__((aligned(16)));
         public:
-        AABox(Point _min, Point _max)
+        AABox(Point _min = Point(), Point _max = Point())
         {
             mBounds[0] = _min;
             mBounds[1] = _max;
@@ -24,11 +23,11 @@ namespace SIMD
 
         bool encloses(const AABox &box) const throw()
         {
-            __m128 res = _mm_cmple_ps(box.mBounds[0].data(), mBounds[0].data());
-            if(std::memchr(reinterpret_cast<void*>(&res), 0, sizeof(__m128)) != NULL)
+            __m128 res = _mm_cmplt_ps(box.mBounds[0].data(), mBounds[0].data());
+            if(_mm_movemask_ps(res) & 0xE)
                 return false;
-            res = _mm_cmpge_ps(box.mBounds[1].data(), mBounds[1].data());
-            if(std::memchr(reinterpret_cast<void*>(&res), 0, sizeof(__m128)) != NULL)
+            res = _mm_cmpgt_ps(box.mBounds[1].data(), mBounds[1].data());
+            if(_mm_movemask_ps(res) & 0xE)
                 return false;
             return true;
         }
