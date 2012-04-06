@@ -10,26 +10,24 @@
 \usepackage{graphicx}
 \usepackage{subfig}
 \usepackage{esvect}
+\usepackage{multirow}
 \renewcommand{\vec}[1]{\vv{#1}}
-\usepackage{listings}
-\lstset{basicstyle=\footnotesize, language=C++, numbers=left, numberbychapter=false}
 \chapterfont{\fontsize{16pt}{19pt}\sffamily}
-\linespread{1.5	}
+\linespread{1.5}
 \renewcommand{\thechapter}{\arabic{chapter}.}
 \renewcommand{\thesection}{\thechapter\arabic{section}.}
 \renewcommand{\thesubsection}{\thesection\arabic{subsection}.}
 \renewcommand{\thesubsubsection}{\thesubsection\arabic{subsubsection}.}
 \renewcommand{\theequation}{\thechapter\arabic{equation}}
 \renewcommand{\thefigure}{\thechapter\arabic{figure}}
-\renewcommand{\lstlistlistingname}{Programmid}
-\renewcommand{\lstlistingname}{Programm}
 
 % et nad kaklema ei läheks
 \usepackage[colorlinks=true]{hyperref}
 \usepackage[tocbib]{apacite}
 
-\pagestyle{empty}
+\setcounter{secnumdepth}{5}
 \begin{document}
+\thispagestyle{empty}
 \begin{center}
 Tallinna Reaalkool
 
@@ -75,8 +73,8 @@ võimalik realiseerida ainult ujukomaaritmeetikat. Ujukomaaritmeetika oli
 aeglane võrreldes täisarvude omaga, mis ei ole enam nii. 
 
 Rasteriseerimine on liikunud üle ujukomaarvudele ja protsessori asemel
-toimub joonistamine graafikakaardis, mille abil on võimalik joonistada
-miljoneid kolmnurki kaadrisagedustel üle 30 kaadri sekundis koos erinevate
+toimub joonis\-tamine graafikakaardis, mille abil on võimalik joonistada
+miljoneid kolmnurki kaadri\-sagedustel üle 30 kaadri sekundis koos erinevate
 effektidega. Kiirtejälitusega on võimalik kasutada ära senist infrastruktuuri
 ja saada realistlikum tulemus.
 
@@ -87,11 +85,11 @@ Uurimistöö allikatena on kasutatud internetist kättesaadavaid selle ala
 teaduslikke artikleid ja doktoritöid.
 
 Uurimistöö koosneb ühest teoreetilise osa peatükist, milles on kuus
-alampeatükki. Praktiline osa puudub. Lisa \ref{chap:download} sisaldab
+alampeatükki ja ühest praktilise osa peatükist. Lisa \ref{chap:download} sisaldab
 uurimistöö raames valminud kiirtejälitaja kompileerimiseks vajalikku
 informatsiooni.
 
-\chapter{Kiirtejälitus}
+\chapter{Kiirtejälituse algoritmid}
 \section{Kiirtejälituse mõiste}
 Järgnev lõik pärineb Eesti Standardikeskuse standardist EVS-ISO/IEC~2382-13:1998:
 \begin{quote}
@@ -173,7 +171,7 @@ analüütiliselt lahendada.
 
 \section{Monte Carlo meetod}
 Monte Carlo meetod on stohhastiline meetod integraali väärtuse arvutamiseks.
-Igast integreerimislõigust võetakse juhuslik suurus ja leitakse integraali
+Igast integ\-ree\-ri\-mis\-lõi\-gust võetakse juhuslik suurus ja leitakse integraali
 ligikaudne väärtus. Kõikide leitud väärtuste aritmeetiline keskmine
 läheneb integraali väärtusele kui ligikaudsete tulemuste arv läheneb
 lõpmatusele. Monte Carlo meetodiga on võimalik suhteliselt lihtsalt
@@ -192,7 +190,7 @@ L_o(x, \omega) = L_e(x, \omega) + \int_\Omega \frac{f_r(x, \omega', \omega)}{P(\
 \end{equation}
 
 Kui valida võrrandis \ref{eq:mc-is1} \(\omega'\) nii, et selle
-tõenäosusfunktsioon on võrdne peegeldusfunktiooniga, siis on nende
+tõenäosusfunktsioon on võrdne peegeldus\-funktsiooniga, siis on nende
 jagatis üks ja võrrand lihtsustub (võrrand \ref{eq:mc-is2}).
 
 \begin{equation} \label{eq:mc-is2}
@@ -325,14 +323,14 @@ ei sisalda punkti \(P'\) koordinaate, saab kolmnurkade töötlemisel välja
 arvutada ja hiljem kasutada tippude koordinaatide asemel.
 \cite[lk. 91]{wald::PhD}
 
-\subsubsection{SSE4 skalaarkorrutis}
+\subsubsection{SSE4.1 skalaarkorrutis}
 Koordinaate \(u\) ja \(v\) saab arvutada, projitseerides punkti \(P'\)
 vastava koordinaadiga seotud külje tipust tõmmatud kõrgusele. Kolmemõõtmelises
 ruumis võib kasutada ka kaugust tasandist, millel asub külg, millele see
 kõrgus on tõmmatud, ja mis on kolmurgaga risti. Punkti ja tasandi vahelise
 kauguse arvutamine nõuab skalaarkorrutise arvutamist, mis võtaks tavalisel
 matemaatikaprotsessoril suhteliset kaua aega, kuid mille effektiivseks 
-arvutamiseks on SSE4 käsustikus olemas eraldi masinkäsk \texttt{DPPS}.
+arvutamiseks on SSE4.1 käsustikus olemas eraldi masinkäsk \texttt{DPPS}.
 \cite{TriSSE4}
 
 \subsection{Kiire lõikumine keraga}
@@ -393,7 +391,7 @@ kehtivad võrrandisüsteemist \ref{eq:cyl-1} tulenevad piirangud.
 
 \subsection{Ruutvõrrandi lahendamine}
 Kera ja silindri lõikekohtade leidmiseks on vaja lahendada ruutvõrrand
-parameetri \(t\) suhtes. Ujukomaarvude piiratuse tõttu võib tavapärane
+parameetri \(t\) suh\-tes. Ujukomaarvude piiratuse tõttu võib tavapärane
 lahend olla ebatäpne. Täpsemaks arvutamiseks peab lineaarliige ja ruutjuur
 determinandist olema samamärgilised. Lisaks peab determinant olema arvutatud
 kaks korda täpsema arvutüübiga, et täpsus säiliks. \cite{FP-quadratic}
@@ -414,6 +412,7 @@ peegelduskoefitsentide \(k\) summa oleks väiksem või võrdne ühega, muidu
 iga põrge lisab süsteemi energiat.
 
 \subsection{Lamberti peegeldufunktsioon}
+\label{subsec:lambert}
 \begin{figure}
 \includegraphics[width=\textwidth]{lambert}
 \caption[Lamberti peegeldufunktsioon]{Lamberti peegeldufunktsioon.
@@ -459,6 +458,7 @@ endisele (võrrand~\ref{eq:mirror_2}).
 \[f_r(\omega', \omega) = \left\{\begin{array}{l l} k_s & \quad \text{kui} ~ -[\omega'-2\vec n(\omega'\cdot\vec n)] = \omega \\ 0 \end{array} \right. \]
 
 \subsection{Phongi udune peegel}
+\label{subsec:phong}
 \begin{figure}[h]
 \centering
 \subfloat[\(\alpha=50\)]{\includegraphics[width=0.25\textwidth]{phong-50}}
@@ -469,6 +469,7 @@ endisele (võrrand~\ref{eq:mirror_2}).
 \label{fig:phong}
 \vspace{100pt}
 \end{figure}
+
 Phongi udune peegel (joonis \ref{fig:phong}) kirjeldab kehi, mille pinnakaredused hajutavad
 peegelduvat valgust. Parameeter \(\alpha\) kirjeldab kui kitsas on peegelduva
 valguse koonus. Kui \(\alpha\) läheneb lõpmatusele, sarnaneb tulemus
@@ -521,12 +522,14 @@ kuid hiljem ka suvalise koodi käivitamiseks.
 
 \subsection{Optimeerimine}
 Lisaks kõige kangemate kompilaatori optimeeringute sisselülitamise saab
-programmi kiiremaks, kui arvutada varem välja väärtused, mis sõltuvad
+programmi kii\-re\-maks, kui arvutada varem välja väärtused, mis sõltuvad
 ainult sisendandmetest ja mida läheb hiljem vaja, nagu näiteks planaarsete
-kujundite pinnanormaalid ning kera ja silindri raadiuste ruudud. Samuti
+kujundite pinnanormaalid ning kera ja si\-lind\-ri raadiuste ruudud. Samuti
 saab mitu sama arvuga jagamist ümber kirjutada üheks jagamiseks ja mitmeks
 korrutamiseks. Trigonomeetrilised funktsioonid ja astmefunktsioonid on
-aeglased, neid tasub vältida nii palju kui võimalik.
+aeglased, neid tasub vältida nii palju kui võimalik. Lisas~\ref{chap:fpspeed}
+on ära toodud ka kõikide x87 matemaatikaprotsessori toetatud trigonomeetriliste
+funktsioonide arvutamiseks kuluv aeg.
 
 \subsubsection{Vektori normeerimine}
 Vektori normeerimiseks on vaja vektor jagada selle pikkusega (valem \ref{eq:vec-1}).
@@ -602,10 +605,119 @@ C = C_t + S \cdot n \cdot C_i
 \item[\(\mathbf{C_i}\)] kiire kujunditega lõikumiste uurimise hind
 \end{itemize}
 
+\chapter{Kiirtejälitaja}
+Uurimistöö raames valmis programm, mis kasutab uurimistöös kirjeldatud
+algoritme ja ideid. Programmi suhteliselt suure mahu tõttu ei ole võimalik
+seda siin ära tuua. Programmi lähtekood on saadaval \texttt{git}i varamust
+aadressil \url{https://github.com/andreasots/raytracer}. Programmi kompileerimiseks
+on vaja Single UNIX spetsifikatsioonile vastavat operatsioonisüsteemi või
+alamsüsteemi, vastavalt operatsioonisüsteemile kas DirectX (Windows),
+X11 (Unix) või Cocoa (MacOS) teeke ja päiseid, OpenEXR teeki ning selle
+päiseid ja viimast C++ versiooni toetavat kompilaatorit. Lähtekoodiga on
+kaasas Code::Blocksi projektifail.
+
+Programm kasutab uurimistöös kirjeldatud algoritmidest Monte Carlo meetodit
+ja peegeldusfunktsiooni järgi mõõtmist (võrrand \ref{eq:mc-is2}), kera ja
+silindri lõikumine kiirega, kolmnurga lõikumine kiirega kasutades SSE4.1
+skalaarkorrutist ja kõik peegeldusfunktsioonid.
+
+Rakendus kasutab PixelToasteri teeki tulemuse kuvamiseks ning salvestab
+selle peale rakenduse sulgemist OpenEXR failina.
+
+\section{Stseenifail}
+Kiirtejälitaja kasutab tekstipõhist faili stseeni laadimiseks. Hetkel 
+kasutatavad käsud on \texttt{camera}, \texttt{sky}, \texttt{material},
+\texttt{triangle}, \texttt{quad}, \texttt{sphere}, \texttt{cylinder}.
+
+\subsection{\texttt{camera}}
+Süntaks:
+\begin{verbatim}
+camera lookat eyeX eyeY eyeZ targetX targetY targetZ upX upY upZ
+camera matrix M0 M1 M2 M3 M4 M5 M6 M7 M8 M9 M10 M11 M12 M13 M14 M15
+\end{verbatim}
+
+See käsk seab kaameramaatriksi. \texttt{camera lookat} kasutab sama
+algoritmi kaameramaatriksi arvutamiseks, mis \texttt{gluLookAt} OpenGL
+teegist. \texttt{camera matrix} asendab kaameramaatriksi. Mitme \texttt{camera}
+käsu korral kehtib viimane.
+
+\subsection{\texttt{sky}}
+Süntaks:
+\begin{verbatim}
+sky tex "file.exr"
+sky color r g b
+\end{verbatim}
+
+See käsk seab taeva värvi (\texttt{sky color}) või tekstuuri (\texttt{sky tex}).
+Tekstuuri korral peab pildifail kasutama silinrilist projektsiooni ja olema
+OpenEXR formaadis. Nii värvi kui ka pildifaili puhul eeldatakse, et RGB
+väärtused on lineaarsed.
+
+\subsection{\texttt{material}}
+Süntaks
+\begin{verbatim}
+material "mat" Phong kd rd gd bd ks alpha sr sg sb e er eg eb
+material "mat" Mirror
+material "mat" Null r g b
+material "mat" Dielectric ior
+\end{verbatim}
+
+Esimene argument on materjali nimi.
+
+\subsubsection{\texttt{material "{}"{} Phong}}
+\begin{itemize}
+\item \texttt{rd gd bd} on pinna värv Lamberti peegeldufunktsiooni jaoks.
+\item \texttt{sr sg sb} on pinna värv Phongi uduse peegli jaoks.
+\item \texttt{er eg eb} on pinnalt kiirguva valguse värv (\(L_e\) valemis \ref{eq:rendering}).
+\item \texttt{kd}, \texttt{ks} on vastavalt Lamberti ja Phongi funktsioonide kaalud.
+\item \texttt{alpha} on Phongi uduse peegli eksponent.
+\end{itemize}
+
+\subsubsection{\texttt{material "{}"{} Mirror}}
+Peegel alampunktist \ref{subsec:peegel}. Kogu valgus peegeldub tagasi.
+
+\subsubsection{\texttt{material "{}"{} Null}}
+Valgus ei peegeldu pinnalt. Pind kiirgab valgust. \texttt{r g b} näitab
+kiirguva valguse kirkkust.
+
+\subsubsection{\texttt{material "{}"{} Dielectric}}
+Valgus murdub pinda läbides. \texttt{ior} on murdumisnäitaja.
+
+\subsection{\texttt{triangle} ja \texttt{quad}}
+Süntaks:
+\begin{verbatim}
+triangle "mat" Ax Ay Az Bx By Bz Cx Cy Cz flat
+quad "mat" Ax Ay Az Bx By Bz Cx Cy Cz Dx Dy Dz flat
+triangle "mat" Ax Ay Az Bx By Bz Cx Cy Cz normals nAx nAy nAz nBx nBy nBz
+	nCx nCy nCz
+quad "mat" Ax Ay Az Bx By Bz Cx Cy Cz Dx Dy Dz normals nAx nAy nAz nBx
+	nBy nBz nCx nCy nCz nDx nDy nDz
+\end{verbatim}
+
+Kolmnurk ja nelinurk. Esimesed käsud kasutavad geomeetrilist normaali
+peegeldusfunktsioonis, viimased kasutavad antud normaale, mis interpoleeritakse
+üle kujundi pinna.
+
+\subsection{\texttt{sphere}}
+Süntaks:
+\begin{verbatim}
+sphere "mat" x y z r
+\end{verbatim}
+
+Kera keskpunktiga \((x;~y;~{}z)\) ja raadiusega \(r\).
+
+\subsection{\texttt{cylinder}}
+Süntaks:
+\begin{verbatim}
+cylinder "mat" Ax Ay Az Bx By Bz r
+\end{verbatim}
+
+Silinder otspunktidega \(A\) ja \(B\) ning raadiusega \(r\).
+
 \chapter*{Kokkuvõte}
 \addcontentsline{toc}{chapter}{Kokkuvõte}
 Uurimistöö eesmärgiks oli anda ülevaade ja kiirtejälituse põhiprotsesside
-suhtes sai eesmärk täidetud. 
+suhtes sai ees\-märk täidetud. 
 
 Kirjeldati:
 \begin{itemize}
@@ -626,22 +738,47 @@ graafikaprotsessoril arvutamist.
 \bibliography{paper}
 
 \appendix
-%\chapter{Radiomeetria mõisted}
-%\begin{description}
-%\item[Kiirgusvoog] (ing. k. \textit{radiant flux}) on energiahulk, mille kiirgus kannab ajaühikus läbi pinna.
-%\item[Kiiritustihedus] (ing. k. \textit{irradiance}) iseloomustab ruumi- ja mittepunktvalgusallikate kiiratud valgust.
-%\item[Kirkus] (ing. k. \textit{radiance}) nimetatakse pinnale langevat kiirgusvoogu.
-%\end{description}
-\chapter{Kiirtejälitaja} \label{chap:download}
-Uurimistöö raames valmis programm, mis kasutab uurimistöös kirjeldatud
-algoritme ja ideid. Programmi suhteliselt suure mahu tõttu ei ole võimalik
-seda siin ära tuua. Programmi lähtekood on saadaval \texttt{git}i varamust
-aadressil \url{https://github.com/andreasots/raytracer}. Programmi kompileerimiseks
-on vaja Single UNIX spetsifikatsioonile vastavat operatsioonisüsteemi,
-vastavalt operatsioonisüsteemile kas DirectX (Windows), X11 (Unix) või
-Cocoa (MacOS) teeke ja päiseid, OpenEXR teeki ning selle päiseid ja
-viimast C++ versiooni toetavat kompilaatorit. Lähtekoodiga on kaasas
-Code::Blocksi projektifail.
+\chapter{Ujukomaarvutuse masinkäskluste kiirus}
+\label{chap:fpspeed}
+Tabel \ref{table:fpspeed} kirjeldab SSE käsustiku ja x87 matemaatikaprotsessori
+aritmeetikaoperatsioonide kiirust. Ajad on märgitud protsessori taktides.
+SSE käsud lõpuga \texttt{PS} sooritavad tehte kõigi nelja arvuga, lõpuga
+\texttt{SS} ainult esimesega. SSE jagamise ja juurimise kiirus sõltub sisendist.
+
+\begin{table}[h]
+\caption{SSE ja x87 32-bitiste ujukomaarvude aritmeetika}
+\label{table:fpspeed}
+\vspace{-15pt}
+\caption*{\textbf{Allikas:} Intel® 64 and IA-32 Architectures Optimization Reference Manual}
+\vspace{-20pt}
+\begin{center}
+\begin{tabular}{|c|l|l|r|r|}
+\hline
+\multirow{2}{*}{Tehe} & \multicolumn{2}{|c|}{Masinkäsk} & \multicolumn{2}{|c|}{Aeg} \\
+\cline{2-5}
+& SSE & x87 & SSE & x87 \\
+\hline
+\(x_n + y_n\) & \texttt{ADDPS} & - & 3 & -\\
+\(x + y\) & \texttt{ADDSS} & \texttt{FADD} & 3 & 3\\
+\(x_n - y_n\) & \texttt{SUBPS} & - & 3 & -\\
+\(x - y\) & \texttt{SUBSS} & \texttt{FSUB} & 3 & 3\\
+\(x_n \cdot y_n\) & \texttt{MULPS} & - & 4 & -\\
+\(x \cdot y\) & \texttt{MULSS} & \texttt{FMUL} & 4 & 5\\
+\(\frac{x_n}{y_n}\) & \texttt{DIVPS} & - & 6 -- 16 & -\\
+\(\frac x y\) & \texttt{DIVSS} & \texttt{FDIV} & 6 -- 16 & 23 \\
+\(\sqrt{x_n}\) & \texttt{SQRTPS} & - & 6 -- 20 & -\\
+\(\sqrt x\) & \texttt{SQRTSS} & \texttt{FSQRT} &  6 -- 20 & 58 \\
+\(\approx\frac1{\sqrt{x_n}}\) & \texttt{RSQRTPS} & - & 3 & - \\
+\(\approx\frac1{\sqrt x}\)& \texttt{RSQRTSS} & - & 3 & - \\
+\(\sin x\) & - & \texttt{FSIN} & - & 119 \\
+\(\cos x\) & - & \texttt{FCOS} & - & 119 \\
+\(\tan x\) & - & \texttt{FPTAN} & - & 123 \\
+\(\arctan \frac{y}{x}\) & - & \texttt{FPATAN} & - & 147 \\
+\hline
+\end{tabular}
+\end{center}
+\vspace{-20pt}
+\end{table}
 
 \chapter*{Resümee}
 Kiirtejälitus on arvutigraafika algoritm, mis suudab luua realistlikuma
